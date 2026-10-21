@@ -1,0 +1,1816 @@
+<div class="mw-content-ltr mw-parser-output" lang="en" dir="ltr"><div class="shortdescription nomobile noexcerpt noprint searchaux" style="display:none">Distinction between meanings of Euclidean space transformations</div>
+<style data-mw-deduplicate="TemplateStyles:r1368532237">.mw-parser-output .hatnote{font-style:italic}.mw-parser-output div.hatnote{padding-left:1.6em;margin-bottom:0.5em}.mw-parser-output .hatnote i{font-style:normal}.mw-parser-output .hatnote+.mw-empty-elt+.hatnote{margin-top:-0.5em}@media print{body.ns-0 .mw-parser-output .hatnote{display:none!important}}</style><div role="note" class="hatnote navigation-not-searchable">For the concept of "passive transformation" in grammar, see <a href="/wiki/Active_voice" title="Active voice">active voice</a> and <a href="/wiki/Passive_voice" title="Passive voice">passive voice</a>.</div>
+<figure typeof="mw:File/Thumb"><a href="/wiki/File:Passive_versus_active_rotation.svg" class="mw-file-description"><img alt="Passive versus active rotation" src="//thumb.wikimedia.org/wikipedia/commons/thumb/9/9a/Passive_versus_active_rotation.svg/330px-Passive_versus_active_rotation.svg.png?utm_source=en.wikipedia.org&amp;utm_campaign=parser&amp;utm_content=thumbnail" decoding="async" loading="lazy" width="310" height="128" class="mw-file-element" srcset="//thumb.wikimedia.org/wikipedia/commons/thumb/9/9a/Passive_versus_active_rotation.svg/960px-Passive_versus_active_rotation.svg.png?utm_source=en.wikipedia.org&amp;utm_campaign=parser&amp;utm_content=thumbnail 2x" data-file-width="737" data-file-height="304" /></a><figcaption>In the passive transformation (left), point <span class="texhtml mvar" style="font-style:italic;">P</span> stays fixed, while the coordinate system rotates counterclockwise by an angle <span class="texhtml mvar" style="font-style:italic;">θ</span> about its origin.  In the active transformation (right), a point <span class="texhtml mvar" style="font-style:italic;">P</span> is transformed to point <span class="texhtml mvar" style="font-style:italic;">P<span class="nowrap" style="padding-left:0.05em;">′</span></span> by rotating clockwise by <a href="/wiki/Angle" title="Angle">angle</a> <span class="texhtml mvar" style="font-style:italic;">θ</span> about the <a href="/wiki/Origin_(mathematics)" title="Origin (mathematics)">origin</a> of a fixed coordinate system.  The coordinates of <span class="texhtml mvar" style="font-style:italic;">P<span class="nowrap" style="padding-left:0.05em;">′</span></span> after the active transformation relative to the original coordinate system are the same as the coordinates of <span class="texhtml mvar" style="font-style:italic;">P</span> relative to the rotated coordinate system.</figcaption></figure>
+<p><a href="/wiki/Geometric_transformation" title="Geometric transformation">Geometric transformations</a> can be distinguished into two types: <b>active</b> or <b>alibi transformations</b> which change the physical position of a set of <a href="/wiki/Point_(geometry)" title="Point (geometry)">points</a> relative to a fixed <a href="/wiki/Frame_of_reference" title="Frame of reference">frame of reference</a> or <a href="/wiki/Coordinate_system" title="Coordinate system">coordinate system</a> (<i><a href="/wiki/Alibi" title="Alibi">alibi</a></i> meaning "being somewhere else at the same time"); and <b>passive</b> or <b>alias transformations</b> which leave points fixed but change the frame of reference or coordinate system relative to which they are described (<i><a href="/wiki/Pseudonym" title="Pseudonym">alias</a></i> meaning "going under a different name").<sup id="cite&#95;ref-1" class="reference"><a href="#cite_note-1"><span class="cite-bracket">&#91;</span>1<span class="cite-bracket">&#93;</span></a></sup><sup id="cite&#95;ref-Davidson&#95;2-0" class="reference"><a href="#cite_note-Davidson-2"><span class="cite-bracket">&#91;</span>2<span class="cite-bracket">&#93;</span></a></sup>
+</p><p>For instance, active transformations are useful to describe successive positions of a <a href="/wiki/Rigid_body" title="Rigid body">rigid body</a>. On the other hand, passive transformations may be useful in human motion analysis to observe the motion of the <a href="/wiki/Tibia" title="Tibia">tibia</a> relative to the <a href="/wiki/Femur" title="Femur">femur</a>, that is, its motion relative to a (<i>local</i>) coordinate system which moves together with the femur, rather than a (<i>global</i>) coordinate system which is fixed to the floor.<sup id="cite&#95;ref-Davidson&#95;2-1" class="reference"><a href="#cite_note-Davidson-2"><span class="cite-bracket">&#91;</span>2<span class="cite-bracket">&#93;</span></a></sup>
+</p><p>In <a href="/wiki/Three-dimensional_Euclidean_space" class="mw-redirect" title="Three-dimensional Euclidean space">three-dimensional Euclidean space</a>, any <a href="/wiki/Rigid_transformation" title="Rigid transformation">proper rigid transformation</a>, whether active or passive, can be represented as a <a href="/wiki/Screw_displacement" class="mw-redirect" title="Screw displacement">screw displacement</a>, the composition of a <a href="/wiki/Translation_(geometry)" title="Translation (geometry)">translation</a> along an axis and a <a href="/wiki/Rotation_(mathematics)" title="Rotation (mathematics)">rotation</a> about that axis.
+</p><p>The terms <i>active transformation</i> and <i>passive transformation</i> were first introduced in 1957 by <a href="/wiki/Valentine_Bargmann" title="Valentine Bargmann">Valentine Bargmann</a> for describing <a href="/wiki/Lorentz_transformations" class="mw-redirect" title="Lorentz transformations">Lorentz transformations</a> in <a href="/wiki/Special_relativity" title="Special relativity">special relativity</a>.<sup id="cite&#95;ref-3" class="reference"><a href="#cite_note-3"><span class="cite-bracket">&#91;</span>3<span class="cite-bracket">&#93;</span></a></sup>
+</p>
+<meta property="mw:PageProp/toc" />
+<div class="mw-heading mw-heading2"><h2 id="Example">Example</h2></div>
+<figure class="mw-default-size" typeof="mw:File/Thumb"><a href="/wiki/File:Alibi_and_alias_rotations.svg" class="mw-file-description"><img src="//thumb.wikimedia.org/wikipedia/commons/thumb/8/86/Alibi_and_alias_rotations.svg/500px-Alibi_and_alias_rotations.svg.png?utm_source=en.wikipedia.org&amp;utm_campaign=parser&amp;utm_content=thumbnail" decoding="async" loading="lazy" width="450" height="373" style="--mw-file-upright: 1.8" class="mw-file-element mw-file-upright" srcset="//thumb.wikimedia.org/wikipedia/commons/thumb/8/86/Alibi_and_alias_rotations.svg/960px-Alibi_and_alias_rotations.svg.png?utm_source=en.wikipedia.org&amp;utm_campaign=parser&amp;utm_content=thumbnail 2x" data-file-width="605" data-file-height="502" /></a><figcaption>Rotation considered as an active (<i>alibi</i>) or passive (<i>alias</i>) transformation</figcaption></figure>
+<figure class="mw-default-size" typeof="mw:File/Thumb"><a href="/wiki/File:Alias_and_alibi_transformations_1_en.png" class="mw-file-description"><img src="//thumb.wikimedia.org/wikipedia/commons/thumb/0/09/Alias_and_alibi_transformations_1_en.png/500px-Alias_and_alibi_transformations_1_en.png?utm_source=en.wikipedia.org&amp;utm_campaign=parser&amp;utm_content=thumbnail" decoding="async" loading="lazy" width="450" height="450" style="--mw-file-upright: 1.8" class="mw-file-element mw-file-upright" srcset="//thumb.wikimedia.org/wikipedia/commons/thumb/0/09/Alias_and_alibi_transformations_1_en.png/960px-Alias_and_alibi_transformations_1_en.png?utm_source=en.wikipedia.org&amp;utm_campaign=parser&amp;utm_content=thumbnail 2x" data-file-width="1072" data-file-height="1072" /></a><figcaption>Translation and rotation as passive (<i>alias</i>) or active (<i>alibi</i>) transformations</figcaption></figure>
+<p>As an example, let the vector <span class="mwe-math-element mwe-math-element-inline"><span class="mwe-math-mathml-a11y" style="display: none;"><math class="mathjax_ignore" xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle \mathbf {v} =(v_{1},v_{2})\in \mathbb {R} ^{2}}">
+  <semantics>
+    <mrow class="MJX-TeXAtom-ORD">
+      <mstyle displaystyle="true" scriptlevel="0">
+        <mrow class="MJX-TeXAtom-ORD">
+          <mi mathvariant="bold">v</mi>
+        </mrow>
+        <mo>=</mo>
+        <mo stretchy="false">(</mo>
+        <msub>
+          <mi>v</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mn>1</mn>
+          </mrow>
+        </msub>
+        <mo>,</mo>
+        <msub>
+          <mi>v</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mn>2</mn>
+          </mrow>
+        </msub>
+        <mo stretchy="false">)</mo>
+        <mo>&#x2208;<!-- ∈ --></mo>
+        <msup>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi mathvariant="double-struck">R</mi>
+          </mrow>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mn>2</mn>
+          </mrow>
+        </msup>
+      </mstyle>
+    </mrow>
+    <annotation encoding="application/x-tex">{\displaystyle \mathbf {v} =(v_{1},v_{2})\in \mathbb {R} ^{2}}</annotation>
+  </semantics>
+</math></span><img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/fd2446b4d132a838f38267bd9b50bdae51987044" class="mwe-math-fallback-image-inline mw-invert skin-invert" aria-hidden="true" style="vertical-align: -0.838ex; width:17.289ex; height:3.176ex;" alt="{\displaystyle \mathbf {v} =(v_{1},v_{2})\in \mathbb {R} ^{2}}"></span>, be a vector in the plane.  A rotation of the vector through an angle <i>θ</i> in counterclockwise direction is given by the <a href="/wiki/Rotation_matrix" title="Rotation matrix">rotation matrix</a>:
+<span class="mwe-math-element mwe-math-element-block"><span class="mwe-math-mathml-a11y" style="display: none;"><math class="mathjax_ignore" display="block" xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle R={\begin{pmatrix}\cos \theta &amp;-\sin \theta \\\sin \theta &amp;\cos \theta \end{pmatrix}},}">
+  <semantics>
+    <mrow class="MJX-TeXAtom-ORD">
+      <mstyle displaystyle="true" scriptlevel="0">
+        <mi>R</mi>
+        <mo>=</mo>
+        <mrow class="MJX-TeXAtom-ORD">
+          <mrow>
+            <mo>(</mo>
+            <mtable rowspacing="4pt" columnspacing="1em">
+              <mtr>
+                <mtd>
+                  <mi>cos</mi>
+                  <mo>&#x2061;<!-- ⁡ --></mo>
+                  <mi>&#x03B8;<!-- θ --></mi>
+                </mtd>
+                <mtd>
+                  <mo>&#x2212;<!-- − --></mo>
+                  <mi>sin</mi>
+                  <mo>&#x2061;<!-- ⁡ --></mo>
+                  <mi>&#x03B8;<!-- θ --></mi>
+                </mtd>
+              </mtr>
+              <mtr>
+                <mtd>
+                  <mi>sin</mi>
+                  <mo>&#x2061;<!-- ⁡ --></mo>
+                  <mi>&#x03B8;<!-- θ --></mi>
+                </mtd>
+                <mtd>
+                  <mi>cos</mi>
+                  <mo>&#x2061;<!-- ⁡ --></mo>
+                  <mi>&#x03B8;<!-- θ --></mi>
+                </mtd>
+              </mtr>
+            </mtable>
+            <mo>)</mo>
+          </mrow>
+        </mrow>
+        <mo>,</mo>
+      </mstyle>
+    </mrow>
+    <annotation encoding="application/x-tex">{\displaystyle R={\begin{pmatrix}\cos \theta &amp;-\sin \theta \\\sin \theta &amp;\cos \theta \end{pmatrix}},}</annotation>
+  </semantics>
+</math></span><img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/3e505413f6b3ab29857a9523ce7729f5292ff4cb" class="mwe-math-fallback-image-display mw-invert skin-invert" aria-hidden="true" style="vertical-align: -2.505ex; width:23.122ex; height:6.176ex;" alt="{\displaystyle R={\begin{pmatrix}\cos \theta &amp;-\sin \theta \\\sin \theta &amp;\cos \theta \end{pmatrix}},}"></span>
+which can be viewed either as an <i>active transformation</i> or a <i>passive transformation</i> (where the above <a href="/wiki/Matrix_(mathematics)" title="Matrix (mathematics)">matrix</a> will be <a href="/wiki/Inverse_matrix" class="mw-redirect" title="Inverse matrix">inverted</a>), as described below.
+</p>
+<div class="mw-heading mw-heading2"><h2 id="Spatial_transformations_in_the_Euclidean_space_R3">Spatial transformations in the Euclidean space R<sup>3</sup></h2></div>
+<p>In general a spatial transformation <span class="mwe-math-element mwe-math-element-inline"><span class="mwe-math-mathml-a11y" style="display: none;"><math class="mathjax_ignore" xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle T\colon \mathbb {R} ^{3}\to \mathbb {R} ^{3}}">
+  <semantics>
+    <mrow class="MJX-TeXAtom-ORD">
+      <mstyle displaystyle="true" scriptlevel="0">
+        <mi>T</mi>
+        <mo>&#x003A;<!-- : --></mo>
+        <msup>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi mathvariant="double-struck">R</mi>
+          </mrow>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mn>3</mn>
+          </mrow>
+        </msup>
+        <mo stretchy="false">&#x2192;<!-- → --></mo>
+        <msup>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi mathvariant="double-struck">R</mi>
+          </mrow>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mn>3</mn>
+          </mrow>
+        </msup>
+      </mstyle>
+    </mrow>
+    <annotation encoding="application/x-tex">{\displaystyle T\colon \mathbb {R} ^{3}\to \mathbb {R} ^{3}}</annotation>
+  </semantics>
+</math></span><img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/08fb2ed3f676caf566f415b92541d809b986ce8a" class="mwe-math-fallback-image-inline mw-invert skin-invert" aria-hidden="true" style="vertical-align: -0.338ex; width:11.749ex; height:2.676ex;" alt="{\displaystyle T\colon \mathbb {R} ^{3}\to \mathbb {R} ^{3}}"></span> may consist of a translation and a linear transformation. In the following, the translation will be omitted, and the linear transformation will be represented by a 3×3 matrix <span class="mwe-math-element mwe-math-element-inline"><span class="mwe-math-mathml-a11y" style="display: none;"><math class="mathjax_ignore" xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle T}">
+  <semantics>
+    <mrow class="MJX-TeXAtom-ORD">
+      <mstyle displaystyle="true" scriptlevel="0">
+        <mi>T</mi>
+      </mstyle>
+    </mrow>
+    <annotation encoding="application/x-tex">{\displaystyle T}</annotation>
+  </semantics>
+</math></span><img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/ec7200acd984a1d3a3d7dc455e262fbe54f7f6e0" class="mwe-math-fallback-image-inline mw-invert skin-invert" aria-hidden="true" style="vertical-align: -0.338ex; width:1.636ex; height:2.176ex;" alt="{\displaystyle T}"></span>.
+</p>
+<div class="mw-heading mw-heading3"><h3 id="Active_transformation">Active transformation</h3></div>
+<p>As an active transformation, <span class="mwe-math-element mwe-math-element-inline"><span class="mwe-math-mathml-a11y" style="display: none;"><math class="mathjax_ignore" xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle T}">
+  <semantics>
+    <mrow class="MJX-TeXAtom-ORD">
+      <mstyle displaystyle="true" scriptlevel="0">
+        <mi>T</mi>
+      </mstyle>
+    </mrow>
+    <annotation encoding="application/x-tex">{\displaystyle T}</annotation>
+  </semantics>
+</math></span><img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/ec7200acd984a1d3a3d7dc455e262fbe54f7f6e0" class="mwe-math-fallback-image-inline mw-invert skin-invert" aria-hidden="true" style="vertical-align: -0.338ex; width:1.636ex; height:2.176ex;" alt="{\displaystyle T}"></span> transforms the initial vector <span class="mwe-math-element mwe-math-element-inline"><span class="mwe-math-mathml-a11y" style="display: none;"><math class="mathjax_ignore" xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle \mathbf {v} =(v_{x},v_{y},v_{z})}">
+  <semantics>
+    <mrow class="MJX-TeXAtom-ORD">
+      <mstyle displaystyle="true" scriptlevel="0">
+        <mrow class="MJX-TeXAtom-ORD">
+          <mi mathvariant="bold">v</mi>
+        </mrow>
+        <mo>=</mo>
+        <mo stretchy="false">(</mo>
+        <msub>
+          <mi>v</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>x</mi>
+          </mrow>
+        </msub>
+        <mo>,</mo>
+        <msub>
+          <mi>v</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>y</mi>
+          </mrow>
+        </msub>
+        <mo>,</mo>
+        <msub>
+          <mi>v</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>z</mi>
+          </mrow>
+        </msub>
+        <mo stretchy="false">)</mo>
+      </mstyle>
+    </mrow>
+    <annotation encoding="application/x-tex">{\displaystyle \mathbf {v} =(v_{x},v_{y},v_{z})}</annotation>
+  </semantics>
+</math></span><img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/0744af00f6b08dd2f26a2c76271389a3c25c5cb6" class="mwe-math-fallback-image-inline mw-invert skin-invert" aria-hidden="true" style="vertical-align: -1.005ex; width:14.993ex; height:3.009ex;" alt="{\displaystyle \mathbf {v} =(v_{x},v_{y},v_{z})}"></span> into a new vector <span class="mwe-math-element mwe-math-element-inline"><span class="mwe-math-mathml-a11y" style="display: none;"><math class="mathjax_ignore" xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle \mathbf {v} '=(v'_{x},v'_{y},v'_{z})=T\mathbf {v} =T(v_{x},v_{y},v_{z})}">
+  <semantics>
+    <mrow class="MJX-TeXAtom-ORD">
+      <mstyle displaystyle="true" scriptlevel="0">
+        <msup>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi mathvariant="bold">v</mi>
+          </mrow>
+          <mo>&#x2032;</mo>
+        </msup>
+        <mo>=</mo>
+        <mo stretchy="false">(</mo>
+        <msubsup>
+          <mi>v</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>x</mi>
+          </mrow>
+          <mo>&#x2032;</mo>
+        </msubsup>
+        <mo>,</mo>
+        <msubsup>
+          <mi>v</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>y</mi>
+          </mrow>
+          <mo>&#x2032;</mo>
+        </msubsup>
+        <mo>,</mo>
+        <msubsup>
+          <mi>v</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>z</mi>
+          </mrow>
+          <mo>&#x2032;</mo>
+        </msubsup>
+        <mo stretchy="false">)</mo>
+        <mo>=</mo>
+        <mi>T</mi>
+        <mrow class="MJX-TeXAtom-ORD">
+          <mi mathvariant="bold">v</mi>
+        </mrow>
+        <mo>=</mo>
+        <mi>T</mi>
+        <mo stretchy="false">(</mo>
+        <msub>
+          <mi>v</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>x</mi>
+          </mrow>
+        </msub>
+        <mo>,</mo>
+        <msub>
+          <mi>v</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>y</mi>
+          </mrow>
+        </msub>
+        <mo>,</mo>
+        <msub>
+          <mi>v</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>z</mi>
+          </mrow>
+        </msub>
+        <mo stretchy="false">)</mo>
+      </mstyle>
+    </mrow>
+    <annotation encoding="application/x-tex">{\displaystyle \mathbf {v} '=(v'_{x},v'_{y},v'_{z})=T\mathbf {v} =T(v_{x},v_{y},v_{z})}</annotation>
+  </semantics>
+</math></span><img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/5c2e55a0c26e29eecd9dd6e93ce2be77cd6611e0" class="mwe-math-fallback-image-inline mw-invert skin-invert" aria-hidden="true" style="vertical-align: -1.005ex; width:37.042ex; height:3.176ex;" alt="{\displaystyle \mathbf {v} &#039;=(v&#039;_{x},v&#039;_{y},v&#039;_{z})=T\mathbf {v} =T(v_{x},v_{y},v_{z})}"></span>.
+</p><p>If one views <span class="mwe-math-element mwe-math-element-inline"><span class="mwe-math-mathml-a11y" style="display: none;"><math class="mathjax_ignore" xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle \{\mathbf {e} '_{x}=T(1,0,0),\ \mathbf {e} '_{y}=T(0,1,0),\ \mathbf {e} '_{z}=T(0,0,1)\}}">
+  <semantics>
+    <mrow class="MJX-TeXAtom-ORD">
+      <mstyle displaystyle="true" scriptlevel="0">
+        <mo fence="false" stretchy="false">{</mo>
+        <msubsup>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi mathvariant="bold">e</mi>
+          </mrow>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>x</mi>
+          </mrow>
+          <mo>&#x2032;</mo>
+        </msubsup>
+        <mo>=</mo>
+        <mi>T</mi>
+        <mo stretchy="false">(</mo>
+        <mn>1</mn>
+        <mo>,</mo>
+        <mn>0</mn>
+        <mo>,</mo>
+        <mn>0</mn>
+        <mo stretchy="false">)</mo>
+        <mo>,</mo>
+        <mtext>&#xA0;</mtext>
+        <msubsup>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi mathvariant="bold">e</mi>
+          </mrow>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>y</mi>
+          </mrow>
+          <mo>&#x2032;</mo>
+        </msubsup>
+        <mo>=</mo>
+        <mi>T</mi>
+        <mo stretchy="false">(</mo>
+        <mn>0</mn>
+        <mo>,</mo>
+        <mn>1</mn>
+        <mo>,</mo>
+        <mn>0</mn>
+        <mo stretchy="false">)</mo>
+        <mo>,</mo>
+        <mtext>&#xA0;</mtext>
+        <msubsup>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi mathvariant="bold">e</mi>
+          </mrow>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>z</mi>
+          </mrow>
+          <mo>&#x2032;</mo>
+        </msubsup>
+        <mo>=</mo>
+        <mi>T</mi>
+        <mo stretchy="false">(</mo>
+        <mn>0</mn>
+        <mo>,</mo>
+        <mn>0</mn>
+        <mo>,</mo>
+        <mn>1</mn>
+        <mo stretchy="false">)</mo>
+        <mo fence="false" stretchy="false">}</mo>
+      </mstyle>
+    </mrow>
+    <annotation encoding="application/x-tex">{\displaystyle \{\mathbf {e} '_{x}=T(1,0,0),\ \mathbf {e} '_{y}=T(0,1,0),\ \mathbf {e} '_{z}=T(0,0,1)\}}</annotation>
+  </semantics>
+</math></span><img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/d7e10de8af4657691a6f1c937785e7cf23e5e5f4" class="mwe-math-fallback-image-inline mw-invert skin-invert" aria-hidden="true" style="vertical-align: -1.005ex; width:48.751ex; height:3.009ex;" alt="{\displaystyle \{\mathbf {e} &#039;_{x}=T(1,0,0),\ \mathbf {e} &#039;_{y}=T(0,1,0),\ \mathbf {e} &#039;_{z}=T(0,0,1)\}}"></span> as a new <a href="/wiki/Basis_(linear_algebra)" title="Basis (linear algebra)">basis</a>, then the coordinates of the new vector <span class="mwe-math-element mwe-math-element-inline"><span class="mwe-math-mathml-a11y" style="display: none;"><math class="mathjax_ignore" xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle \mathbf {v} '=v_{x}\mathbf {e} '_{x}+v_{y}\mathbf {e} '_{y}+v_{z}\mathbf {e} '_{z}}">
+  <semantics>
+    <mrow class="MJX-TeXAtom-ORD">
+      <mstyle displaystyle="true" scriptlevel="0">
+        <msup>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi mathvariant="bold">v</mi>
+          </mrow>
+          <mo>&#x2032;</mo>
+        </msup>
+        <mo>=</mo>
+        <msub>
+          <mi>v</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>x</mi>
+          </mrow>
+        </msub>
+        <msubsup>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi mathvariant="bold">e</mi>
+          </mrow>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>x</mi>
+          </mrow>
+          <mo>&#x2032;</mo>
+        </msubsup>
+        <mo>+</mo>
+        <msub>
+          <mi>v</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>y</mi>
+          </mrow>
+        </msub>
+        <msubsup>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi mathvariant="bold">e</mi>
+          </mrow>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>y</mi>
+          </mrow>
+          <mo>&#x2032;</mo>
+        </msubsup>
+        <mo>+</mo>
+        <msub>
+          <mi>v</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>z</mi>
+          </mrow>
+        </msub>
+        <msubsup>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi mathvariant="bold">e</mi>
+          </mrow>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>z</mi>
+          </mrow>
+          <mo>&#x2032;</mo>
+        </msubsup>
+      </mstyle>
+    </mrow>
+    <annotation encoding="application/x-tex">{\displaystyle \mathbf {v} '=v_{x}\mathbf {e} '_{x}+v_{y}\mathbf {e} '_{y}+v_{z}\mathbf {e} '_{z}}</annotation>
+  </semantics>
+</math></span><img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/63d9b25362a15bb97d88cbc75df51dc1cc043d04" class="mwe-math-fallback-image-inline mw-invert skin-invert" aria-hidden="true" style="vertical-align: -1.005ex; width:24.38ex; height:3.176ex;" alt="{\displaystyle \mathbf {v} &#039;=v_{x}\mathbf {e} &#039;_{x}+v_{y}\mathbf {e} &#039;_{y}+v_{z}\mathbf {e} &#039;_{z}}"></span> in the new basis are the same as those of <span class="mwe-math-element mwe-math-element-inline"><span class="mwe-math-mathml-a11y" style="display: none;"><math class="mathjax_ignore" xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle \mathbf {v} =v_{x}\mathbf {e} _{x}+v_{y}\mathbf {e} _{y}+v_{z}\mathbf {e} _{z}}">
+  <semantics>
+    <mrow class="MJX-TeXAtom-ORD">
+      <mstyle displaystyle="true" scriptlevel="0">
+        <mrow class="MJX-TeXAtom-ORD">
+          <mi mathvariant="bold">v</mi>
+        </mrow>
+        <mo>=</mo>
+        <msub>
+          <mi>v</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>x</mi>
+          </mrow>
+        </msub>
+        <msub>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi mathvariant="bold">e</mi>
+          </mrow>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>x</mi>
+          </mrow>
+        </msub>
+        <mo>+</mo>
+        <msub>
+          <mi>v</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>y</mi>
+          </mrow>
+        </msub>
+        <msub>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi mathvariant="bold">e</mi>
+          </mrow>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>y</mi>
+          </mrow>
+        </msub>
+        <mo>+</mo>
+        <msub>
+          <mi>v</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>z</mi>
+          </mrow>
+        </msub>
+        <msub>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi mathvariant="bold">e</mi>
+          </mrow>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>z</mi>
+          </mrow>
+        </msub>
+      </mstyle>
+    </mrow>
+    <annotation encoding="application/x-tex">{\displaystyle \mathbf {v} =v_{x}\mathbf {e} _{x}+v_{y}\mathbf {e} _{y}+v_{z}\mathbf {e} _{z}}</annotation>
+  </semantics>
+</math></span><img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/696fb9a62b521107af0b00349e0e20b0d56d4e31" class="mwe-math-fallback-image-inline mw-invert skin-invert" aria-hidden="true" style="vertical-align: -1.005ex; width:23.696ex; height:2.676ex;" alt="{\displaystyle \mathbf {v} =v_{x}\mathbf {e} _{x}+v_{y}\mathbf {e} _{y}+v_{z}\mathbf {e} _{z}}"></span> in the original basis. Note that active transformations make sense even as a linear transformation into a different <a href="/wiki/Vector_space" title="Vector space">vector space</a>. It makes sense to write the new vector in the unprimed basis (as above) only when the transformation is from the space into itself.
+</p>
+<div class="mw-heading mw-heading3"><h3 id="Passive_transformation">Passive transformation</h3></div>
+<p>On the other hand, when one views <span class="mwe-math-element mwe-math-element-inline"><span class="mwe-math-mathml-a11y" style="display: none;"><math class="mathjax_ignore" xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle T}">
+  <semantics>
+    <mrow class="MJX-TeXAtom-ORD">
+      <mstyle displaystyle="true" scriptlevel="0">
+        <mi>T</mi>
+      </mstyle>
+    </mrow>
+    <annotation encoding="application/x-tex">{\displaystyle T}</annotation>
+  </semantics>
+</math></span><img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/ec7200acd984a1d3a3d7dc455e262fbe54f7f6e0" class="mwe-math-fallback-image-inline mw-invert skin-invert" aria-hidden="true" style="vertical-align: -0.338ex; width:1.636ex; height:2.176ex;" alt="{\displaystyle T}"></span> as a passive transformation, the initial vector <span class="mwe-math-element mwe-math-element-inline"><span class="mwe-math-mathml-a11y" style="display: none;"><math class="mathjax_ignore" xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle \mathbf {v} =(v_{x},v_{y},v_{z})}">
+  <semantics>
+    <mrow class="MJX-TeXAtom-ORD">
+      <mstyle displaystyle="true" scriptlevel="0">
+        <mrow class="MJX-TeXAtom-ORD">
+          <mi mathvariant="bold">v</mi>
+        </mrow>
+        <mo>=</mo>
+        <mo stretchy="false">(</mo>
+        <msub>
+          <mi>v</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>x</mi>
+          </mrow>
+        </msub>
+        <mo>,</mo>
+        <msub>
+          <mi>v</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>y</mi>
+          </mrow>
+        </msub>
+        <mo>,</mo>
+        <msub>
+          <mi>v</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>z</mi>
+          </mrow>
+        </msub>
+        <mo stretchy="false">)</mo>
+      </mstyle>
+    </mrow>
+    <annotation encoding="application/x-tex">{\displaystyle \mathbf {v} =(v_{x},v_{y},v_{z})}</annotation>
+  </semantics>
+</math></span><img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/0744af00f6b08dd2f26a2c76271389a3c25c5cb6" class="mwe-math-fallback-image-inline mw-invert skin-invert" aria-hidden="true" style="vertical-align: -1.005ex; width:14.993ex; height:3.009ex;" alt="{\displaystyle \mathbf {v} =(v_{x},v_{y},v_{z})}"></span> is left unchanged, while the coordinate system and its basis vectors are transformed in the opposite direction, that is, with the inverse transformation <span class="mwe-math-element mwe-math-element-inline"><span class="mwe-math-mathml-a11y" style="display: none;"><math class="mathjax_ignore" xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle T^{-1}}">
+  <semantics>
+    <mrow class="MJX-TeXAtom-ORD">
+      <mstyle displaystyle="true" scriptlevel="0">
+        <msup>
+          <mi>T</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mo>&#x2212;<!-- − --></mo>
+            <mn>1</mn>
+          </mrow>
+        </msup>
+      </mstyle>
+    </mrow>
+    <annotation encoding="application/x-tex">{\displaystyle T^{-1}}</annotation>
+  </semantics>
+</math></span><img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/1a1a5bed0ce2d8adc7fdad412c34ef905fb5026f" class="mwe-math-fallback-image-inline mw-invert skin-invert" aria-hidden="true" style="vertical-align: -0.338ex; width:4.053ex; height:2.676ex;" alt="{\displaystyle T^{-1}}"></span>.<sup id="cite&#95;ref-Amidror&#95;4-0" class="reference"><a href="#cite_note-Amidror-4"><span class="cite-bracket">&#91;</span>4<span class="cite-bracket">&#93;</span></a></sup> This gives a new coordinate system <i>XYZ</i> with basis vectors:
+<span class="mwe-math-element mwe-math-element-block"><span class="mwe-math-mathml-a11y" style="display: none;"><math class="mathjax_ignore" display="block" xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle \mathbf {e} _{X}=T^{-1}(1,0,0),\ \mathbf {e} _{Y}=T^{-1}(0,1,0),\ \mathbf {e} _{Z}=T^{-1}(0,0,1)}">
+  <semantics>
+    <mrow class="MJX-TeXAtom-ORD">
+      <mstyle displaystyle="true" scriptlevel="0">
+        <msub>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi mathvariant="bold">e</mi>
+          </mrow>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>X</mi>
+          </mrow>
+        </msub>
+        <mo>=</mo>
+        <msup>
+          <mi>T</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mo>&#x2212;<!-- − --></mo>
+            <mn>1</mn>
+          </mrow>
+        </msup>
+        <mo stretchy="false">(</mo>
+        <mn>1</mn>
+        <mo>,</mo>
+        <mn>0</mn>
+        <mo>,</mo>
+        <mn>0</mn>
+        <mo stretchy="false">)</mo>
+        <mo>,</mo>
+        <mtext>&#xA0;</mtext>
+        <msub>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi mathvariant="bold">e</mi>
+          </mrow>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>Y</mi>
+          </mrow>
+        </msub>
+        <mo>=</mo>
+        <msup>
+          <mi>T</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mo>&#x2212;<!-- − --></mo>
+            <mn>1</mn>
+          </mrow>
+        </msup>
+        <mo stretchy="false">(</mo>
+        <mn>0</mn>
+        <mo>,</mo>
+        <mn>1</mn>
+        <mo>,</mo>
+        <mn>0</mn>
+        <mo stretchy="false">)</mo>
+        <mo>,</mo>
+        <mtext>&#xA0;</mtext>
+        <msub>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi mathvariant="bold">e</mi>
+          </mrow>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>Z</mi>
+          </mrow>
+        </msub>
+        <mo>=</mo>
+        <msup>
+          <mi>T</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mo>&#x2212;<!-- − --></mo>
+            <mn>1</mn>
+          </mrow>
+        </msup>
+        <mo stretchy="false">(</mo>
+        <mn>0</mn>
+        <mo>,</mo>
+        <mn>0</mn>
+        <mo>,</mo>
+        <mn>1</mn>
+        <mo stretchy="false">)</mo>
+      </mstyle>
+    </mrow>
+    <annotation encoding="application/x-tex">{\displaystyle \mathbf {e} _{X}=T^{-1}(1,0,0),\ \mathbf {e} _{Y}=T^{-1}(0,1,0),\ \mathbf {e} _{Z}=T^{-1}(0,0,1)}</annotation>
+  </semantics>
+</math></span><img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/518e08fa08bc52ba07f4dca61addb38b0f128bb4" class="mwe-math-fallback-image-display mw-invert skin-invert" aria-hidden="true" style="vertical-align: -0.838ex; width:54.991ex; height:3.176ex;" alt="{\displaystyle \mathbf {e} _{X}=T^{-1}(1,0,0),\ \mathbf {e} _{Y}=T^{-1}(0,1,0),\ \mathbf {e} _{Z}=T^{-1}(0,0,1)}"></span>
+</p><p>The new coordinates <span class="mwe-math-element mwe-math-element-inline"><span class="mwe-math-mathml-a11y" style="display: none;"><math class="mathjax_ignore" xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle (v_{X},v_{Y},v_{Z})}">
+  <semantics>
+    <mrow class="MJX-TeXAtom-ORD">
+      <mstyle displaystyle="true" scriptlevel="0">
+        <mo stretchy="false">(</mo>
+        <msub>
+          <mi>v</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>X</mi>
+          </mrow>
+        </msub>
+        <mo>,</mo>
+        <msub>
+          <mi>v</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>Y</mi>
+          </mrow>
+        </msub>
+        <mo>,</mo>
+        <msub>
+          <mi>v</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>Z</mi>
+          </mrow>
+        </msub>
+        <mo stretchy="false">)</mo>
+      </mstyle>
+    </mrow>
+    <annotation encoding="application/x-tex">{\displaystyle (v_{X},v_{Y},v_{Z})}</annotation>
+  </semantics>
+</math></span><img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/c4306a9aa6a44112ce053c31dfe906ef9b2793ac" class="mwe-math-fallback-image-inline mw-invert skin-invert" aria-hidden="true" style="vertical-align: -0.838ex; width:11.799ex; height:2.843ex;" alt="{\displaystyle (v_{X},v_{Y},v_{Z})}"></span> of <span class="mwe-math-element mwe-math-element-inline"><span class="mwe-math-mathml-a11y" style="display: none;"><math class="mathjax_ignore" xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle \mathbf {v} }">
+  <semantics>
+    <mrow class="MJX-TeXAtom-ORD">
+      <mstyle displaystyle="true" scriptlevel="0">
+        <mrow class="MJX-TeXAtom-ORD">
+          <mi mathvariant="bold">v</mi>
+        </mrow>
+      </mstyle>
+    </mrow>
+    <annotation encoding="application/x-tex">{\displaystyle \mathbf {v} }</annotation>
+  </semantics>
+</math></span><img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/35c1866e359fbfd2e0f606c725ba5cc37a5195d6" class="mwe-math-fallback-image-inline mw-invert skin-invert" aria-hidden="true" style="vertical-align: -0.338ex; width:1.411ex; height:1.676ex;" alt="{\displaystyle \mathbf {v} }"></span> with respect to the new coordinate system <i>XYZ</i> are given by: 
+<span class="mwe-math-element mwe-math-element-block"><span class="mwe-math-mathml-a11y" style="display: none;"><math class="mathjax_ignore" display="block" xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle \mathbf {v} =(v_{x},v_{y},v_{z})=v_{X}\mathbf {e} _{X}+v_{Y}\mathbf {e} _{Y}+v_{Z}\mathbf {e} _{Z}=T^{-1}(v_{X},v_{Y},v_{Z}).}">
+  <semantics>
+    <mrow class="MJX-TeXAtom-ORD">
+      <mstyle displaystyle="true" scriptlevel="0">
+        <mrow class="MJX-TeXAtom-ORD">
+          <mi mathvariant="bold">v</mi>
+        </mrow>
+        <mo>=</mo>
+        <mo stretchy="false">(</mo>
+        <msub>
+          <mi>v</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>x</mi>
+          </mrow>
+        </msub>
+        <mo>,</mo>
+        <msub>
+          <mi>v</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>y</mi>
+          </mrow>
+        </msub>
+        <mo>,</mo>
+        <msub>
+          <mi>v</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>z</mi>
+          </mrow>
+        </msub>
+        <mo stretchy="false">)</mo>
+        <mo>=</mo>
+        <msub>
+          <mi>v</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>X</mi>
+          </mrow>
+        </msub>
+        <msub>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi mathvariant="bold">e</mi>
+          </mrow>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>X</mi>
+          </mrow>
+        </msub>
+        <mo>+</mo>
+        <msub>
+          <mi>v</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>Y</mi>
+          </mrow>
+        </msub>
+        <msub>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi mathvariant="bold">e</mi>
+          </mrow>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>Y</mi>
+          </mrow>
+        </msub>
+        <mo>+</mo>
+        <msub>
+          <mi>v</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>Z</mi>
+          </mrow>
+        </msub>
+        <msub>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi mathvariant="bold">e</mi>
+          </mrow>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>Z</mi>
+          </mrow>
+        </msub>
+        <mo>=</mo>
+        <msup>
+          <mi>T</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mo>&#x2212;<!-- − --></mo>
+            <mn>1</mn>
+          </mrow>
+        </msup>
+        <mo stretchy="false">(</mo>
+        <msub>
+          <mi>v</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>X</mi>
+          </mrow>
+        </msub>
+        <mo>,</mo>
+        <msub>
+          <mi>v</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>Y</mi>
+          </mrow>
+        </msub>
+        <mo>,</mo>
+        <msub>
+          <mi>v</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>Z</mi>
+          </mrow>
+        </msub>
+        <mo stretchy="false">)</mo>
+        <mo>.</mo>
+      </mstyle>
+    </mrow>
+    <annotation encoding="application/x-tex">{\displaystyle \mathbf {v} =(v_{x},v_{y},v_{z})=v_{X}\mathbf {e} _{X}+v_{Y}\mathbf {e} _{Y}+v_{Z}\mathbf {e} _{Z}=T^{-1}(v_{X},v_{Y},v_{Z}).}</annotation>
+  </semantics>
+</math></span><img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/89d09243cd40ca235ac75cf00260c951955bd86f" class="mwe-math-fallback-image-display mw-invert skin-invert" aria-hidden="true" style="vertical-align: -1.005ex; width:59.506ex; height:3.343ex;" alt="{\displaystyle \mathbf {v} =(v_{x},v_{y},v_{z})=v_{X}\mathbf {e} _{X}+v_{Y}\mathbf {e} _{Y}+v_{Z}\mathbf {e} _{Z}=T^{-1}(v_{X},v_{Y},v_{Z}).}"></span>
+</p><p>From this equation one sees that the new coordinates are given by
+<span class="mwe-math-element mwe-math-element-block"><span class="mwe-math-mathml-a11y" style="display: none;"><math class="mathjax_ignore" display="block" xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle (v_{X},v_{Y},v_{Z})=T(v_{x},v_{y},v_{z}).}">
+  <semantics>
+    <mrow class="MJX-TeXAtom-ORD">
+      <mstyle displaystyle="true" scriptlevel="0">
+        <mo stretchy="false">(</mo>
+        <msub>
+          <mi>v</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>X</mi>
+          </mrow>
+        </msub>
+        <mo>,</mo>
+        <msub>
+          <mi>v</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>Y</mi>
+          </mrow>
+        </msub>
+        <mo>,</mo>
+        <msub>
+          <mi>v</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>Z</mi>
+          </mrow>
+        </msub>
+        <mo stretchy="false">)</mo>
+        <mo>=</mo>
+        <mi>T</mi>
+        <mo stretchy="false">(</mo>
+        <msub>
+          <mi>v</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>x</mi>
+          </mrow>
+        </msub>
+        <mo>,</mo>
+        <msub>
+          <mi>v</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>y</mi>
+          </mrow>
+        </msub>
+        <mo>,</mo>
+        <msub>
+          <mi>v</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>z</mi>
+          </mrow>
+        </msub>
+        <mo stretchy="false">)</mo>
+        <mo>.</mo>
+      </mstyle>
+    </mrow>
+    <annotation encoding="application/x-tex">{\displaystyle (v_{X},v_{Y},v_{Z})=T(v_{x},v_{y},v_{z}).}</annotation>
+  </semantics>
+</math></span><img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/cda95a9b452d9fe5a1054760056f01cc6aee2aba" class="mwe-math-fallback-image-display mw-invert skin-invert" aria-hidden="true" style="vertical-align: -1.005ex; width:27.664ex; height:3.009ex;" alt="{\displaystyle (v_{X},v_{Y},v_{Z})=T(v_{x},v_{y},v_{z}).}"></span>
+</p><p>As a passive transformation <span class="mwe-math-element mwe-math-element-inline"><span class="mwe-math-mathml-a11y" style="display: none;"><math class="mathjax_ignore" xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle T}">
+  <semantics>
+    <mrow class="MJX-TeXAtom-ORD">
+      <mstyle displaystyle="true" scriptlevel="0">
+        <mi>T</mi>
+      </mstyle>
+    </mrow>
+    <annotation encoding="application/x-tex">{\displaystyle T}</annotation>
+  </semantics>
+</math></span><img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/ec7200acd984a1d3a3d7dc455e262fbe54f7f6e0" class="mwe-math-fallback-image-inline mw-invert skin-invert" aria-hidden="true" style="vertical-align: -0.338ex; width:1.636ex; height:2.176ex;" alt="{\displaystyle T}"></span> transforms the old coordinates into the new ones.
+</p><p>Note the equivalence between the two kinds of transformations: the coordinates of the new point in the active transformation and the new coordinates of the point in the passive transformation are the same, namely
+<span class="mwe-math-element mwe-math-element-block"><span class="mwe-math-mathml-a11y" style="display: none;"><math class="mathjax_ignore" display="block" xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle (v_{X},v_{Y},v_{Z})=(v'_{x},v'_{y},v'_{z}).}">
+  <semantics>
+    <mrow class="MJX-TeXAtom-ORD">
+      <mstyle displaystyle="true" scriptlevel="0">
+        <mo stretchy="false">(</mo>
+        <msub>
+          <mi>v</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>X</mi>
+          </mrow>
+        </msub>
+        <mo>,</mo>
+        <msub>
+          <mi>v</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>Y</mi>
+          </mrow>
+        </msub>
+        <mo>,</mo>
+        <msub>
+          <mi>v</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>Z</mi>
+          </mrow>
+        </msub>
+        <mo stretchy="false">)</mo>
+        <mo>=</mo>
+        <mo stretchy="false">(</mo>
+        <msubsup>
+          <mi>v</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>x</mi>
+          </mrow>
+          <mo>&#x2032;</mo>
+        </msubsup>
+        <mo>,</mo>
+        <msubsup>
+          <mi>v</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>y</mi>
+          </mrow>
+          <mo>&#x2032;</mo>
+        </msubsup>
+        <mo>,</mo>
+        <msubsup>
+          <mi>v</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>z</mi>
+          </mrow>
+          <mo>&#x2032;</mo>
+        </msubsup>
+        <mo stretchy="false">)</mo>
+        <mo>.</mo>
+      </mstyle>
+    </mrow>
+    <annotation encoding="application/x-tex">{\displaystyle (v_{X},v_{Y},v_{Z})=(v'_{x},v'_{y},v'_{z}).}</annotation>
+  </semantics>
+</math></span><img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/b38e6fb22890c515a1cb70b7b24465ede4655db5" class="mwe-math-fallback-image-display mw-invert skin-invert" aria-hidden="true" style="vertical-align: -1.005ex; width:26.028ex; height:3.009ex;" alt="{\displaystyle (v_{X},v_{Y},v_{Z})=(v&#039;_{x},v&#039;_{y},v&#039;_{z}).}"></span>
+</p>
+<div class="mw-heading mw-heading2"><h2 id="In_abstract_vector_spaces">In abstract vector spaces</h2></div>
+<style data-mw-deduplicate="TemplateStyles:r1364180890">.mw-parser-output .ambox{border:1px solid #a2a9b1;border-left:10px solid #36c;background-color:#fbfbfb;box-sizing:border-box}.mw-parser-output .ambox+.mw-empty-elt+.ambox,.mw-parser-output .ambox+.mw-empty-elt+.mw-empty-elt+.ambox,.mw-parser-output .ambox+.mw-empty-elt+.mw-empty-elt+.mw-empty-elt+.ambox{margin-top:-1px}html body.mediawiki .mw-parser-output .ambox.mbox-small-left{margin:4px 1em 4px 0;overflow:hidden;width:238px;border-collapse:collapse;font-size:88%;line-height:1.25em}.mw-parser-output .ambox-speedy{border-left:10px solid #b32424;background-color:#fee7e6}.mw-parser-output .ambox-delete{border-left:10px solid #b32424}.mw-parser-output .ambox-content{border-left:10px solid #f28500}.mw-parser-output .ambox-style{border-left:10px solid #fc3}.mw-parser-output .ambox-move{border-left:10px solid #9932cc}.mw-parser-output .ambox-protection{border-left:10px solid #a2a9b1}.mw-parser-output .ambox .mbox-text{border:none;padding:0.25em 0.5em;width:100%}.mw-parser-output .ambox .mbox-image{border:none;padding:2px 0 2px 0.5em;text-align:center}.mw-parser-output .ambox .mbox-imageright{border:none;padding:2px 0.5em 2px 0;text-align:center}.mw-parser-output .ambox .mbox-empty-cell{border:none;padding:0;width:1px}.mw-parser-output .ambox .mbox-image-div{width:52px}@media(min-width:720px){.mw-parser-output .ambox{margin:0 10%}}@media print{body.ns-0 .mw-parser-output .ambox{display:none!important}}</style><table class="box-Unreferenced&#95;section plainlinks metadata ambox ambox-content ambox-Unreferenced" role="presentation"><tbody><tr><td class="mbox-image"><div class="mbox-image-div"><span typeof="mw:File"><a href="/wiki/File:Question_book-new.svg" class="mw-file-description"><img alt="icon" src="//thumb.wikimedia.org/wikipedia/en/thumb/9/99/Question_book-new.svg/60px-Question_book-new.svg.png?utm_source=en.wikipedia.org&amp;utm_campaign=parser&amp;utm_content=thumbnail" decoding="async" loading="lazy" width="50" height="39" class="mw-file-element" srcset="//thumb.wikimedia.org/wikipedia/en/thumb/9/99/Question_book-new.svg/120px-Question_book-new.svg.png?utm_source=en.wikipedia.org&amp;utm_campaign=parser&amp;utm_content=thumbnail 2x" data-file-width="512" data-file-height="399" /></a></span></div></td><td class="mbox-text"><div class="mbox-text-span">This section <b>does not <a href="/wiki/Wikipedia:Citing_sources" title="Wikipedia:Citing sources">cite</a> any <a href="/wiki/Wikipedia:Verifiability" title="Wikipedia:Verifiability">sources</a></b>.<span class="hide-when-compact"> Please help <a href="/wiki/Special:EditPage/Active_and_passive_transformation" title="Special:EditPage/Active and passive transformation">improve this section</a> by <a href="/wiki/Help:Referencing_for_beginners" title="Help:Referencing for beginners">adding citations to reliable sources</a>. Unsourced material may be challenged and <a href="/wiki/Wikipedia:Verifiability#Burden_of_evidence" title="Wikipedia:Verifiability">removed</a>.</span>  <span class="date-container"><i>(<span class="date">September 2023</span>)</i></span><span class="hide-when-compact"><i> (<small><a href="/wiki/Help:Maintenance_template_removal" title="Help:Maintenance template removal">Learn how and when to remove this message</a></small>)</i></span></div></td></tr></tbody></table>
+<p>The distinction between active and passive transformations can be seen mathematically by considering abstract <a href="/wiki/Vector_spaces" class="mw-redirect" title="Vector spaces">vector spaces</a>. 
+</p><p>Fix a finite-dimensional vector space <span class="mwe-math-element mwe-math-element-inline"><span class="mwe-math-mathml-a11y" style="display: none;"><math class="mathjax_ignore" xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle V}">
+  <semantics>
+    <mrow class="MJX-TeXAtom-ORD">
+      <mstyle displaystyle="true" scriptlevel="0">
+        <mi>V</mi>
+      </mstyle>
+    </mrow>
+    <annotation encoding="application/x-tex">{\displaystyle V}</annotation>
+  </semantics>
+</math></span><img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/af0f6064540e84211d0ffe4dac72098adfa52845" class="mwe-math-fallback-image-inline mw-invert skin-invert" aria-hidden="true" style="vertical-align: -0.338ex; width:1.787ex; height:2.176ex;" alt="{\displaystyle V}"></span> over a field <span class="mwe-math-element mwe-math-element-inline"><span class="mwe-math-mathml-a11y" style="display: none;"><math class="mathjax_ignore" xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle K}">
+  <semantics>
+    <mrow class="MJX-TeXAtom-ORD">
+      <mstyle displaystyle="true" scriptlevel="0">
+        <mi>K</mi>
+      </mstyle>
+    </mrow>
+    <annotation encoding="application/x-tex">{\displaystyle K}</annotation>
+  </semantics>
+</math></span><img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/2b76fce82a62ed5461908f0dc8f037de4e3686b0" class="mwe-math-fallback-image-inline mw-invert skin-invert" aria-hidden="true" style="vertical-align: -0.338ex; width:2.066ex; height:2.176ex;" alt="{\displaystyle K}"></span> (thought of as <span class="mwe-math-element mwe-math-element-inline"><span class="mwe-math-mathml-a11y" style="display: none;"><math class="mathjax_ignore" xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle \mathbb {R} }">
+  <semantics>
+    <mrow class="MJX-TeXAtom-ORD">
+      <mstyle displaystyle="true" scriptlevel="0">
+        <mrow class="MJX-TeXAtom-ORD">
+          <mi mathvariant="double-struck">R</mi>
+        </mrow>
+      </mstyle>
+    </mrow>
+    <annotation encoding="application/x-tex">{\displaystyle \mathbb {R} }</annotation>
+  </semantics>
+</math></span><img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/786849c765da7a84dbc3cce43e96aad58a5868dc" class="mwe-math-fallback-image-inline mw-invert skin-invert" aria-hidden="true" style="vertical-align: -0.338ex; width:1.678ex; height:2.176ex;" alt="{\displaystyle \mathbb {R} }"></span> or <span class="mwe-math-element mwe-math-element-inline"><span class="mwe-math-mathml-a11y" style="display: none;"><math class="mathjax_ignore" xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle \mathbb {C} }">
+  <semantics>
+    <mrow class="MJX-TeXAtom-ORD">
+      <mstyle displaystyle="true" scriptlevel="0">
+        <mrow class="MJX-TeXAtom-ORD">
+          <mi mathvariant="double-struck">C</mi>
+        </mrow>
+      </mstyle>
+    </mrow>
+    <annotation encoding="application/x-tex">{\displaystyle \mathbb {C} }</annotation>
+  </semantics>
+</math></span><img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/f9add4085095b9b6d28d045fd9c92c2c09f549a7" class="mwe-math-fallback-image-inline mw-invert skin-invert" aria-hidden="true" style="vertical-align: -0.338ex; width:1.678ex; height:2.176ex;" alt="{\displaystyle \mathbb {C} }"></span>), and a basis <span class="mwe-math-element mwe-math-element-inline"><span class="mwe-math-mathml-a11y" style="display: none;"><math class="mathjax_ignore" xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle {\mathcal {B}}=\{e_{i}\}_{1\leq i\leq n}}">
+  <semantics>
+    <mrow class="MJX-TeXAtom-ORD">
+      <mstyle displaystyle="true" scriptlevel="0">
+        <mrow class="MJX-TeXAtom-ORD">
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi class="MJX-tex-caligraphic" mathvariant="script">B</mi>
+          </mrow>
+        </mrow>
+        <mo>=</mo>
+        <mo fence="false" stretchy="false">{</mo>
+        <msub>
+          <mi>e</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>i</mi>
+          </mrow>
+        </msub>
+        <msub>
+          <mo fence="false" stretchy="false">}</mo>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mn>1</mn>
+            <mo>&#x2264;<!-- ≤ --></mo>
+            <mi>i</mi>
+            <mo>&#x2264;<!-- ≤ --></mo>
+            <mi>n</mi>
+          </mrow>
+        </msub>
+      </mstyle>
+    </mrow>
+    <annotation encoding="application/x-tex">{\displaystyle {\mathcal {B}}=\{e_{i}\}_{1\leq i\leq n}}</annotation>
+  </semantics>
+</math></span><img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/9f41d0e3cae169fe1a358f3f247e9123dcbe4e74" class="mwe-math-fallback-image-inline mw-invert skin-invert" aria-hidden="true" style="vertical-align: -0.838ex; width:14.015ex; height:2.843ex;" alt="{\displaystyle {\mathcal {B}}=\{e_{i}\}_{1\leq i\leq n}}"></span> of <span class="mwe-math-element mwe-math-element-inline"><span class="mwe-math-mathml-a11y" style="display: none;"><math class="mathjax_ignore" xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle V}">
+  <semantics>
+    <mrow class="MJX-TeXAtom-ORD">
+      <mstyle displaystyle="true" scriptlevel="0">
+        <mi>V</mi>
+      </mstyle>
+    </mrow>
+    <annotation encoding="application/x-tex">{\displaystyle V}</annotation>
+  </semantics>
+</math></span><img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/af0f6064540e84211d0ffe4dac72098adfa52845" class="mwe-math-fallback-image-inline mw-invert skin-invert" aria-hidden="true" style="vertical-align: -0.338ex; width:1.787ex; height:2.176ex;" alt="{\displaystyle V}"></span>. This basis provides an isomorphism <span class="mwe-math-element mwe-math-element-inline"><span class="mwe-math-mathml-a11y" style="display: none;"><math class="mathjax_ignore" xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle C:K^{n}\rightarrow V}">
+  <semantics>
+    <mrow class="MJX-TeXAtom-ORD">
+      <mstyle displaystyle="true" scriptlevel="0">
+        <mi>C</mi>
+        <mo>:</mo>
+        <msup>
+          <mi>K</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>n</mi>
+          </mrow>
+        </msup>
+        <mo stretchy="false">&#x2192;<!-- → --></mo>
+        <mi>V</mi>
+      </mstyle>
+    </mrow>
+    <annotation encoding="application/x-tex">{\displaystyle C:K^{n}\rightarrow V}</annotation>
+  </semantics>
+</math></span><img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/fd595c8fe30102b1735e82c7d591cdbed3721c37" class="mwe-math-fallback-image-inline mw-invert skin-invert" aria-hidden="true" style="vertical-align: -0.338ex; width:12.417ex; height:2.343ex;" alt="{\displaystyle C:K^{n}\rightarrow V}"></span> via the component map <span class="mwe-math-element mwe-math-element-inline"><span class="mwe-math-mathml-a11y" style="display: none;"><math class="mathjax_ignore" xmlns="http://www.w3.org/1998/Math/MathML" alttext="{\textstyle (v_{i})_{1\leq i\leq n}=(v_{1},\cdots ,v_{n})\mapsto \sum _{i}v_{i}e_{i}}">
+  <semantics>
+    <mrow class="MJX-TeXAtom-ORD">
+      <mstyle displaystyle="false" scriptlevel="0">
+        <mo stretchy="false">(</mo>
+        <msub>
+          <mi>v</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>i</mi>
+          </mrow>
+        </msub>
+        <msub>
+          <mo stretchy="false">)</mo>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mn>1</mn>
+            <mo>&#x2264;<!-- ≤ --></mo>
+            <mi>i</mi>
+            <mo>&#x2264;<!-- ≤ --></mo>
+            <mi>n</mi>
+          </mrow>
+        </msub>
+        <mo>=</mo>
+        <mo stretchy="false">(</mo>
+        <msub>
+          <mi>v</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mn>1</mn>
+          </mrow>
+        </msub>
+        <mo>,</mo>
+        <mo>&#x22EF;<!-- ⋯ --></mo>
+        <mo>,</mo>
+        <msub>
+          <mi>v</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>n</mi>
+          </mrow>
+        </msub>
+        <mo stretchy="false">)</mo>
+        <mo stretchy="false">&#x21A6;<!-- ↦ --></mo>
+        <munder>
+          <mo>&#x2211;<!-- ∑ --></mo>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>i</mi>
+          </mrow>
+        </munder>
+        <msub>
+          <mi>v</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>i</mi>
+          </mrow>
+        </msub>
+        <msub>
+          <mi>e</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>i</mi>
+          </mrow>
+        </msub>
+      </mstyle>
+    </mrow>
+    <annotation encoding="application/x-tex">{\textstyle (v_{i})_{1\leq i\leq n}=(v_{1},\cdots ,v_{n})\mapsto \sum _{i}v_{i}e_{i}}</annotation>
+  </semantics>
+</math></span><img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/0b2eceab23dfafc5cd46009b7752fe78b8dc2808" class="mwe-math-fallback-image-inline mw-invert skin-invert" aria-hidden="true" style="vertical-align: -1.005ex; width:34.581ex; height:3.009ex;" alt="{\textstyle (v_{i})_{1\leq i\leq n}=(v_{1},\cdots ,v_{n})\mapsto \sum _{i}v_{i}e_{i}}"></span>.
+</p><p>An <b>active transformation</b> is then an <a href="/wiki/Endomorphism" title="Endomorphism">endomorphism</a> on <span class="mwe-math-element mwe-math-element-inline"><span class="mwe-math-mathml-a11y" style="display: none;"><math class="mathjax_ignore" xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle V}">
+  <semantics>
+    <mrow class="MJX-TeXAtom-ORD">
+      <mstyle displaystyle="true" scriptlevel="0">
+        <mi>V</mi>
+      </mstyle>
+    </mrow>
+    <annotation encoding="application/x-tex">{\displaystyle V}</annotation>
+  </semantics>
+</math></span><img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/af0f6064540e84211d0ffe4dac72098adfa52845" class="mwe-math-fallback-image-inline mw-invert skin-invert" aria-hidden="true" style="vertical-align: -0.338ex; width:1.787ex; height:2.176ex;" alt="{\displaystyle V}"></span>, that is, a linear map from <span class="mwe-math-element mwe-math-element-inline"><span class="mwe-math-mathml-a11y" style="display: none;"><math class="mathjax_ignore" xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle V}">
+  <semantics>
+    <mrow class="MJX-TeXAtom-ORD">
+      <mstyle displaystyle="true" scriptlevel="0">
+        <mi>V</mi>
+      </mstyle>
+    </mrow>
+    <annotation encoding="application/x-tex">{\displaystyle V}</annotation>
+  </semantics>
+</math></span><img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/af0f6064540e84211d0ffe4dac72098adfa52845" class="mwe-math-fallback-image-inline mw-invert skin-invert" aria-hidden="true" style="vertical-align: -0.338ex; width:1.787ex; height:2.176ex;" alt="{\displaystyle V}"></span> to itself. Taking such a transformation <span class="mwe-math-element mwe-math-element-inline"><span class="mwe-math-mathml-a11y" style="display: none;"><math class="mathjax_ignore" xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle \tau \in {\text{End}}(V)}">
+  <semantics>
+    <mrow class="MJX-TeXAtom-ORD">
+      <mstyle displaystyle="true" scriptlevel="0">
+        <mi>&#x03C4;<!-- τ --></mi>
+        <mo>&#x2208;<!-- ∈ --></mo>
+        <mrow class="MJX-TeXAtom-ORD">
+          <mtext>End</mtext>
+        </mrow>
+        <mo stretchy="false">(</mo>
+        <mi>V</mi>
+        <mo stretchy="false">)</mo>
+      </mstyle>
+    </mrow>
+    <annotation encoding="application/x-tex">{\displaystyle \tau \in {\text{End}}(V)}</annotation>
+  </semantics>
+</math></span><img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/2bffde7b4e7b3d370ff7e49da004d8d0a734e82a" class="mwe-math-fallback-image-inline mw-invert skin-invert" aria-hidden="true" style="vertical-align: -0.838ex; width:11.807ex; height:2.843ex;" alt="{\displaystyle \tau \in {\text{End}}(V)}"></span>, a vector <span class="mwe-math-element mwe-math-element-inline"><span class="mwe-math-mathml-a11y" style="display: none;"><math class="mathjax_ignore" xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle v\in V}">
+  <semantics>
+    <mrow class="MJX-TeXAtom-ORD">
+      <mstyle displaystyle="true" scriptlevel="0">
+        <mi>v</mi>
+        <mo>&#x2208;<!-- ∈ --></mo>
+        <mi>V</mi>
+      </mstyle>
+    </mrow>
+    <annotation encoding="application/x-tex">{\displaystyle v\in V}</annotation>
+  </semantics>
+</math></span><img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/99886ebbde63daa0224fb9bf56fa11b3c8a6f4fb" class="mwe-math-fallback-image-inline mw-invert skin-invert" aria-hidden="true" style="vertical-align: -0.338ex; width:5.756ex; height:2.176ex;" alt="{\displaystyle v\in V}"></span> transforms as <span class="mwe-math-element mwe-math-element-inline"><span class="mwe-math-mathml-a11y" style="display: none;"><math class="mathjax_ignore" xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle v\mapsto \tau v}">
+  <semantics>
+    <mrow class="MJX-TeXAtom-ORD">
+      <mstyle displaystyle="true" scriptlevel="0">
+        <mi>v</mi>
+        <mo stretchy="false">&#x21A6;<!-- ↦ --></mo>
+        <mi>&#x03C4;<!-- τ --></mi>
+        <mi>v</mi>
+      </mstyle>
+    </mrow>
+    <annotation encoding="application/x-tex">{\displaystyle v\mapsto \tau v}</annotation>
+  </semantics>
+</math></span><img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/1a58529b1b0fadb524f79d06ee2503ccfd10187b" class="mwe-math-fallback-image-inline mw-invert skin-invert" aria-hidden="true" style="vertical-align: -0.338ex; width:7.071ex; height:1.843ex;" alt="{\displaystyle v\mapsto \tau v}"></span>. The components of <span class="mwe-math-element mwe-math-element-inline"><span class="mwe-math-mathml-a11y" style="display: none;"><math class="mathjax_ignore" xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle \tau }">
+  <semantics>
+    <mrow class="MJX-TeXAtom-ORD">
+      <mstyle displaystyle="true" scriptlevel="0">
+        <mi>&#x03C4;<!-- τ --></mi>
+      </mstyle>
+    </mrow>
+    <annotation encoding="application/x-tex">{\displaystyle \tau }</annotation>
+  </semantics>
+</math></span><img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/38a7dcde9730ef0853809fefc18d88771f95206c" class="mwe-math-fallback-image-inline mw-invert skin-invert" aria-hidden="true" style="vertical-align: -0.338ex; width:1.202ex; height:1.676ex;" alt="{\displaystyle \tau }"></span> with respect to the basis <span class="mwe-math-element mwe-math-element-inline"><span class="mwe-math-mathml-a11y" style="display: none;"><math class="mathjax_ignore" xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle {\mathcal {B}}}">
+  <semantics>
+    <mrow class="MJX-TeXAtom-ORD">
+      <mstyle displaystyle="true" scriptlevel="0">
+        <mrow class="MJX-TeXAtom-ORD">
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi class="MJX-tex-caligraphic" mathvariant="script">B</mi>
+          </mrow>
+        </mrow>
+      </mstyle>
+    </mrow>
+    <annotation encoding="application/x-tex">{\displaystyle {\mathcal {B}}}</annotation>
+  </semantics>
+</math></span><img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/e5622de88a69f68340f8dcb43d0b8bd443ba9e13" class="mwe-math-fallback-image-inline mw-invert skin-invert" aria-hidden="true" style="vertical-align: -0.338ex; width:1.543ex; height:2.176ex;" alt="{\displaystyle {\mathcal {B}}}"></span> are defined via the equation <span class="mwe-math-element mwe-math-element-inline"><span class="mwe-math-mathml-a11y" style="display: none;"><math class="mathjax_ignore" xmlns="http://www.w3.org/1998/Math/MathML" alttext="{\textstyle \tau e_{i}=\sum _{j}\tau _{ji}e_{j}}">
+  <semantics>
+    <mrow class="MJX-TeXAtom-ORD">
+      <mstyle displaystyle="false" scriptlevel="0">
+        <mi>&#x03C4;<!-- τ --></mi>
+        <msub>
+          <mi>e</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>i</mi>
+          </mrow>
+        </msub>
+        <mo>=</mo>
+        <munder>
+          <mo>&#x2211;<!-- ∑ --></mo>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>j</mi>
+          </mrow>
+        </munder>
+        <msub>
+          <mi>&#x03C4;<!-- τ --></mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>j</mi>
+            <mi>i</mi>
+          </mrow>
+        </msub>
+        <msub>
+          <mi>e</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>j</mi>
+          </mrow>
+        </msub>
+      </mstyle>
+    </mrow>
+    <annotation encoding="application/x-tex">{\textstyle \tau e_{i}=\sum _{j}\tau _{ji}e_{j}}</annotation>
+  </semantics>
+</math></span><img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/dcf4842c4cf082f68beb4d42263a240106ef80f6" class="mwe-math-fallback-image-inline mw-invert skin-invert" aria-hidden="true" style="vertical-align: -1.338ex; width:14.421ex; height:3.343ex;" alt="{\textstyle \tau e_{i}=\sum _{j}\tau _{ji}e_{j}}"></span>. Then, the components of <span class="mwe-math-element mwe-math-element-inline"><span class="mwe-math-mathml-a11y" style="display: none;"><math class="mathjax_ignore" xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle v}">
+  <semantics>
+    <mrow class="MJX-TeXAtom-ORD">
+      <mstyle displaystyle="true" scriptlevel="0">
+        <mi>v</mi>
+      </mstyle>
+    </mrow>
+    <annotation encoding="application/x-tex">{\displaystyle v}</annotation>
+  </semantics>
+</math></span><img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/e07b00e7fc0847fbd16391c778d65bc25c452597" class="mwe-math-fallback-image-inline mw-invert skin-invert" aria-hidden="true" style="vertical-align: -0.338ex; width:1.128ex; height:1.676ex;" alt="{\displaystyle v}"></span> transform as <span class="mwe-math-element mwe-math-element-inline"><span class="mwe-math-mathml-a11y" style="display: none;"><math class="mathjax_ignore" xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle v_{i}\mapsto \tau _{ij}v_{j}}">
+  <semantics>
+    <mrow class="MJX-TeXAtom-ORD">
+      <mstyle displaystyle="true" scriptlevel="0">
+        <msub>
+          <mi>v</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>i</mi>
+          </mrow>
+        </msub>
+        <mo stretchy="false">&#x21A6;<!-- ↦ --></mo>
+        <msub>
+          <mi>&#x03C4;<!-- τ --></mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>i</mi>
+            <mi>j</mi>
+          </mrow>
+        </msub>
+        <msub>
+          <mi>v</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>j</mi>
+          </mrow>
+        </msub>
+      </mstyle>
+    </mrow>
+    <annotation encoding="application/x-tex">{\displaystyle v_{i}\mapsto \tau _{ij}v_{j}}</annotation>
+  </semantics>
+</math></span><img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/25ed2ddb2f67d07e8bbbff803d4659c3a2851a0e" class="mwe-math-fallback-image-inline mw-invert skin-invert" aria-hidden="true" style="vertical-align: -1.005ex; width:10.072ex; height:2.509ex;" alt="{\displaystyle v_{i}\mapsto \tau _{ij}v_{j}}"></span>.
+</p><p>A <b>passive transformation</b> is instead an endomorphism on <span class="mwe-math-element mwe-math-element-inline"><span class="mwe-math-mathml-a11y" style="display: none;"><math class="mathjax_ignore" xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle K^{n}}">
+  <semantics>
+    <mrow class="MJX-TeXAtom-ORD">
+      <mstyle displaystyle="true" scriptlevel="0">
+        <msup>
+          <mi>K</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>n</mi>
+          </mrow>
+        </msup>
+      </mstyle>
+    </mrow>
+    <annotation encoding="application/x-tex">{\displaystyle K^{n}}</annotation>
+  </semantics>
+</math></span><img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/1d63366b3d00300e06eee81786182062b98775c5" class="mwe-math-fallback-image-inline mw-invert skin-invert" aria-hidden="true" style="vertical-align: -0.338ex; width:3.312ex; height:2.343ex;" alt="{\displaystyle K^{n}}"></span>. This is applied to the components: <span class="mwe-math-element mwe-math-element-inline"><span class="mwe-math-mathml-a11y" style="display: none;"><math class="mathjax_ignore" xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle v_{i}\mapsto T_{ij}v_{j}=:v'_{i}}">
+  <semantics>
+    <mrow class="MJX-TeXAtom-ORD">
+      <mstyle displaystyle="true" scriptlevel="0">
+        <msub>
+          <mi>v</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>i</mi>
+          </mrow>
+        </msub>
+        <mo stretchy="false">&#x21A6;<!-- ↦ --></mo>
+        <msub>
+          <mi>T</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>i</mi>
+            <mi>j</mi>
+          </mrow>
+        </msub>
+        <msub>
+          <mi>v</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>j</mi>
+          </mrow>
+        </msub>
+        <mo>=:</mo>
+        <msubsup>
+          <mi>v</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>i</mi>
+          </mrow>
+          <mo>&#x2032;</mo>
+        </msubsup>
+      </mstyle>
+    </mrow>
+    <annotation encoding="application/x-tex">{\displaystyle v_{i}\mapsto T_{ij}v_{j}=:v'_{i}}</annotation>
+  </semantics>
+</math></span><img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/19069ada94cc5c4baee6e892109d828b8e4f803e" class="mwe-math-fallback-image-inline mw-invert skin-invert" aria-hidden="true" style="vertical-align: -1.005ex; width:16.086ex; height:2.843ex;" alt="{\displaystyle v_{i}\mapsto T_{ij}v_{j}=:v&#039;_{i}}"></span>. Provided that <span class="mwe-math-element mwe-math-element-inline"><span class="mwe-math-mathml-a11y" style="display: none;"><math class="mathjax_ignore" xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle T}">
+  <semantics>
+    <mrow class="MJX-TeXAtom-ORD">
+      <mstyle displaystyle="true" scriptlevel="0">
+        <mi>T</mi>
+      </mstyle>
+    </mrow>
+    <annotation encoding="application/x-tex">{\displaystyle T}</annotation>
+  </semantics>
+</math></span><img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/ec7200acd984a1d3a3d7dc455e262fbe54f7f6e0" class="mwe-math-fallback-image-inline mw-invert skin-invert" aria-hidden="true" style="vertical-align: -0.338ex; width:1.636ex; height:2.176ex;" alt="{\displaystyle T}"></span> is invertible, the new basis <span class="mwe-math-element mwe-math-element-inline"><span class="mwe-math-mathml-a11y" style="display: none;"><math class="mathjax_ignore" xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle {\mathcal {B}}'=\{e'_{i}\}}">
+  <semantics>
+    <mrow class="MJX-TeXAtom-ORD">
+      <mstyle displaystyle="true" scriptlevel="0">
+        <msup>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mrow class="MJX-TeXAtom-ORD">
+              <mi class="MJX-tex-caligraphic" mathvariant="script">B</mi>
+            </mrow>
+          </mrow>
+          <mo>&#x2032;</mo>
+        </msup>
+        <mo>=</mo>
+        <mo fence="false" stretchy="false">{</mo>
+        <msubsup>
+          <mi>e</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>i</mi>
+          </mrow>
+          <mo>&#x2032;</mo>
+        </msubsup>
+        <mo fence="false" stretchy="false">}</mo>
+      </mstyle>
+    </mrow>
+    <annotation encoding="application/x-tex">{\displaystyle {\mathcal {B}}'=\{e'_{i}\}}</annotation>
+  </semantics>
+</math></span><img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/c46b2ae1b9fb0246c5a42dab88c9d02d1c8e3df6" class="mwe-math-fallback-image-inline mw-invert skin-invert" aria-hidden="true" style="vertical-align: -1.005ex; width:9.54ex; height:3.176ex;" alt="{\displaystyle {\mathcal {B}}&#039;=\{e&#039;_{i}\}}"></span> is determined by asking that <span class="mwe-math-element mwe-math-element-inline"><span class="mwe-math-mathml-a11y" style="display: none;"><math class="mathjax_ignore" xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle v_{i}e_{i}=v'_{i}e'_{i}}">
+  <semantics>
+    <mrow class="MJX-TeXAtom-ORD">
+      <mstyle displaystyle="true" scriptlevel="0">
+        <msub>
+          <mi>v</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>i</mi>
+          </mrow>
+        </msub>
+        <msub>
+          <mi>e</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>i</mi>
+          </mrow>
+        </msub>
+        <mo>=</mo>
+        <msubsup>
+          <mi>v</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>i</mi>
+          </mrow>
+          <mo>&#x2032;</mo>
+        </msubsup>
+        <msubsup>
+          <mi>e</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>i</mi>
+          </mrow>
+          <mo>&#x2032;</mo>
+        </msubsup>
+      </mstyle>
+    </mrow>
+    <annotation encoding="application/x-tex">{\displaystyle v_{i}e_{i}=v'_{i}e'_{i}}</annotation>
+  </semantics>
+</math></span><img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/cd9bfe1a7c185e0ba19b37f7c47ffdae3dbe370a" class="mwe-math-fallback-image-inline mw-invert skin-invert" aria-hidden="true" style="vertical-align: -1.005ex; width:10.719ex; height:2.843ex;" alt="{\displaystyle v_{i}e_{i}=v&#039;_{i}e&#039;_{i}}"></span>, from which the expression <span class="mwe-math-element mwe-math-element-inline"><span class="mwe-math-mathml-a11y" style="display: none;"><math class="mathjax_ignore" xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle e'_{i}=(T^{-1})_{ji}e_{j}}">
+  <semantics>
+    <mrow class="MJX-TeXAtom-ORD">
+      <mstyle displaystyle="true" scriptlevel="0">
+        <msubsup>
+          <mi>e</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>i</mi>
+          </mrow>
+          <mo>&#x2032;</mo>
+        </msubsup>
+        <mo>=</mo>
+        <mo stretchy="false">(</mo>
+        <msup>
+          <mi>T</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mo>&#x2212;<!-- − --></mo>
+            <mn>1</mn>
+          </mrow>
+        </msup>
+        <msub>
+          <mo stretchy="false">)</mo>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>j</mi>
+            <mi>i</mi>
+          </mrow>
+        </msub>
+        <msub>
+          <mi>e</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>j</mi>
+          </mrow>
+        </msub>
+      </mstyle>
+    </mrow>
+    <annotation encoding="application/x-tex">{\displaystyle e'_{i}=(T^{-1})_{ji}e_{j}}</annotation>
+  </semantics>
+</math></span><img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/ce004eb8fb13525a9ef8ec0c432be1ddcf93f179" class="mwe-math-fallback-image-inline mw-invert skin-invert" aria-hidden="true" style="vertical-align: -1.005ex; width:14.314ex; height:3.343ex;" alt="{\displaystyle e&#039;_{i}=(T^{-1})_{ji}e_{j}}"></span> can be derived.
+</p><p>Although the spaces <span class="mwe-math-element mwe-math-element-inline"><span class="mwe-math-mathml-a11y" style="display: none;"><math class="mathjax_ignore" xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle {\text{End}}(V)}">
+  <semantics>
+    <mrow class="MJX-TeXAtom-ORD">
+      <mstyle displaystyle="true" scriptlevel="0">
+        <mrow class="MJX-TeXAtom-ORD">
+          <mtext>End</mtext>
+        </mrow>
+        <mo stretchy="false">(</mo>
+        <mi>V</mi>
+        <mo stretchy="false">)</mo>
+      </mstyle>
+    </mrow>
+    <annotation encoding="application/x-tex">{\displaystyle {\text{End}}(V)}</annotation>
+  </semantics>
+</math></span><img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/5c11660eaacd443816e20d7b3e142b73dc5a52bc" class="mwe-math-fallback-image-inline mw-invert skin-invert" aria-hidden="true" style="vertical-align: -0.838ex; width:7.764ex; height:2.843ex;" alt="{\displaystyle {\text{End}}(V)}"></span> and <span class="mwe-math-element mwe-math-element-inline"><span class="mwe-math-mathml-a11y" style="display: none;"><math class="mathjax_ignore" xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle {\text{End}}({K^{n}})}">
+  <semantics>
+    <mrow class="MJX-TeXAtom-ORD">
+      <mstyle displaystyle="true" scriptlevel="0">
+        <mrow class="MJX-TeXAtom-ORD">
+          <mtext>End</mtext>
+        </mrow>
+        <mo stretchy="false">(</mo>
+        <mrow class="MJX-TeXAtom-ORD">
+          <msup>
+            <mi>K</mi>
+            <mrow class="MJX-TeXAtom-ORD">
+              <mi>n</mi>
+            </mrow>
+          </msup>
+        </mrow>
+        <mo stretchy="false">)</mo>
+      </mstyle>
+    </mrow>
+    <annotation encoding="application/x-tex">{\displaystyle {\text{End}}({K^{n}})}</annotation>
+  </semantics>
+</math></span><img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/620c932cbf4adcd980aef4d861b84e266d524a15" class="mwe-math-fallback-image-inline mw-invert skin-invert" aria-hidden="true" style="vertical-align: -0.838ex; width:9.29ex; height:2.843ex;" alt="{\displaystyle {\text{End}}({K^{n}})}"></span> are isomorphic, they are not canonically isomorphic. Nevertheless a choice of basis <span class="mwe-math-element mwe-math-element-inline"><span class="mwe-math-mathml-a11y" style="display: none;"><math class="mathjax_ignore" xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle {\mathcal {B}}}">
+  <semantics>
+    <mrow class="MJX-TeXAtom-ORD">
+      <mstyle displaystyle="true" scriptlevel="0">
+        <mrow class="MJX-TeXAtom-ORD">
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi class="MJX-tex-caligraphic" mathvariant="script">B</mi>
+          </mrow>
+        </mrow>
+      </mstyle>
+    </mrow>
+    <annotation encoding="application/x-tex">{\displaystyle {\mathcal {B}}}</annotation>
+  </semantics>
+</math></span><img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/e5622de88a69f68340f8dcb43d0b8bd443ba9e13" class="mwe-math-fallback-image-inline mw-invert skin-invert" aria-hidden="true" style="vertical-align: -0.338ex; width:1.543ex; height:2.176ex;" alt="{\displaystyle {\mathcal {B}}}"></span> allows construction of an isomorphism.
+</p>
+<div class="mw-heading mw-heading3"><h3 id="As_left-_and_right-actions">As left- and right-actions</h3></div>
+<p>Often one restricts to the case where the maps are invertible, so that active transformations are the <a href="/wiki/General_linear_group" title="General linear group">general linear group</a> <span class="mwe-math-element mwe-math-element-inline"><span class="mwe-math-mathml-a11y" style="display: none;"><math class="mathjax_ignore" xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle {\text{GL}}(V)}">
+  <semantics>
+    <mrow class="MJX-TeXAtom-ORD">
+      <mstyle displaystyle="true" scriptlevel="0">
+        <mrow class="MJX-TeXAtom-ORD">
+          <mtext>GL</mtext>
+        </mrow>
+        <mo stretchy="false">(</mo>
+        <mi>V</mi>
+        <mo stretchy="false">)</mo>
+      </mstyle>
+    </mrow>
+    <annotation encoding="application/x-tex">{\displaystyle {\text{GL}}(V)}</annotation>
+  </semantics>
+</math></span><img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/8190beb8410b4069ebe3b70341eed2ba3fa398a4" class="mwe-math-fallback-image-inline mw-invert skin-invert" aria-hidden="true" style="vertical-align: -0.838ex; width:6.874ex; height:2.843ex;" alt="{\displaystyle {\text{GL}}(V)}"></span> of transformations while passive transformations are the group <span class="mwe-math-element mwe-math-element-inline"><span class="mwe-math-mathml-a11y" style="display: none;"><math class="mathjax_ignore" xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle {\text{GL}}(n,K)}">
+  <semantics>
+    <mrow class="MJX-TeXAtom-ORD">
+      <mstyle displaystyle="true" scriptlevel="0">
+        <mrow class="MJX-TeXAtom-ORD">
+          <mtext>GL</mtext>
+        </mrow>
+        <mo stretchy="false">(</mo>
+        <mi>n</mi>
+        <mo>,</mo>
+        <mi>K</mi>
+        <mo stretchy="false">)</mo>
+      </mstyle>
+    </mrow>
+    <annotation encoding="application/x-tex">{\displaystyle {\text{GL}}(n,K)}</annotation>
+  </semantics>
+</math></span><img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/3eb25cb3093b56e4884bce03af9661e00a6c3901" class="mwe-math-fallback-image-inline mw-invert skin-invert" aria-hidden="true" style="vertical-align: -0.838ex; width:9.581ex; height:2.843ex;" alt="{\displaystyle {\text{GL}}(n,K)}"></span>.
+</p><p>The transformations can then be understood as acting on the space of bases for <span class="mwe-math-element mwe-math-element-inline"><span class="mwe-math-mathml-a11y" style="display: none;"><math class="mathjax_ignore" xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle V}">
+  <semantics>
+    <mrow class="MJX-TeXAtom-ORD">
+      <mstyle displaystyle="true" scriptlevel="0">
+        <mi>V</mi>
+      </mstyle>
+    </mrow>
+    <annotation encoding="application/x-tex">{\displaystyle V}</annotation>
+  </semantics>
+</math></span><img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/af0f6064540e84211d0ffe4dac72098adfa52845" class="mwe-math-fallback-image-inline mw-invert skin-invert" aria-hidden="true" style="vertical-align: -0.338ex; width:1.787ex; height:2.176ex;" alt="{\displaystyle V}"></span>. An active transformation <span class="mwe-math-element mwe-math-element-inline"><span class="mwe-math-mathml-a11y" style="display: none;"><math class="mathjax_ignore" xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle \tau \in {\text{GL}}(V)}">
+  <semantics>
+    <mrow class="MJX-TeXAtom-ORD">
+      <mstyle displaystyle="true" scriptlevel="0">
+        <mi>&#x03C4;<!-- τ --></mi>
+        <mo>&#x2208;<!-- ∈ --></mo>
+        <mrow class="MJX-TeXAtom-ORD">
+          <mtext>GL</mtext>
+        </mrow>
+        <mo stretchy="false">(</mo>
+        <mi>V</mi>
+        <mo stretchy="false">)</mo>
+      </mstyle>
+    </mrow>
+    <annotation encoding="application/x-tex">{\displaystyle \tau \in {\text{GL}}(V)}</annotation>
+  </semantics>
+</math></span><img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/2838a0780df58543a459a898ce86e478d486a9ff" class="mwe-math-fallback-image-inline mw-invert skin-invert" aria-hidden="true" style="vertical-align: -0.838ex; width:10.916ex; height:2.843ex;" alt="{\displaystyle \tau \in {\text{GL}}(V)}"></span> sends the basis <span class="mwe-math-element mwe-math-element-inline"><span class="mwe-math-mathml-a11y" style="display: none;"><math class="mathjax_ignore" xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle \{e_{i}\}\mapsto \{\tau e_{i}\}}">
+  <semantics>
+    <mrow class="MJX-TeXAtom-ORD">
+      <mstyle displaystyle="true" scriptlevel="0">
+        <mo fence="false" stretchy="false">{</mo>
+        <msub>
+          <mi>e</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>i</mi>
+          </mrow>
+        </msub>
+        <mo fence="false" stretchy="false">}</mo>
+        <mo stretchy="false">&#x21A6;<!-- ↦ --></mo>
+        <mo fence="false" stretchy="false">{</mo>
+        <mi>&#x03C4;<!-- τ --></mi>
+        <msub>
+          <mi>e</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>i</mi>
+          </mrow>
+        </msub>
+        <mo fence="false" stretchy="false">}</mo>
+      </mstyle>
+    </mrow>
+    <annotation encoding="application/x-tex">{\displaystyle \{e_{i}\}\mapsto \{\tau e_{i}\}}</annotation>
+  </semantics>
+</math></span><img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/e07b2da546cb27c0a84cbf67c7e7a7be6ea4412a" class="mwe-math-fallback-image-inline mw-invert skin-invert" aria-hidden="true" style="vertical-align: -0.838ex; width:13.232ex; height:2.843ex;" alt="{\displaystyle \{e_{i}\}\mapsto \{\tau e_{i}\}}"></span>. Meanwhile a passive transformation <span class="mwe-math-element mwe-math-element-inline"><span class="mwe-math-mathml-a11y" style="display: none;"><math class="mathjax_ignore" xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle T\in {\text{GL}}(n,K)}">
+  <semantics>
+    <mrow class="MJX-TeXAtom-ORD">
+      <mstyle displaystyle="true" scriptlevel="0">
+        <mi>T</mi>
+        <mo>&#x2208;<!-- ∈ --></mo>
+        <mrow class="MJX-TeXAtom-ORD">
+          <mtext>GL</mtext>
+        </mrow>
+        <mo stretchy="false">(</mo>
+        <mi>n</mi>
+        <mo>,</mo>
+        <mi>K</mi>
+        <mo stretchy="false">)</mo>
+      </mstyle>
+    </mrow>
+    <annotation encoding="application/x-tex">{\displaystyle T\in {\text{GL}}(n,K)}</annotation>
+  </semantics>
+</math></span><img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/adc330f80b8e20f0f7c99dba2b6f81a74e35b439" class="mwe-math-fallback-image-inline mw-invert skin-invert" aria-hidden="true" style="vertical-align: -0.838ex; width:14.058ex; height:2.843ex;" alt="{\displaystyle T\in {\text{GL}}(n,K)}"></span> sends the basis <span class="mwe-math-element mwe-math-element-inline"><span class="mwe-math-mathml-a11y" style="display: none;"><math class="mathjax_ignore" xmlns="http://www.w3.org/1998/Math/MathML" alttext="{\textstyle \{e_{i}\}\mapsto \left\{\sum _{j}(T^{-1})_{ji}e_{j}\right\}}">
+  <semantics>
+    <mrow class="MJX-TeXAtom-ORD">
+      <mstyle displaystyle="false" scriptlevel="0">
+        <mo fence="false" stretchy="false">{</mo>
+        <msub>
+          <mi>e</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>i</mi>
+          </mrow>
+        </msub>
+        <mo fence="false" stretchy="false">}</mo>
+        <mo stretchy="false">&#x21A6;<!-- ↦ --></mo>
+        <mrow>
+          <mo>{</mo>
+          <mrow>
+            <munder>
+              <mo>&#x2211;<!-- ∑ --></mo>
+              <mrow class="MJX-TeXAtom-ORD">
+                <mi>j</mi>
+              </mrow>
+            </munder>
+            <mo stretchy="false">(</mo>
+            <msup>
+              <mi>T</mi>
+              <mrow class="MJX-TeXAtom-ORD">
+                <mo>&#x2212;<!-- − --></mo>
+                <mn>1</mn>
+              </mrow>
+            </msup>
+            <msub>
+              <mo stretchy="false">)</mo>
+              <mrow class="MJX-TeXAtom-ORD">
+                <mi>j</mi>
+                <mi>i</mi>
+              </mrow>
+            </msub>
+            <msub>
+              <mi>e</mi>
+              <mrow class="MJX-TeXAtom-ORD">
+                <mi>j</mi>
+              </mrow>
+            </msub>
+          </mrow>
+          <mo>}</mo>
+        </mrow>
+      </mstyle>
+    </mrow>
+    <annotation encoding="application/x-tex">{\textstyle \{e_{i}\}\mapsto \left\{\sum _{j}(T^{-1})_{ji}e_{j}\right\}}</annotation>
+  </semantics>
+</math></span><img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/447c9eef4771c549497f7914644c6d4971e21712" class="mwe-math-fallback-image-inline mw-invert skin-invert" aria-hidden="true" style="vertical-align: -1.838ex; width:23.619ex; height:4.843ex;" alt="{\textstyle \{e_{i}\}\mapsto \left\{\sum _{j}(T^{-1})_{ji}e_{j}\right\}}"></span>. 
+</p><p>The inverse in the passive transformation ensures the <i>components</i> transform identically under <span class="mwe-math-element mwe-math-element-inline"><span class="mwe-math-mathml-a11y" style="display: none;"><math class="mathjax_ignore" xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle \tau }">
+  <semantics>
+    <mrow class="MJX-TeXAtom-ORD">
+      <mstyle displaystyle="true" scriptlevel="0">
+        <mi>&#x03C4;<!-- τ --></mi>
+      </mstyle>
+    </mrow>
+    <annotation encoding="application/x-tex">{\displaystyle \tau }</annotation>
+  </semantics>
+</math></span><img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/38a7dcde9730ef0853809fefc18d88771f95206c" class="mwe-math-fallback-image-inline mw-invert skin-invert" aria-hidden="true" style="vertical-align: -0.338ex; width:1.202ex; height:1.676ex;" alt="{\displaystyle \tau }"></span> and <span class="mwe-math-element mwe-math-element-inline"><span class="mwe-math-mathml-a11y" style="display: none;"><math class="mathjax_ignore" xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle T}">
+  <semantics>
+    <mrow class="MJX-TeXAtom-ORD">
+      <mstyle displaystyle="true" scriptlevel="0">
+        <mi>T</mi>
+      </mstyle>
+    </mrow>
+    <annotation encoding="application/x-tex">{\displaystyle T}</annotation>
+  </semantics>
+</math></span><img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/ec7200acd984a1d3a3d7dc455e262fbe54f7f6e0" class="mwe-math-fallback-image-inline mw-invert skin-invert" aria-hidden="true" style="vertical-align: -0.338ex; width:1.636ex; height:2.176ex;" alt="{\displaystyle T}"></span>. This then gives a sharp distinction between active and passive transformations: active transformations <a href="/wiki/Left_action" class="mw-redirect" title="Left action">act from the left</a> on bases, while the  passive transformations act from the right, due to the inverse.
+</p><p>This observation is made more natural by viewing bases <span class="mwe-math-element mwe-math-element-inline"><span class="mwe-math-mathml-a11y" style="display: none;"><math class="mathjax_ignore" xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle {\mathcal {B}}}">
+  <semantics>
+    <mrow class="MJX-TeXAtom-ORD">
+      <mstyle displaystyle="true" scriptlevel="0">
+        <mrow class="MJX-TeXAtom-ORD">
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi class="MJX-tex-caligraphic" mathvariant="script">B</mi>
+          </mrow>
+        </mrow>
+      </mstyle>
+    </mrow>
+    <annotation encoding="application/x-tex">{\displaystyle {\mathcal {B}}}</annotation>
+  </semantics>
+</math></span><img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/e5622de88a69f68340f8dcb43d0b8bd443ba9e13" class="mwe-math-fallback-image-inline mw-invert skin-invert" aria-hidden="true" style="vertical-align: -0.338ex; width:1.543ex; height:2.176ex;" alt="{\displaystyle {\mathcal {B}}}"></span> as a choice of isomorphism <span class="mwe-math-element mwe-math-element-inline"><span class="mwe-math-mathml-a11y" style="display: none;"><math class="mathjax_ignore" xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle \Phi _{\mathcal {B}}:K^{n}\rightarrow V}">
+  <semantics>
+    <mrow class="MJX-TeXAtom-ORD">
+      <mstyle displaystyle="true" scriptlevel="0">
+        <msub>
+          <mi mathvariant="normal">&#x03A6;<!-- Φ --></mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mrow class="MJX-TeXAtom-ORD">
+              <mi class="MJX-tex-caligraphic" mathvariant="script">B</mi>
+            </mrow>
+          </mrow>
+        </msub>
+        <mo>:</mo>
+        <msup>
+          <mi>K</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>n</mi>
+          </mrow>
+        </msup>
+        <mo stretchy="false">&#x2192;<!-- → --></mo>
+        <mi>V</mi>
+      </mstyle>
+    </mrow>
+    <annotation encoding="application/x-tex">{\displaystyle \Phi _{\mathcal {B}}:K^{n}\rightarrow V}</annotation>
+  </semantics>
+</math></span><img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/76afaae18c4a1dcf90ab8571970aa7d6c23e3b17" class="mwe-math-fallback-image-inline mw-invert skin-invert" aria-hidden="true" style="vertical-align: -0.671ex; width:13.653ex; height:2.676ex;" alt="{\displaystyle \Phi _{\mathcal {B}}:K^{n}\rightarrow V}"></span>. The space of bases is equivalently the space of such isomorphisms, denoted <span class="mwe-math-element mwe-math-element-inline"><span class="mwe-math-mathml-a11y" style="display: none;"><math class="mathjax_ignore" xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle {\text{Iso}}(K^{n},V)}">
+  <semantics>
+    <mrow class="MJX-TeXAtom-ORD">
+      <mstyle displaystyle="true" scriptlevel="0">
+        <mrow class="MJX-TeXAtom-ORD">
+          <mtext>Iso</mtext>
+        </mrow>
+        <mo stretchy="false">(</mo>
+        <msup>
+          <mi>K</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>n</mi>
+          </mrow>
+        </msup>
+        <mo>,</mo>
+        <mi>V</mi>
+        <mo stretchy="false">)</mo>
+      </mstyle>
+    </mrow>
+    <annotation encoding="application/x-tex">{\displaystyle {\text{Iso}}(K^{n},V)}</annotation>
+  </semantics>
+</math></span><img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/c22aa64eb9585cb504c1c583df1579b8c83b3820" class="mwe-math-fallback-image-inline mw-invert skin-invert" aria-hidden="true" style="vertical-align: -0.838ex; width:10.861ex; height:2.843ex;" alt="{\displaystyle {\text{Iso}}(K^{n},V)}"></span>. Active transformations, identified with <span class="mwe-math-element mwe-math-element-inline"><span class="mwe-math-mathml-a11y" style="display: none;"><math class="mathjax_ignore" xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle {\text{GL}}(V)}">
+  <semantics>
+    <mrow class="MJX-TeXAtom-ORD">
+      <mstyle displaystyle="true" scriptlevel="0">
+        <mrow class="MJX-TeXAtom-ORD">
+          <mtext>GL</mtext>
+        </mrow>
+        <mo stretchy="false">(</mo>
+        <mi>V</mi>
+        <mo stretchy="false">)</mo>
+      </mstyle>
+    </mrow>
+    <annotation encoding="application/x-tex">{\displaystyle {\text{GL}}(V)}</annotation>
+  </semantics>
+</math></span><img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/8190beb8410b4069ebe3b70341eed2ba3fa398a4" class="mwe-math-fallback-image-inline mw-invert skin-invert" aria-hidden="true" style="vertical-align: -0.838ex; width:6.874ex; height:2.843ex;" alt="{\displaystyle {\text{GL}}(V)}"></span>, act on <span class="mwe-math-element mwe-math-element-inline"><span class="mwe-math-mathml-a11y" style="display: none;"><math class="mathjax_ignore" xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle {\text{Iso}}(K^{n},V)}">
+  <semantics>
+    <mrow class="MJX-TeXAtom-ORD">
+      <mstyle displaystyle="true" scriptlevel="0">
+        <mrow class="MJX-TeXAtom-ORD">
+          <mtext>Iso</mtext>
+        </mrow>
+        <mo stretchy="false">(</mo>
+        <msup>
+          <mi>K</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>n</mi>
+          </mrow>
+        </msup>
+        <mo>,</mo>
+        <mi>V</mi>
+        <mo stretchy="false">)</mo>
+      </mstyle>
+    </mrow>
+    <annotation encoding="application/x-tex">{\displaystyle {\text{Iso}}(K^{n},V)}</annotation>
+  </semantics>
+</math></span><img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/c22aa64eb9585cb504c1c583df1579b8c83b3820" class="mwe-math-fallback-image-inline mw-invert skin-invert" aria-hidden="true" style="vertical-align: -0.838ex; width:10.861ex; height:2.843ex;" alt="{\displaystyle {\text{Iso}}(K^{n},V)}"></span> from the left by composition, that is if <span class="mwe-math-element mwe-math-element-inline"><span class="mwe-math-mathml-a11y" style="display: none;"><math class="mathjax_ignore" xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle \tau }">
+  <semantics>
+    <mrow class="MJX-TeXAtom-ORD">
+      <mstyle displaystyle="true" scriptlevel="0">
+        <mi>&#x03C4;<!-- τ --></mi>
+      </mstyle>
+    </mrow>
+    <annotation encoding="application/x-tex">{\displaystyle \tau }</annotation>
+  </semantics>
+</math></span><img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/38a7dcde9730ef0853809fefc18d88771f95206c" class="mwe-math-fallback-image-inline mw-invert skin-invert" aria-hidden="true" style="vertical-align: -0.338ex; width:1.202ex; height:1.676ex;" alt="{\displaystyle \tau }"></span> represents an active transformation, we have <span class="mwe-math-element mwe-math-element-inline"><span class="mwe-math-mathml-a11y" style="display: none;"><math class="mathjax_ignore" xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle \Phi _{\mathcal {B'}}=\tau \circ \Phi _{\mathcal {B}}}">
+  <semantics>
+    <mrow class="MJX-TeXAtom-ORD">
+      <mstyle displaystyle="true" scriptlevel="0">
+        <msub>
+          <mi mathvariant="normal">&#x03A6;<!-- Φ --></mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mrow class="MJX-TeXAtom-ORD">
+              <msup>
+                <mi class="MJX-tex-caligraphic" mathvariant="script">B</mi>
+                <mo>&#x2032;</mo>
+              </msup>
+            </mrow>
+          </mrow>
+        </msub>
+        <mo>=</mo>
+        <mi>&#x03C4;<!-- τ --></mi>
+        <mo>&#x2218;<!-- ∘ --></mo>
+        <msub>
+          <mi mathvariant="normal">&#x03A6;<!-- Φ --></mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mrow class="MJX-TeXAtom-ORD">
+              <mi class="MJX-tex-caligraphic" mathvariant="script">B</mi>
+            </mrow>
+          </mrow>
+        </msub>
+      </mstyle>
+    </mrow>
+    <annotation encoding="application/x-tex">{\displaystyle \Phi _{\mathcal {B'}}=\tau \circ \Phi _{\mathcal {B}}}</annotation>
+  </semantics>
+</math></span><img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/3ac3750fb48d31e17f3980a11d259022db4341b0" class="mwe-math-fallback-image-inline mw-invert skin-invert" aria-hidden="true" style="vertical-align: -0.838ex; width:13.034ex; height:2.676ex;" alt="{\displaystyle \Phi _{\mathcal {B&#039;}}=\tau \circ \Phi _{\mathcal {B}}}"></span>. On the opposite, passive transformations, identified with <span class="mwe-math-element mwe-math-element-inline"><span class="mwe-math-mathml-a11y" style="display: none;"><math class="mathjax_ignore" xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle {\text{GL}}(n,K)}">
+  <semantics>
+    <mrow class="MJX-TeXAtom-ORD">
+      <mstyle displaystyle="true" scriptlevel="0">
+        <mrow class="MJX-TeXAtom-ORD">
+          <mtext>GL</mtext>
+        </mrow>
+        <mo stretchy="false">(</mo>
+        <mi>n</mi>
+        <mo>,</mo>
+        <mi>K</mi>
+        <mo stretchy="false">)</mo>
+      </mstyle>
+    </mrow>
+    <annotation encoding="application/x-tex">{\displaystyle {\text{GL}}(n,K)}</annotation>
+  </semantics>
+</math></span><img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/3eb25cb3093b56e4884bce03af9661e00a6c3901" class="mwe-math-fallback-image-inline mw-invert skin-invert" aria-hidden="true" style="vertical-align: -0.838ex; width:9.581ex; height:2.843ex;" alt="{\displaystyle {\text{GL}}(n,K)}"></span> acts on <span class="mwe-math-element mwe-math-element-inline"><span class="mwe-math-mathml-a11y" style="display: none;"><math class="mathjax_ignore" xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle {\text{Iso}}(K^{n},V)}">
+  <semantics>
+    <mrow class="MJX-TeXAtom-ORD">
+      <mstyle displaystyle="true" scriptlevel="0">
+        <mrow class="MJX-TeXAtom-ORD">
+          <mtext>Iso</mtext>
+        </mrow>
+        <mo stretchy="false">(</mo>
+        <msup>
+          <mi>K</mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mi>n</mi>
+          </mrow>
+        </msup>
+        <mo>,</mo>
+        <mi>V</mi>
+        <mo stretchy="false">)</mo>
+      </mstyle>
+    </mrow>
+    <annotation encoding="application/x-tex">{\displaystyle {\text{Iso}}(K^{n},V)}</annotation>
+  </semantics>
+</math></span><img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/c22aa64eb9585cb504c1c583df1579b8c83b3820" class="mwe-math-fallback-image-inline mw-invert skin-invert" aria-hidden="true" style="vertical-align: -0.838ex; width:10.861ex; height:2.843ex;" alt="{\displaystyle {\text{Iso}}(K^{n},V)}"></span> from the right by pre-composition, that is if <span class="mwe-math-element mwe-math-element-inline"><span class="mwe-math-mathml-a11y" style="display: none;"><math class="mathjax_ignore" xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle T}">
+  <semantics>
+    <mrow class="MJX-TeXAtom-ORD">
+      <mstyle displaystyle="true" scriptlevel="0">
+        <mi>T</mi>
+      </mstyle>
+    </mrow>
+    <annotation encoding="application/x-tex">{\displaystyle T}</annotation>
+  </semantics>
+</math></span><img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/ec7200acd984a1d3a3d7dc455e262fbe54f7f6e0" class="mwe-math-fallback-image-inline mw-invert skin-invert" aria-hidden="true" style="vertical-align: -0.338ex; width:1.636ex; height:2.176ex;" alt="{\displaystyle T}"></span> represents a passive transformation, we have <span class="mwe-math-element mwe-math-element-inline"><span class="mwe-math-mathml-a11y" style="display: none;"><math class="mathjax_ignore" xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle \Phi _{\mathcal {B''}}=\Phi _{\mathcal {B}}\circ T}">
+  <semantics>
+    <mrow class="MJX-TeXAtom-ORD">
+      <mstyle displaystyle="true" scriptlevel="0">
+        <msub>
+          <mi mathvariant="normal">&#x03A6;<!-- Φ --></mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mrow class="MJX-TeXAtom-ORD">
+              <msup>
+                <mi class="MJX-tex-caligraphic" mathvariant="script">B</mi>
+                <mo>&#x2033;</mo>
+              </msup>
+            </mrow>
+          </mrow>
+        </msub>
+        <mo>=</mo>
+        <msub>
+          <mi mathvariant="normal">&#x03A6;<!-- Φ --></mi>
+          <mrow class="MJX-TeXAtom-ORD">
+            <mrow class="MJX-TeXAtom-ORD">
+              <mi class="MJX-tex-caligraphic" mathvariant="script">B</mi>
+            </mrow>
+          </mrow>
+        </msub>
+        <mo>&#x2218;<!-- ∘ --></mo>
+        <mi>T</mi>
+      </mstyle>
+    </mrow>
+    <annotation encoding="application/x-tex">{\displaystyle \Phi _{\mathcal {B''}}=\Phi _{\mathcal {B}}\circ T}</annotation>
+  </semantics>
+</math></span><img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/d4f180ce685e126b52b963acba9625274663872f" class="mwe-math-fallback-image-inline mw-invert skin-invert" aria-hidden="true" style="vertical-align: -0.838ex; width:13.835ex; height:2.676ex;" alt="{\displaystyle \Phi _{\mathcal {B&#039;&#039;}}=\Phi _{\mathcal {B}}\circ T}"></span>.
+</p><p>This turns the space of bases into a <i>left</i> <span class="mwe-math-element mwe-math-element-inline"><span class="mwe-math-mathml-a11y" style="display: none;"><math class="mathjax_ignore" xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle {\text{GL}}(V)}">
+  <semantics>
+    <mrow class="MJX-TeXAtom-ORD">
+      <mstyle displaystyle="true" scriptlevel="0">
+        <mrow class="MJX-TeXAtom-ORD">
+          <mtext>GL</mtext>
+        </mrow>
+        <mo stretchy="false">(</mo>
+        <mi>V</mi>
+        <mo stretchy="false">)</mo>
+      </mstyle>
+    </mrow>
+    <annotation encoding="application/x-tex">{\displaystyle {\text{GL}}(V)}</annotation>
+  </semantics>
+</math></span><img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/8190beb8410b4069ebe3b70341eed2ba3fa398a4" class="mwe-math-fallback-image-inline mw-invert skin-invert" aria-hidden="true" style="vertical-align: -0.838ex; width:6.874ex; height:2.843ex;" alt="{\displaystyle {\text{GL}}(V)}"></span>-<a href="/wiki/Torsor" class="mw-redirect" title="Torsor">torsor</a> and a <i>right</i> <span class="mwe-math-element mwe-math-element-inline"><span class="mwe-math-mathml-a11y" style="display: none;"><math class="mathjax_ignore" xmlns="http://www.w3.org/1998/Math/MathML"  alttext="{\displaystyle {\text{GL}}(n,K)}">
+  <semantics>
+    <mrow class="MJX-TeXAtom-ORD">
+      <mstyle displaystyle="true" scriptlevel="0">
+        <mrow class="MJX-TeXAtom-ORD">
+          <mtext>GL</mtext>
+        </mrow>
+        <mo stretchy="false">(</mo>
+        <mi>n</mi>
+        <mo>,</mo>
+        <mi>K</mi>
+        <mo stretchy="false">)</mo>
+      </mstyle>
+    </mrow>
+    <annotation encoding="application/x-tex">{\displaystyle {\text{GL}}(n,K)}</annotation>
+  </semantics>
+</math></span><img src="https://wikimedia.org/api/rest_v1/media/math/render/svg/3eb25cb3093b56e4884bce03af9661e00a6c3901" class="mwe-math-fallback-image-inline mw-invert skin-invert" aria-hidden="true" style="vertical-align: -0.838ex; width:9.581ex; height:2.843ex;" alt="{\displaystyle {\text{GL}}(n,K)}"></span>-torsor.
+</p><p>From a physical perspective, active transformations can be characterized as transformations of physical space, while passive transformations are characterized as redundancies in the description of physical space. This plays an important role in mathematical <a href="/wiki/Gauge_theory" title="Gauge theory">gauge theory</a>, where <a href="/wiki/Gauge_transformations" class="mw-redirect" title="Gauge transformations">gauge transformations</a> are described mathematically by transition maps which act <i>from the right</i> on fibers.
+</p>
+<div class="mw-heading mw-heading2"><h2 id="See_also">See also</h2></div>
+<ul><li><a href="/wiki/Change_of_basis" title="Change of basis">Change of basis</a></li>
+<li><a href="/wiki/Covariance_and_contravariance_of_vectors" title="Covariance and contravariance of vectors">Covariance and contravariance of vectors</a></li>
+<li><a href="/wiki/Rotation_of_axes" class="mw-redirect" title="Rotation of axes">Rotation of axes</a></li>
+<li><a href="/wiki/Translation_of_axes" title="Translation of axes">Translation of axes</a></li></ul>
+<div class="mw-heading mw-heading2"><h2 id="References">References</h2></div>
+<div class="mw-references-wrap"><ol class="references">
+<li id="cite&#95;note-1"><span class="mw-cite-backlink"><b><a href="#cite_ref-1">^</a></b></span> <span class="reference-text"><style data-mw-deduplicate="TemplateStyles:r1333433106">.mw-parser-output cite.citation{font-style:inherit;word-wrap:break-word}.mw-parser-output .citation q{quotes:"\"""\"""'""'"}.mw-parser-output .citation:target{background-color:rgba(0,127,255,0.133)}.mw-parser-output .id-lock-free.id-lock-free a{background:url("//upload.wikimedia.org/wikipedia/commons/6/65/Lock-green.svg")right 0.1em center/9px no-repeat}.mw-parser-output .id-lock-limited.id-lock-limited a,.mw-parser-output .id-lock-registration.id-lock-registration a{background:url("//upload.wikimedia.org/wikipedia/commons/d/d6/Lock-gray-alt-2.svg")right 0.1em center/9px no-repeat}.mw-parser-output .id-lock-subscription.id-lock-subscription a{background:url("//upload.wikimedia.org/wikipedia/commons/a/aa/Lock-red-alt-2.svg")right 0.1em center/9px no-repeat}.mw-parser-output .cs1-ws-icon a{background:url("//upload.wikimedia.org/wikipedia/commons/4/4c/Wikisource-logo.svg")right 0.1em center/12px no-repeat}body:not(.skin-timeless):not(.skin-minerva) .mw-parser-output .id-lock-free a,body:not(.skin-timeless):not(.skin-minerva) .mw-parser-output .id-lock-limited a,body:not(.skin-timeless):not(.skin-minerva) .mw-parser-output .id-lock-registration a,body:not(.skin-timeless):not(.skin-minerva) .mw-parser-output .id-lock-subscription a,body:not(.skin-timeless):not(.skin-minerva) .mw-parser-output .cs1-ws-icon a{background-size:contain;padding:0 1em 0 0}.mw-parser-output .cs1-code{color:inherit;background:inherit;border:none;padding:inherit}.mw-parser-output .cs1-hidden-error{display:none;color:var(--color-error,#bf3c2c)}.mw-parser-output .cs1-visible-error{color:var(--color-error,#bf3c2c)}.mw-parser-output .cs1-maint{display:none;color:#085;margin-left:0.3em}.mw-parser-output .cs1-kern-left{padding-left:0.2em}.mw-parser-output .cs1-kern-right{padding-right:0.2em}.mw-parser-output .citation .mw-selflink{font-weight:inherit}@media screen{.mw-parser-output .cs1-format{font-size:95%}html.skin-theme-clientpref-night .mw-parser-output .cs1-maint{color:#18911f}}@media screen and (prefers-color-scheme:dark){html.skin-theme-clientpref-os .mw-parser-output .cs1-maint{color:#18911f}}</style><cite id="CITEREFCrampinPirani1986" class="citation book cs1">Crampin, M.; Pirani, F.A.E. (1986). <a rel="nofollow" class="external text" href="https://books.google.com/books?id=iDfk7bjI5qAC&amp;pg=PA22"><i>Applicable Differential Geometry</i></a>. Cambridge University Press. p.&#160;22. <a href="/wiki/ISBN_(identifier)" class="mw-redirect" title="ISBN (identifier)">ISBN</a>&#160;<a href="/wiki/Special:BookSources/978-0-521-23190-9" title="Special:BookSources/978-0-521-23190-9"><bdi>978-0-521-23190-9</bdi></a>.</cite><span title="ctx&#95;ver=Z39.88-2004&amp;rft&#95;val&#95;fmt=info%3Aofi%2Ffmt%3Akev%3Amtx%3Abook&amp;rft.genre=book&amp;rft.btitle=Applicable+Differential+Geometry&amp;rft.pages=22&amp;rft.pub=Cambridge+University+Press&amp;rft.date=1986&amp;rft.isbn=978-0-521-23190-9&amp;rft.aulast=Crampin&amp;rft.aufirst=M.&amp;rft.au=Pirani%2C+F.A.E.&amp;rft&#95;id=https%3A%2F%2Fbooks.google.com%2Fbooks%3Fid%3DiDfk7bjI5qAC%26pg%3DPA22&amp;rfr&#95;id=info%3Asid%2Fen.wikipedia.org%3AActive+and+passive+transformation" class="Z3988"></span></span>
+</li>
+<li id="cite&#95;note-Davidson-2"><span class="mw-cite-backlink">^ <a href="#cite_ref-Davidson_2-0"><sup><i><b>a</b></i></sup></a> <a href="#cite_ref-Davidson_2-1"><sup><i><b>b</b></i></sup></a></span> <span class="reference-text"><link rel="mw-deduplicated-inline-style" href="mw-data:TemplateStyles:r1333433106" /><cite id="CITEREFJoseph&#95;K.&#95;Davidson,&#95;Kenneth&#95;Henderson&#95;Hunt2004" class="citation book cs1">Joseph K. Davidson, Kenneth Henderson Hunt (2004). <a rel="nofollow" class="external text" href="https://books.google.com/books?id=OQq67Tr7D0cC&amp;pg=PA74">"§4.4.1 The active interpretation and the active transformation"</a>. <i>Robots and screw theory: applications of kinematics and statics to robotics</i>. Oxford University Press. p.&#160;74 <i>ff</i>. <a href="/wiki/ISBN_(identifier)" class="mw-redirect" title="ISBN (identifier)">ISBN</a>&#160;<a href="/wiki/Special:BookSources/0-19-856245-4" title="Special:BookSources/0-19-856245-4"><bdi>0-19-856245-4</bdi></a>.</cite><span title="ctx&#95;ver=Z39.88-2004&amp;rft&#95;val&#95;fmt=info%3Aofi%2Ffmt%3Akev%3Amtx%3Abook&amp;rft.genre=bookitem&amp;rft.atitle=%C2%A74.4.1+The+active+interpretation+and+the+active+transformation&amp;rft.btitle=Robots+and+screw+theory%3A+applications+of+kinematics+and+statics+to+robotics&amp;rft.pages=74+%27%27ff%27%27&amp;rft.pub=Oxford+University+Press&amp;rft.date=2004&amp;rft.isbn=0-19-856245-4&amp;rft.au=Joseph+K.+Davidson%2C+Kenneth+Henderson+Hunt&amp;rft&#95;id=https%3A%2F%2Fbooks.google.com%2Fbooks%3Fid%3DOQq67Tr7D0cC%26pg%3DPA74&amp;rfr&#95;id=info%3Asid%2Fen.wikipedia.org%3AActive+and+passive+transformation" class="Z3988"></span></span>
+</li>
+<li id="cite&#95;note-3"><span class="mw-cite-backlink"><b><a href="#cite_ref-3">^</a></b></span> <span class="reference-text"><link rel="mw-deduplicated-inline-style" href="mw-data:TemplateStyles:r1333433106" /><cite id="CITEREFBargmann1957" class="citation journal cs1">Bargmann, Valentine (1957). "Relativity". <i>Reviews of Modern Physics</i>. <b>29</b> (2): <span class="nowrap">161–</span>174. <a href="/wiki/Bibcode_(identifier)" class="mw-redirect" title="Bibcode (identifier)">Bibcode</a>:<a rel="nofollow" class="external text" href="https://ui.adsabs.harvard.edu/abs/1957RvMP...29..161B">1957RvMP...29..161B</a>. <a href="/wiki/Doi_(identifier)" class="mw-redirect" title="Doi (identifier)">doi</a>:<a rel="nofollow" class="external text" href="https://doi.org/10.1103%2FRevModPhys.29.161">10.1103/RevModPhys.29.161</a>.</cite><span title="ctx&#95;ver=Z39.88-2004&amp;rft&#95;val&#95;fmt=info%3Aofi%2Ffmt%3Akev%3Amtx%3Ajournal&amp;rft.genre=article&amp;rft.jtitle=Reviews+of+Modern+Physics&amp;rft.atitle=Relativity&amp;rft.volume=29&amp;rft.issue=2&amp;rft.pages=161-174&amp;rft.date=1957&amp;rft&#95;id=info%3Adoi%2F10.1103%2FRevModPhys.29.161&amp;rft&#95;id=info%3Abibcode%2F1957RvMP...29..161B&amp;rft.aulast=Bargmann&amp;rft.aufirst=Valentine&amp;rfr&#95;id=info%3Asid%2Fen.wikipedia.org%3AActive+and+passive+transformation" class="Z3988"></span></span>
+</li>
+<li id="cite&#95;note-Amidror-4"><span class="mw-cite-backlink"><b><a href="#cite_ref-Amidror_4-0">^</a></b></span> <span class="reference-text"><link rel="mw-deduplicated-inline-style" href="mw-data:TemplateStyles:r1333433106" /><cite id="CITEREFAmidror2007" class="citation book cs1">Amidror, Isaac (2007). <a rel="nofollow" class="external text" href="https://books.google.com/books?id=Z_QRomE5g3QC&amp;pg=PT361">"Appendix D: Remark D.12"</a>. <i>The theory of the Moiré phenomenon: Aperiodic layers</i>. Springer. p.&#160;346. <a href="/wiki/ISBN_(identifier)" class="mw-redirect" title="ISBN (identifier)">ISBN</a>&#160;<a href="/wiki/Special:BookSources/978-1-4020-5457-0" title="Special:BookSources/978-1-4020-5457-0"><bdi>978-1-4020-5457-0</bdi></a>.</cite><span title="ctx&#95;ver=Z39.88-2004&amp;rft&#95;val&#95;fmt=info%3Aofi%2Ffmt%3Akev%3Amtx%3Abook&amp;rft.genre=bookitem&amp;rft.atitle=Appendix+D%3A+Remark+D.12&amp;rft.btitle=The+theory+of+the+Moir%C3%A9+phenomenon%3A+Aperiodic+layers&amp;rft.pages=346&amp;rft.pub=Springer&amp;rft.date=2007&amp;rft.isbn=978-1-4020-5457-0&amp;rft.aulast=Amidror&amp;rft.aufirst=Isaac&amp;rft&#95;id=https%3A%2F%2Fbooks.google.com%2Fbooks%3Fid%3DZ&#95;QRomE5g3QC%26pg%3DPT361&amp;rfr&#95;id=info%3Asid%2Fen.wikipedia.org%3AActive+and+passive+transformation" class="Z3988"></span></span>
+</li>
+</ol></div>
+<ul><li><a href="/wiki/Dirk_Struik" class="mw-redirect" title="Dirk Struik">Dirk Struik</a> (1953) <i>Lectures on Analytic and Projective Geometry</i>, page 84, <a href="/wiki/Addison-Wesley" title="Addison-Wesley">Addison-Wesley</a>.</li></ul>
+<div class="mw-heading mw-heading2"><h2 id="External_links">External links</h2></div>
+<ul><li><a rel="nofollow" class="external text" href="https://web.archive.org/web/20110511051125/https://profiles.google.com/114134834346472219368/posts/AWqcUGXVjcs/Consider-an-equilateral-triangle-in-a-plane-whose">UI ambiguity</a></li></ul></div>
