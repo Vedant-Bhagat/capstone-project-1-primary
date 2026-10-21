@@ -14,7 +14,7 @@ A **new, second public repository**, because the evaluation prompt requires one 
 | Owner | `Vedant-Bhagat`; Janhavi and Pranesh to be added as collaborators |
 | Default branch | `main` — the evaluation prompt returns `NOT ASSESSABLE` if the code is not on `main` |
 | First line of README | the exact area-4 declaration from file 01 — in place |
-| Local working copy | `primary/` inside the shared `todo` working folder, gitignored by the starter repo |
+| Local working copy | `todo/capstone-project-1-primary/`, a sibling of `todo/capstone-project-1/` so both projects share one working folder |
 
 **Cross-link both repositories.** Each README gets a line naming the other and saying which course
 deliverable it is — starter or main dish. Costs two lines and stops either repository looking like an
