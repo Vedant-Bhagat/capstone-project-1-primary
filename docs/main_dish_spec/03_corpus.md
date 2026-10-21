@@ -59,6 +59,9 @@ category in config order that contains it, and is never stored twice or counted 
 - **The assignment** happens in `fetch.py`: categories are processed in that order, an article already
   assigned to an earlier category is skipped, and the 150-article cap is applied *after* skipping. A later
   category therefore still gets its full 150 if it has enough articles left.
+- **"Assigned" means membership, not selection.** An article is claimed by every earlier category that
+  *contains* it, checked before that category's cap is applied. An article cut from an earlier category by
+  the cap is therefore excluded from every later category too; it is not offered to the next one.
 
 **Why eight and not one.** A single-topic corpus makes retrieval look better than it is: if everything is
 about birds, any bird-related chunk is a plausible hit and precision is unmeasurable. Multiple distinct

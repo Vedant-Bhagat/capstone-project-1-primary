@@ -14,6 +14,25 @@ USER_AGENT         = ("MariaDB-capstone-ingest/0.1 "
 REQUEST_INTERVAL_S = 1.0
 RAW_DIR            = Path(__file__).resolve().parent.parent / "raw"   # gitignored
 
+# Corpus categories, (key, Wikipedia category). ORDER IS LOAD-BEARING: an
+# article in several categories belongs to the first one listed here
+# (03_corpus.md, overlap rule).
+CATEGORIES = [
+    ("birds",                "Birds described in 1758"),
+    ("physics",              "Concepts in physics"),
+    ("composers",            "Composers for piano"),
+    ("prog_lang",            "Programming languages"),
+    ("space_telescopes",     "Space telescopes"),
+    ("diseases",             "Infectious diseases"),
+    ("political_philosophy", "Concepts in political philosophy"),
+    ("ethics",               "Concepts in ethics"),
+    ("architecture",         "Architectural styles"),
+]
+ARTICLES_PER_CATEGORY = 150   # longest first when a category has more
+# Pages in a category that are indexes of other articles, not prose.
+NON_ARTICLE_PREFIXES = ("List of", "Lists of", "Outline of", "Index of",
+                        "Glossary of", "Timeline of")
+
 # Chunking
 CHUNK_TARGET_WORDS  = 300
 CHUNK_OVERLAP_WORDS = 50

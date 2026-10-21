@@ -63,22 +63,41 @@ def _cached(path, produce):
 
 def category_members(category):
     """Articles (namespace 0) directly in `Category:<category>`, as
-    [{'pageid', 'title'}]. Subcategories are not followed."""
+    [{'pageid', 'title', 'length'}], length being wikitext bytes.
+    Subcategories are not followed."""
     def produce():
         members, cont = [], {}
         while True:
-            data = _get({"list": "categorymembers",
-                         "cmtitle": f"Category:{category}",
-                         "cmnamespace": 0, "cmtype": "page", "cmlimit": "max",
-                         **cont})
-            members += [{"pageid": m["pageid"], "title": m["title"]}
-                        for m in data["query"]["categorymembers"]]
+            data = _get({"generator": "categorymembers",
+                         "gcmtitle": f"Category:{category}",
+                         "gcmnamespace": 0, "gcmtype": "page",
+                         "gcmlimit": "max", "prop": "info", **cont})
+            members += [{"pageid": p["pageid"], "title": p["title"],
+                         "length": p["length"]}
+                        for p in data.get("query", {}).get("pages", [])]
             if "continue" not in data:
-                return members
+                return sorted(members, key=lambda m: m["pageid"])
             cont = data["continue"]
 
     slug = urllib.parse.quote(category, safe="")
-    return _cached(config.RAW_DIR / "categories" / f"{slug}.json", produce)
+    return _cached(config.RAW_DIR / "category_members" / f"{slug}.json", produce)
+
+
+def select_articles(categories=config.CATEGORIES):
+    """The articles to fetch, as {key: [member, ...]} (03_corpus.md).
+
+    Overlap: an article belongs to the first category in `categories` that
+    contains it, so it is fetched and stored once. Cap: of what is left, keep
+    the ARTICLES_PER_CATEGORY longest, ties broken by lower pageid."""
+    claimed, selection = set(), {}
+    for key, category in categories:
+        members = [m for m in category_members(category)
+                   if not m["title"].startswith(config.NON_ARTICLE_PREFIXES)]
+        eligible = [m for m in members if m["pageid"] not in claimed]
+        claimed.update(m["pageid"] for m in members)
+        eligible.sort(key=lambda m: (-m["length"], m["pageid"]))
+        selection[key] = eligible[:config.ARTICLES_PER_CATEGORY]
+    return selection
 
 
 def fetch_article(pageid):
