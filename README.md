@@ -208,7 +208,7 @@ README, and whichever area a README declares is the only one scored. One README 
 two areas.
 
 Self-assessments for the weeks up to and including 2026-10-15 are in that repository; the weekly record
-continues here from 2026-10-21, when main-dish work began in earnest.
+continues here from 2026-10-22, when main-dish work began in earnest.
 
 ## AI use
 
