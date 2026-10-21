@@ -69,7 +69,10 @@ the verification checklist at the end of file 09.
 Wikipedia's action API, `action=query`. Two calls per category:
 
 1. `list=categorymembers` to enumerate article titles in the category.
-2. `prop=extracts&explaintext=1` in batches of 20 titles to pull plain text.
+2. `prop=extracts&explaintext=1` to pull plain text, **one article per request**. (Originally planned in
+   batches of 20; checked at implementation, the API lowers `exlimit` to 1 for whole-article extracts and
+   only batches intro-only ones. At one request per second, ~1,200 articles is a ~20-minute first fetch,
+   paid once thanks to the `raw/` cache.)
 
 Both are public, need no key, and are rate-limited politely at one request per second with a descriptive
 `User-Agent` as Wikipedia's etiquette requires.
