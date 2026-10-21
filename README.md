@@ -43,7 +43,10 @@ SQL statement, then measures honestly what the approximate index costs in accura
 
 ## Status
 
-**Specification complete. Implementation not started.**
+**Specification complete. Schema and retrieval (component B) implemented; ingest and evaluation in
+progress.**
+
+Work is split three ways — see [`WORK_DIVISION.md`](WORK_DIVISION.md) for who owns what and how to start.
 
 The full specification is in [`docs/main_dish_spec/`](docs/main_dish_spec/) — 14 documents plus a runnable
 probe script, written before any implementation so that the graded requirements, the schema and the
@@ -148,8 +151,12 @@ generalising from one convenient test — the first was an IATA-code join in the
 inflated 66,770 routes to 76,277 rows. Pranesh independently reproduced the original defect on MariaDB
 13.0.2, confirming it on a third version.
 
-**This finding is not yet a claim about MariaDB in general.** It was observed on 12.3.3 on Windows with
-3-dimensional synthetic vectors. There is a six-item verification checklist at the end of
+**This is not a claim about MariaDB in general — and we have since narrowed it ourselves.** It was observed
+on 12.3.3 on Windows with 3-dimensional synthetic vectors. Re-checked at **384 dimensions** against the real
+schema and a 2,000-chunk fixture, **it did not reproduce**: every configuration returned the full 10 rows,
+including a filter deliberately selecting only rows far from the query. So the shortfall is low-dimensional
+behaviour on current evidence, not a defect we are prepared to report, and whether it affects real
+embeddings is still open (finding 7c). There is a six-item verification checklist at the end of
 [`09_verified_findings.md`](docs/main_dish_spec/09_verified_findings.md) — reproduce at 384 dimensions on
 real embeddings, with genuinely random vectors, on 11.8 and the current release, on Linux, and search
 MariaDB's Jira for duplicates — which gates it before it goes anywhere public.
@@ -174,13 +181,22 @@ docs/main_dish_spec/        the specification; start at its README
   probe/vector_probe.sql        reproduces findings 1-7
   probe/selectivity_probe.sql   reproduces finding 7b (Janhavi)
 
+sql/schema.sql              all tables; idempotent
+sql/fixture.sql             2,000 synthetic chunks, so no component waits on the ingest
+sql/retrieval/
+  semantic.sql              plain top-k semantic search
+  hybrid_filter.sql         relational predicate + vector, one statement
+  hybrid_fulltext.sql       full-text + vector, fused with RRF
+  under_return.sql          the filtered-search behaviour, checked at 384 dims
+
 self_assessment/            weekly self-assessment, one section per contributor
+WORK_DIVISION.md            who owns which component, and how to start
 AI_USE_LOG.md               record of AI tool use, traced per change
 CONTRIBUTING.md             branching, commits, PR and review workflow
 ```
 
-Implementation directories — `python/`, `sql/`, `.github/workflows/` — arrive with the milestones in
-[`11_deliverables.md`](docs/main_dish_spec/11_deliverables.md).
+Still to come: `python/` (ingest), `sql/evaluation/` (recall harness) and `.github/workflows/`, per the
+milestones in [`11_deliverables.md`](docs/main_dish_spec/11_deliverables.md).
 
 ## Our other project
 

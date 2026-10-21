@@ -302,6 +302,42 @@ written into the query.
    and the vector index earns nothing. That is a sharper and more useful finding than anything in the
    original draft, and it came from a teammate's review.
 
+### 7c. At 384 dimensions it does not reproduce
+
+Checked 2026-10-21 against the real schema and a 2,000-chunk fixture of 384-dimension vectors
+(`sql/fixture.sql`), using `sql/retrieval/under_return.sql`. **Every configuration returned the full 10
+rows:**
+
+| scenario | filter | selectivity | plan | returned |
+|---|---|---|---|---|
+| A | `category` (indexed) | 6.4% | btree pre-filter | 10 of 10 |
+| B | `section` (unindexed) | 12.5% | vector index, post-filter | 10 of 10 |
+| C | `body LIKE` (unindexed), selecting only rows **far** from the query | 6.4% | vector index, post-filter | 10 of 10 |
+
+C is the worst case for post-filtering by construction — the graph walk heads toward `birds` while the
+predicate keeps only `compilers` — and it still came back full. The forced plan was also confirmed
+identical to exhaustive search.
+
+**So the shortfall is not established as general MariaDB behaviour.** It is real and reproducible at 3
+dimensions, and absent at 384 on this data. The most likely explanation is that a 3-dimensional HNSW graph
+over 2,000 points is degenerate — `m = 6` neighbours cannot navigate a space that crowded — but that is a
+hypothesis we have not tested.
+
+What this changes:
+
+- **The README must not present the shortfall as a MariaDB defect**, only as behaviour observed at low
+  dimensionality. Corrected.
+- **Filing a Jira issue is off the table for now.** A report that does not reproduce at a realistic
+  dimensionality would cost us more credibility than the finding is worth (risk R10).
+- **`FORCE INDEX` stays** in `hybrid_filter.sql`. It costs nothing, it buys a guaranteed exact plan rather
+  than a cost estimate, and the behaviour it defends against was genuinely observed.
+- **The honest headline survives intact**, because it never depended on the shortfall: a filtered vector
+  query is served by the *relational* index, exhaustively, with the vector index contributing nothing. That
+  is a real limitation of the feature and it is measurable regardless.
+
+The remaining open question is real embeddings. Synthetic clustered vectors are not real ones, and
+component A's output is what finally settles this.
+
 **Credit where it is due.** This is the second time Janhavi's review has caught a wrong assumption of ours —
 the first was the IATA-code join in the starter, which silently inflated 66,770 routes to 76,277 rows. Both
 times the error was a case of testing one convenient point and generalising from it.
@@ -341,7 +377,8 @@ generalise:
 
 ### Required before finding 7 goes in a public README or a bug report
 
-- [ ] Reproduce on the real corpus: 384 dimensions, ~12,000 real embeddings
+- [~] 384 dimensions — **checked on a synthetic 2,000-chunk fixture: did NOT reproduce** (7c). Still
+      open for ~12,000 *real* embeddings from component A
 - [ ] Reproduce with genuinely random vectors, to rule out the patterned-data artifact
 - [x] Reproduce on a third MariaDB version — **Pranesh confirmed finding 7 on 13.0.2**, 2026-10-15
 - [ ] Reproduce on MariaDB 11.8, the minimum version this project supports
