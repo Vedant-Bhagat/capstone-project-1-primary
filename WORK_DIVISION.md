@@ -84,8 +84,9 @@ decision, not making one. If you disagree with a parameter, change the spec in t
 graded depth is in SQL. No abstraction layers, no plugin architecture for embedding backends, no CLI
 framework. One script that runs start to finish.
 
-**Done when:** a clean machine runs `python -m python.ingest` from the README and ends up with ~12,000
-indexed chunks, and `sql/retrieval/semantic.sql` returns sensible neighbours on real text.
+**Done when:** a clean machine runs `python -m python.ingest` from the README and ends up with ~13,000
+indexed chunks (an unverified estimate; replace with the measured count after the first full ingest), and
+`sql/retrieval/semantic.sql` returns sensible neighbours on real text.
 
 ---
 

@@ -27,7 +27,7 @@ Three things to point out to a reader, because they are the whole value proposit
   vector store returns ids, and you then query your real database for the titles — two systems, two
   latencies, and code to stitch them.
 - **`ORDER BY ... LIMIT` is the entire API.** No special search syntax, no client library. `EXPLAIN` shows
-  `key: embedding`, confirming the index is used rather than all 12,000 rows being compared.
+  `key: embedding`, confirming the index is used rather than all ~13,000 rows being compared.
 - **This is approximate.** The ordering is HNSW's best guess. File 07 measures how often it is right.
 
 ## 2. Hybrid: the "absolute, then fluffy" shape

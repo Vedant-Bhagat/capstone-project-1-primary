@@ -81,7 +81,8 @@ Deliberately first and deliberately small. It unblocks everyone else, and it is 
 findings get encoded in DDL while they are fresh.
 
 ### M1 — Corpus in the database
-*Done when: `python -m python.ingest` on a clean machine produces ~12,000 indexed chunks.*
+*Done when: `python -m python.ingest` on a clean machine produces ~13,000 indexed chunks (an unverified
+estimate; replace with the measured count after the first full ingest).*
 
 - `fetch.py`, `chunk.py`, `embed.py`, `ingest.py`
 - `corpus_manifest.csv` committed

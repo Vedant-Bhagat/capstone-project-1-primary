@@ -63,35 +63,34 @@ category in config order that contains it, and is never stored twice or counted 
   *contains* it, checked before that category's cap is applied. An article cut from an earlier category by
   the cap is therefore excluded from every later category too; it is not offered to the next one.
 
-**Why eight and not one.** A single-topic corpus makes retrieval look better than it is: if everything is
+**Why nine and not one.** A single-topic corpus makes retrieval look better than it is: if everything is
 about birds, any bird-related chunk is a plausible hit and precision is unmeasurable. Multiple distinct
 categories create genuine opportunities for the retriever to be wrong, which is the only way the recall
-number means anything. It also gives the category filter real selectivity — each category is about 12% of
+number means anything. It also gives the category filter real selectivity — each category is about 9–12% of
 the corpus, which is the range where the hybrid query is interesting and, as file 09 shows, where the
 under-return defect bites.
 
-**Why these are deliberately uneven in difficulty.** `philosophy` and `physics` should retrieve worse than
-`birds` and `composers`. If they do, we have a per-category recall table, which is a more honest and more
-interesting result than one global number. If they do not, that is also worth reporting.
+**Why these are deliberately uneven in difficulty.** `political_philosophy`, `ethics` and `physics` should
+retrieve worse than `birds` and `composers`. If they do, we have a per-category recall table, which is a more
+honest and more interesting result than one global number. If they do not, that is also worth reporting.
 
 ### Category size is a correctness constraint, not a presentation choice
 
-Eight categories means each is ~12.5% of the corpus. **That is above the threshold where MariaDB's optimizer
-stops pre-filtering a vector query and starts silently under-returning** — the crossover is around 7%, and
+Nine categories capped at 150 means each is ~11.6% of the corpus (150 of ~1,295; `physics`, at 113
+articles, is ~8.7%). **Every one of them is above the threshold where MariaDB's optimizer stops
+pre-filtering a vector query and starts silently under-returning** — the crossover is around 7%, and
 finding 7b in file 09 has the measurement.
 
-Two independent responses, and we take both:
+Two responses were considered:
 
 1. **Force the index in every filtered query** (file 06). This is the real fix and it works regardless of
-   category size.
-2. **Prefer more, smaller categories.** Sixteen categories at ~6% each sit below the crossover, so the safe
-   plan is also the one the optimizer picks unaided. That makes the demo robust for a reader who copies a
-   query without the hint, which is most readers.
+   category size. **It is the one we rely on.**
+2. **More, smaller categories.** Sixteen categories at ~6% each would sit below the crossover, so the safe
+   plan would also be the one the optimizer picks unaided. **Not taken:** the team chose the nine
+   categories above, at up to 150 articles each.
 
-Sixteen categories at ~75 articles each is the same total corpus and no more fetching work, so the second
-response is nearly free. The eight above should therefore be treated as the minimum, and splitting them —
-`birds` into `birds` and `flightless_birds`, `physics` into `classical_physics` and `quantum_physics`, and
-so on — is preferred.
+The consequence is that the index hint is the only protection. A reader who copies a filtered query
+without it can silently get too few rows on this corpus, so every filtered query we publish carries it.
 
 The crossover was measured on the 3-dimensional synthetic harness and is likely cost-model dependent, so it
 must be re-measured on the real corpus before the category sizing is considered settled. That check is on
@@ -215,12 +214,12 @@ project a museum piece. Both, clearly labelled, is the honest answer.
 
 | Quantity | Estimate | Basis |
 |---|---|---|
-| Articles | ~1,200 | 8 categories x 150 |
+| Articles | ~1,295 | 9 categories, capped at 150 (table above) |
 | Mean article length | ~3,500 words | Typical for non-stub Wikipedia articles; to be measured, not assumed |
-| Chunks | ~12,000 | At ~300 words per chunk. Close to Kaj's ~10 per article estimate |
-| Chunk text on disk | ~25 MB | 12,000 x 300 words x ~6 bytes |
-| Vectors at 384 dims | **~18 MB** | 12,000 x 384 x 4 bytes |
-| Vectors at 768 dims | ~37 MB | Same, doubled |
+| Chunks | ~13,000 (unverified) | Kaj's ~10 per article estimate. **Not measured:** the one real article chunked so far (Emperor penguin) gave 26. Replace with the measured count after the first full ingest |
+| Chunk text on disk | ~23 MB | 13,000 x 300 words x ~6 bytes |
+| Vectors at 384 dims | **~20 MB** | 13,000 x 384 x 4 bytes |
+| Vectors at 768 dims | ~40 MB | Same, doubled |
 
 The vector sizes are load-bearing, not decoration. The server's default
 `mhnsw_max_cache_size` is **16,777,216 bytes — 16 MB** (verified, file 09). At 384 dimensions we are

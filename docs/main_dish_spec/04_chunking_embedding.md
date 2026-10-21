@@ -120,9 +120,9 @@ pipeline step is required — a good, concrete illustration of why limitation C3
 
 ## Batching and cost
 
-12,000 chunks on CPU at batch size 32 should run in single-digit minutes; a GPU makes it seconds. Fast
-enough that re-embedding the whole corpus to test a chunking change is a coffee break, not a blocker, which
-is what makes the file-07 experiments affordable.
+~13,000 chunks (an unverified estimate, file 03) on CPU at batch size 32 should run in single-digit minutes;
+a GPU makes it seconds. Fast enough that re-embedding the whole corpus to test a chunking change is a coffee
+break, not a blocker, which is what makes the file-07 experiments affordable.
 
 `embed.py` must show a progress indicator and be resumable — writing vectors to disk as it goes — so an
 interrupted run does not start over. Readers judge an ingest that appears to hang.
