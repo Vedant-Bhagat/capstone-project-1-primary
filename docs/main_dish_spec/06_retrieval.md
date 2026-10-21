@@ -41,7 +41,7 @@ SET @q = VEC_FromText(?);
 
 SELECT a.title, c.section, LEFT(c.body, 200) AS preview, a.url,
        VEC_DISTANCE_COSINE(c.embedding, @q) AS distance
-FROM chunks c
+FROM chunks c FORCE INDEX (ix_category)   -- NOT optional; see below
 JOIN articles a ON a.id = c.article_id
 WHERE c.category = 'physics'          -- absolute: indexed, on the same table
   AND c.word_count >= 100            -- absolute: no stubs
@@ -49,20 +49,37 @@ ORDER BY distance
 LIMIT 10;
 ```
 
+**`FORCE INDEX` is load-bearing and must not be removed.** Without it, above roughly 7% selectivity the
+optimizer picks the vector index and post-filters, and the query silently returns fewer rows than asked for
+— frequently zero. Measured over four rebuilds at 12.5% selectivity: the default plan returned 0 rows on
+three of them, the forced plan returned the full 10 every time and matched exhaustive search exactly.
+Finding 7b in file 09 has the sweep and the crossover.
+
+This is the one place in the project where a query carries a hint, and the README must explain why rather
+than leaving something that reads like superstition. A bare `FORCE INDEX` with no justification is worse
+than none — a reader will delete it.
+
 **Why this is genuinely hybrid and not a `WHERE` bolted on.** The predicate is not a post-filter applied by
-our application after a vector service returned results. It is in the same statement, and MariaDB's
-optimizer *chooses* how to combine the two access paths — in this case using `ix_category` to narrow the
-candidate set and then computing distances exactly over it. The combination is the database's decision,
-based on its own statistics. That is a capability that only exists when one system owns both the vectors and
-the relational data.
+our application after a vector service returned results. It is in the same statement, over the same tables,
+and the database combines the relational narrowing with the distance computation itself. A standalone vector
+service cannot do this at all, because it does not know what is in `articles` or what `category` means.
 
-The demonstration should show this with `EXPLAIN` side by side: unfiltered uses `key: embedding`, filtered
-uses `key: ix_category`. Same query shape, two different strategies, chosen automatically. That contrast is
-the clearest evidence of depth we can put in front of an evaluator.
+The demonstration should show three plans with `EXPLAIN`, side by side:
 
-And the filtered form is **exact**, because brute force over 12% of the corpus is cheap. So the honest
-summary is counter-intuitive and worth stating: *adding a selective filter makes the query both faster and
-more accurate, because it stops being approximate.*
+| query | plan | correct? |
+|---|---|---|
+| unfiltered | `key: embedding` — HNSW graph walk | approximate, measured in file 07 |
+| filtered, no hint | `key: embedding`, `Using where` — post-filter | **no — silently short** |
+| filtered, `FORCE INDEX` | `key: ix_category`, `Using filesort` — pre-filter | yes, exhaustive-equivalent |
+
+That three-way contrast is the clearest evidence of depth in the project, and it is more interesting than
+the two-way contrast the first draft of this file described, because the middle row is a trap a reader
+would otherwise fall into.
+
+The honest summary is counter-intuitive and worth stating plainly: **the filtered query is exact, and the
+vector index contributes nothing to it.** Brute force over 12% of the corpus is cheap enough that exactness
+is the better trade — but it means MariaDB's vector index does not currently serve selective filtered
+queries, and the README should say so rather than implying hybrid search gets the best of both.
 
 ## 3. Hybrid: full-text and vector combined
 

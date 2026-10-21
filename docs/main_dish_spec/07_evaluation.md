@@ -203,8 +203,10 @@ underpin claims made elsewhere in the spec.
 | T3 | `chunks.category` agrees with `articles.category` for every row | Drift in the file-05 denormalisation |
 | T4 | Indexed top-10 matches brute-force top-10 **exactly** for a fixed query at high `ef_search` | Index corruption, or a metric mismatch |
 | T5 | `recall@10 >= 0.98` at the documented `ef_search` | Regression in the headline claim |
-| T6 | The indexed hybrid query returns exactly `k` rows | The under-return defect appearing where we claimed to have fixed it |
+| T6 | The hybrid query **with `FORCE INDEX`** returns exactly `k` rows, and the same rows as exhaustive search | The under-return defect appearing where we claimed to have fixed it. Must assert row identity, not just the count — Janhavi observed a run returning the right count with none of the right rows |
 | T7 | The unindexed-filter query **still under-returns** | That the documented defect is still real. If MariaDB fixes it, this test fails and tells us to update the write-up |
+| T9 | Every committed hybrid query text contains `FORCE INDEX` | Someone "tidying up" the hint, which would reintroduce the defect silently. The cheapest possible guard against our own future selves |
+| T10 | Measured at ingest: no category exceeds the crossover selectivity on the real corpus | File 03's sizing assumption drifting as the corpus changes |
 | T8 | `EXPLAIN` on `semantic.sql` shows the vector index in use | A plan regression quietly turning every query into a table scan |
 
 T7 is worth dwelling on: it is a test that asserts a bug still exists. That is the right design, because our

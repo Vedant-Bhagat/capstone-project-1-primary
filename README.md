@@ -103,9 +103,50 @@ single time.
 *Five consecutive rebuilds of an identical table with identical data. Each query asks for `LIMIT 10`; both
 filters match exactly 20 rows.*
 
-This is why the schema denormalises the filter column onto the vector-indexed table and indexes it — the
-design is driven by measured server behaviour rather than by preference. The reasoning is in
-[`05_schema.md`](docs/main_dish_spec/05_schema.md).
+### Indexing the filter column is necessary but not sufficient
+
+Our first conclusion from the table above was that indexing the filter column fixes the problem. **That was
+wrong, and a teammate's review caught it.** The probe above used a filter matching 1% of rows. Janhavi
+tested the same mitigation at ~12% — the selectivity our corpus actually plans to use — and found the
+optimizer abandons the pre-filter and goes back to post-filtering through the vector index.
+
+Sweeping the selectivity of an equality predicate, three rebuilds at each point:
+
+| matching rows | selectivity | plan chosen | rows returned |
+|---|---|---|---|
+| 20 | 1.0% | btree — pre-filter | 10, 10, 10 |
+| 125 | 6.2% | btree — pre-filter | 10, 10, 10 |
+| 166 | 8.3% | **vector index — post-filter** | **0, 2, 0** |
+| 250 | 12.5% | **vector index — post-filter** | **0, 10, 10** |
+
+**The crossover sits around 7%.** Below it the plan is exact. Above it the plan is silently unreliable, and
+Janhavi also observed a run returning the right *number* of rows with none of the *right* rows — which no
+row count would betray.
+
+The fix is to stop trusting the optimizer and write the hint into the query. At 12.5%, four rebuilds:
+
+| | run 1 | run 2 | run 3 | run 4 |
+|---|---|---|---|---|
+| default plan | **0** | **0** | **0** | 10 |
+| `FORCE INDEX (ix_category)` | 10 | 10 | 10 | 10 |
+
+The forced results are identical to exhaustive search, not merely the right count.
+
+So the honest headline, which is sharper than what we started with: **MariaDB's vector index does not
+currently serve selective filtered queries.** You either accept approximate results that are sometimes
+empty, or you force an exact scan over the filtered subset and the vector index contributes nothing. For a
+12% slice of 12,000 chunks the exact scan is cheap and is clearly the right trade — but it is a real
+limitation of the feature, not a detail.
+
+This is why the schema denormalises the filter column onto the vector-indexed table *and* why every hybrid
+query carries `FORCE INDEX`. Both halves are required: the hint cannot name an index on another table. The
+reasoning is in [`05_schema.md`](docs/main_dish_spec/05_schema.md) and the measurements in
+[`09_verified_findings.md`](docs/main_dish_spec/09_verified_findings.md), finding 7b.
+
+Credit: Janhavi found this reviewing the specification, and it is the second time her review has caught us
+generalising from one convenient test — the first was an IATA-code join in the starter that silently
+inflated 66,770 routes to 76,277 rows. Pranesh independently reproduced the original defect on MariaDB
+13.0.2, confirming it on a third version.
 
 **This finding is not yet a claim about MariaDB in general.** It was observed on 12.3.3 on Windows with
 3-dimensional synthetic vectors. There is a six-item verification checklist at the end of
@@ -130,7 +171,8 @@ docs/main_dish_spec/        the specification; start at its README
   10_risks.md               what can go wrong, and the response
   11_deliverables.md        file inventory, milestones, acceptance criteria
   12_open_decisions.md      what is still open, including the work split
-  probe/vector_probe.sql    reproduces every verified claim
+  probe/vector_probe.sql        reproduces findings 1-7
+  probe/selectivity_probe.sql   reproduces finding 7b (Janhavi)
 
 self_assessment/            weekly self-assessment, one section per contributor
 AI_USE_LOG.md               record of AI tool use, traced per change

@@ -127,21 +127,35 @@ filter rejects most candidates, **the query silently returns fewer rows than req
 no warning (file 09).
 
 Denormalising `category` onto `chunks` **and indexing it** lets the optimizer pre-filter instead: it uses
-`ix_category` to narrow to the matching chunks, then computes distances exactly over that subset. Verified —
-the plan changes from `key: embedding, Extra: Using where` to `key: ix_category, Extra: Using filesort`, and
-the correct number of rows comes back every time.
+`ix_category` to narrow to the matching chunks, then computes distances exactly over that subset. The plan
+changes from `key: embedding, Extra: Using where` to `key: ix_category, Extra: Using filesort`.
 
-The cost is a 12% exhaustive scan instead of a graph walk. On ~1,440 chunks that is nothing, and the result
-is **exact rather than approximate**, which is a better answer, not a worse one.
+**But indexing the column is not enough on its own.** An earlier version of this file claimed it was, on the
+strength of a probe at 1% selectivity. Janhavi tested the same mitigation at ~12% — the selectivity file 03
+actually plans — and found the optimizer abandons the pre-filter and goes back to post-filtering through the
+vector index, with the same silent nondeterministic shortfall. The crossover sits around **7%**. Finding 7b
+in file 09 has the sweep.
 
-So the rule the schema encodes:
+So the rule the schema encodes has two halves, and both are required:
 
-> **Any column used to filter a vector query must live on the same table as the vector index, and must be
-> indexed.** Otherwise the query can under-return without telling you.
+> **1. Any column used to filter a vector query must live on the same table as the vector index, and must
+> be indexed.** Otherwise the query can under-return without telling you — and an index hint cannot name an
+> index on another table, so this is what makes the second half possible at all.
+>
+> **2. The query must force that index.** Above roughly 7% selectivity the optimizer will not choose it,
+> and `FORCE INDEX` is what makes the plan deterministic. Verified over four rebuilds at 12.5%: forced
+> gives 10 of 10 every time and results identical to exhaustive search, while the default plan returned 0
+> on three of those four.
 
-Nothing in MariaDB's documentation told us this. We found it by probing, and it is the single most
-defensible design decision in the project — it is a schema shaped by measured server behaviour. The README
-should present it exactly that way.
+The cost is an exhaustive scan over the matching subset instead of a graph walk. On ~1,440 chunks that is
+cheap, and the result is **exact rather than approximate** — a better answer, not a worse one. The price is
+that the vector index contributes nothing to a filtered query, which is a real limitation of the feature and
+is written up as such in file 09.
+
+Nothing in MariaDB's documentation told us any of this. We found it by probing, Janhavi found the hole in
+our first conclusion by probing further, and the schema is shaped by what the server actually did. That is
+the single most defensible design decision in the project, and the README should present it exactly that
+way — including the part where our first answer was wrong.
 
 The normalisation purist's objection is real and should be answered in the README rather than dodged:
 `chunks.category` can drift from `articles.category`. Our corpus is immutable after ingest so it cannot

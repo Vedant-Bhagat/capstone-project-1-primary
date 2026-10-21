@@ -141,6 +141,10 @@ EXPLAIN: type: ref   key: category   rows: 20
 MariaDB **pre-filters**: it uses the ordinary index to narrow to the 20 matching rows, then computes exact
 distances over them. The vector index is not used, the answer is exact, and the full 10 rows come back.
 
+> **This result does not generalise, and an earlier version of this spec wrongly assumed it did.** 20 of
+> 2,000 rows is 1% selectivity. Janhavi tested the same mitigation at ~12% and found the optimizer abandons
+> the pre-filter and breaks. See finding 7b, which supersedes the conclusion originally drawn here.
+
 ### With an unindexed filter column: silently wrong
 
 ```sql
@@ -211,10 +215,96 @@ no way to detect it. This reads as a defect rather than an accuracy trade-off.
 
 1. **Schema.** Any column used to filter a vector query must be on the vector-indexed table and indexed.
    This is why file 05 denormalises `category` onto `chunks`. The design is driven by measured behaviour.
+   **Necessary but not sufficient** — see 7b.
 2. **Testing.** Every retrieval measurement records how many rows came back, not just how many were
    correct. A silent truncation is invisible to a recall metric that divides by what it received.
 3. **A likely contribution.** This is a strong Jira candidate — and, per `[kaj]` B6, documenting a
    limitation we hit is explicitly rewarded. See file 11.
+
+## 7b. Indexing the filter column is not enough — the optimizer abandons it above ~7%
+
+**Found by Janhavi** on 2026-10-15, reviewing this specification, and independently reproduced here on
+2026-10-21. Her probe is committed as [`probe/selectivity_probe.sql`](probe/selectivity_probe.sql).
+
+Finding 7 concluded that indexing the filter column fixes the problem. That conclusion was drawn from a
+filter matching 1% of rows. Janhavi pointed out that file 03 plans eight categories at roughly **12%** each,
+tested at that selectivity, and found the mitigation does not hold.
+
+Reproduced — 250 of 2,000 rows matching, `category` indexed, three rebuilds:
+
+```
+EXPLAIN, every run:  type: index   key: v   rows: 80   Extra: Using where
+run 1 -> 10 rows      run 2 -> 0 rows      run 3 -> 0 rows
+```
+
+**The optimizer chose the vector index and post-filtered, despite `category` being indexed.** Same silent
+nondeterministic shortfall as finding 7. Janhavi also observed a run returning 10 rows of which *none* were
+in the exact top 10 — the right count, the wrong rows — which is worse than under-returning because no row
+count betrays it.
+
+### Where it flips
+
+Sweeping the selectivity of an equality predicate, three rebuilds at each point:
+
+| matching rows | selectivity | plan chosen | rows returned |
+|---|---|---|---|
+| 20 | 1.0% | `key: category` — pre-filter | 10, 10, 10 |
+| 40 | 2.0% | `key: category` — pre-filter | 10, 10, 10 |
+| 60 | 3.0% | `key: category` — pre-filter | 10, 10, 10 |
+| 80 | 4.0% | `key: category` — pre-filter | 10, 10, 10 |
+| 100 | 5.0% | `key: category` — pre-filter | 10, 10, 10 |
+| 125 | 6.2% | `key: category` — pre-filter | 10, 10, 10 |
+| 166 | 8.3% | **`key: v` — post-filter** | **0, 2, 0** |
+| 200 | 10.0% | **`key: v` — post-filter** | 10, 10, 10 |
+| 250 | 12.5% | **`key: v` — post-filter** | **0, 10, 10** |
+
+**The crossover sits between 6.2% and 8.3%** — call it roughly 7% on this harness. Below it the plan is safe
+and exact. Above it the plan is approximate, post-filtered, and silently unreliable.
+
+Two things ruled out along the way:
+
+- **`ANALYZE TABLE ... PERSISTENT FOR ALL` is not the cause.** Janhavi's probe runs it and this one did not,
+  so it was the obvious suspect. Tested both ways at 12.5%: identical plan, same nondeterministic shortfall.
+- **Range predicates are unaffected.** `WHERE m < 12` returned the full 10 rows at every selectivity from 1%
+  to 50%, with and without `ANALYZE`. The problem is specific to equality predicates crossing the
+  optimizer's threshold.
+
+### The fix: force the index
+
+`FORCE INDEX` on the filter column restores the safe plan deterministically. At 12.5%, four rebuilds:
+
+| | run 1 | run 2 | run 3 | run 4 |
+|---|---|---|---|---|
+| default plan | **0** | **0** | **0** | 10 |
+| `FORCE INDEX (category)` | 10 | 10 | 10 | 10 |
+| `IGNORE INDEX (v)` | 10 | 10 | 10 | 10 |
+| forced result == exhaustive result | yes | yes | yes | yes |
+
+Both forms work and both give results **identical to exhaustive search**, not merely the right row count.
+So a filtered vector query can be made correct, but not by trusting the optimizer — the hint has to be
+written into the query.
+
+### What this changes
+
+1. **Every hybrid query carries an explicit index hint.** File 06's `hybrid_filter.sql` must use
+   `FORCE INDEX`, and the README must explain why rather than leaving a bare hint that looks like
+   superstition.
+2. **Denormalising the filter column is still necessary** — the hint cannot name an index on another table.
+   It is just not sufficient on its own.
+3. **File 03's category sizing is now a correctness constraint, not a presentation choice.** Eight
+   categories at ~12% each sit above the crossover. Either the categories get finer-grained, or the hint
+   does the work. We should do both: finer categories keep us in the safe region, and the hint protects us
+   when a category grows.
+4. **The trade-off is now explicit and worth stating.** The forced plan is exhaustive over the matching
+   subset — exact but linear in the filtered rows, with no HNSW involvement at all. Which means the honest
+   headline for filtered search is that **MariaDB's vector index does not currently serve selective
+   filtered queries well**: you either accept approximate-and-sometimes-empty, or you force an exact scan
+   and the vector index earns nothing. That is a sharper and more useful finding than anything in the
+   original draft, and it came from a teammate's review.
+
+**Credit where it is due.** This is the second time Janhavi's review has caught a wrong assumption of ours —
+the first was the IATA-code join in the starter, which silently inflated 66,770 routes to 76,277 rows. Both
+times the error was a case of testing one convenient point and generalising from it.
 
 ## 8. Minor confirmations
 
@@ -253,8 +343,12 @@ generalise:
 
 - [ ] Reproduce on the real corpus: 384 dimensions, ~12,000 real embeddings
 - [ ] Reproduce with genuinely random vectors, to rule out the patterned-data artifact
-- [ ] Reproduce on MariaDB 11.8 and the current release
+- [x] Reproduce on a third MariaDB version — **Pranesh confirmed finding 7 on 13.0.2**, 2026-10-15
+- [ ] Reproduce on MariaDB 11.8, the minimum version this project supports
 - [ ] Reproduce on Linux, to rule out anything platform-specific
+- [ ] Re-measure the 7b crossover at 384 dimensions — the threshold is likely cost-model dependent and so
+      may sit elsewhere on real data, which matters because file 03's category sizing depends on it
+- [ ] Confirm `FORCE INDEX` still gives exhaustive-equivalent results at 384 dimensions
 - [ ] Search MariaDB's Jira for an existing report before filing — Robert asked for this explicitly
 - [ ] Reduce to the smallest possible reproduction case
 

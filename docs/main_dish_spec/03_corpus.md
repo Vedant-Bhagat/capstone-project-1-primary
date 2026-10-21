@@ -41,6 +41,29 @@ under-return defect bites.
 `birds` and `composers`. If they do, we have a per-category recall table, which is a more honest and more
 interesting result than one global number. If they do not, that is also worth reporting.
 
+### Category size is a correctness constraint, not a presentation choice
+
+Eight categories means each is ~12.5% of the corpus. **That is above the threshold where MariaDB's optimizer
+stops pre-filtering a vector query and starts silently under-returning** — the crossover is around 7%, and
+finding 7b in file 09 has the measurement.
+
+Two independent responses, and we take both:
+
+1. **Force the index in every filtered query** (file 06). This is the real fix and it works regardless of
+   category size.
+2. **Prefer more, smaller categories.** Sixteen categories at ~6% each sit below the crossover, so the safe
+   plan is also the one the optimizer picks unaided. That makes the demo robust for a reader who copies a
+   query without the hint, which is most readers.
+
+Sixteen categories at ~75 articles each is the same total corpus and no more fetching work, so the second
+response is nearly free. The eight above should therefore be treated as the minimum, and splitting them —
+`birds` into `birds` and `flightless_birds`, `physics` into `classical_physics` and `quantum_physics`, and
+so on — is preferred.
+
+The crossover was measured on the 3-dimensional synthetic harness and is likely cost-model dependent, so it
+must be re-measured on the real corpus before the category sizing is considered settled. That check is on
+the verification checklist at the end of file 09.
+
 ## Fetching
 
 Wikipedia's action API, `action=query`. Two calls per category:
