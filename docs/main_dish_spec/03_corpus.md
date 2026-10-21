@@ -99,16 +99,31 @@ the verification checklist at the end of file 09.
 
 ## Fetching
 
-Wikipedia's action API, `action=query`. Two calls per category:
+Wikipedia's action API. Public, no key, rate-limited politely at one request per second with a descriptive
+`User-Agent` as Wikipedia's etiquette requires (both set in `python/config.py`). Every article is fetched
+**by revision id**, never as "the current version":
 
-1. `list=categorymembers` to enumerate article titles in the category.
-2. `prop=extracts&explaintext=1` to pull plain text, **one article per request**. (Originally planned in
-   batches of 20; checked at implementation, the API lowers `exlimit` to 1 for whole-article extracts and
-   only batches intro-only ones. At one request per second, ~1,200 articles is a ~20-minute first fetch,
-   paid once thanks to the `raw/` cache.)
+1. **List each category with sizes and current revids** — `fetch.category_members`, one request per 500
+   members: `generator=categorymembers&prop=info|revisions&rvprop=ids`. This returns each article's
+   `pageid`, `title`, `length` (wikitext bytes, for the cap) and the revid current at listing time, so
+   pinning a revision costs no extra requests.
+2. **Render that exact revision** — `fetch.fetch_article(pageid, revid)`, one article per request:
+   `action=parse&oldid=<revid>&prop=text`. The pageid and revid in the response must match those asked for,
+   or the fetch fails. A revision that has since been deleted or hidden returns `None`; the article is
+   skipped and reported. At one request per second, ~1,300 articles is a ~22-minute first fetch.
+3. **Convert the HTML to plain text** — `python/htmltotext.py`, standard library only. It drops citation
+   markers, edit links, tables, images, navigation boxes, infoboxes, notices and the reference list, keeps
+   maths as its LaTeX source, and writes headings as `== Heading ==` lines for `chunk.py`. Checked on the
+   same revision of Emperor penguin, its output matches the old TextExtracts output sentence for sentence
+   and produces identical chunks.
+4. **Cache by revid** — the rendered HTML, not the converted text, goes to `raw/revisions/<revid>.json`
+   (gitignored), so a converter change costs no re-fetch. A revision's content never changes, so this cache
+   never goes stale.
 
-Both are public, need no key, and are rate-limited politely at one request per second with a descriptive
-`User-Agent` as Wikipedia's etiquette requires.
+**Why not the TextExtracts API.** The first implementation used `prop=extracts&explaintext=1`. Checked
+against the live API, it serves only the current text: asked for an old revision via `revids=`, it returns
+today's article *while still reporting the old revid*, and it has no `oldid` parameter at all. Revision
+pinning was impossible with it, and the reproduction path would have been silently wrong, so it was dropped.
 
 ### Reproducibility — the part that is easy to get wrong
 
@@ -117,21 +132,81 @@ would make every number in our README unreproducible and quietly invalidate the 
 
 Three mitigations, in order of strength:
 
-1. **Record the revision ID of every article fetched** (`prop=revisions&rvprop=ids`) into the `articles`
-   table. The corpus is then exactly identifiable after the fact, and any article can be re-fetched at the
-   precise revision we used via `oldid=`.
-2. **Commit the manifest, not the text.** `corpus_manifest.csv` — title, pageid, revid, category — is a few
-   hundred kilobytes, well inside what a repository should hold, and makes the corpus reproducible without
-   committing the corpus. This is the same move as the starter's OpenFlights step, one degree stronger.
+1. **Fetch and record by revision id.** Every article's revid is stored in `articles.revid` and in the
+   manifest. The corpus is then exactly identifiable after the fact, and every article can be re-rendered at
+   the precise revision we used.
+2. **Commit the manifest, not the text.** `corpus_manifest.csv` (below) is about 200 KB, well inside what a
+   repository should hold, and makes the corpus reproducible without committing it. This is the same move as
+   the starter's OpenFlights step, one degree stronger.
 3. **Cache raw responses to `raw/`**, gitignored. Re-running ingest does not re-fetch, so iteration on
    chunking or embedding costs no network time and no load on Wikipedia's servers.
 
-The README then offers two paths, and says plainly which is which:
+**Known, accepted limitation: templates render as they are today.** Pinning by revid fixes the article's
+own wikitext exactly. But the HTML is rendered at fetch time, and templates called from that wikitext run
+with *today's* template code, not the code current when the revision was saved. The common case is
+`{{convert}}` producing "100 cm (39 in)"; date and number formatting templates are others. So reproducing an
+old corpus gets the same prose, but in rare cases a differently formatted number or phrase, if a template
+itself has changed since. The only exact alternative is converting raw wikitext ourselves, which means
+reimplementing templates: one revision of Emperor penguin alone makes 180 template calls, 51 of them
+`{{convert}}` inside sentences. We judged that not worth it. The manifest's content hash makes any such drift
+**visible** instead of silent.
 
-- `python -m python.ingest` — fetch the current Wikipedia, build a fresh corpus. Our numbers will not
+### The manifest
+
+`corpus_manifest.csv` at the repository root, committed. It lists exactly the articles stored in the
+`articles` table: the resolved list after the cap, the overlap rule, and any skipped revisions.
+
+| Column | Example | Meaning |
+|---|---|---|
+| `category` | `birds` | Category key from `config.CATEGORIES` |
+| `pageid` | `223204` | Wikipedia page id |
+| `revid` | `1377089235` | The exact revision rendered |
+| `title` | `Emperor penguin` | Title at fetch time. It is part of the embedded text (`04_chunking_embedding.md`), so reproduction uses this, not the page's current title |
+| `fetched_at` | `2026-10-21T14:05:09Z` | UTC time the revision's HTML was first fetched, stored in its `raw/revisions/` cache record |
+| `text_sha256` | `9f86d0…` (64 hex) | SHA-256 of the converted plain text, UTF-8 encoded: the exact input to `chunk.py` |
+
+Format: UTF-8, a header row, Python `csv` default quoting (titles can contain commas and quotes), rows
+ordered by config category order and then `pageid`, so two manifests of the same corpus diff cleanly. The
+file is written atomically (temp file, then rename).
+
+**Why a content hash.** The revid pins the source; the hash verifies the result. It costs one SHA-256 per
+article, and it is the only way a reproduction can say whether it actually matched instead of assuming it.
+It hashes the plain text rather than the HTML because the text is what reaches chunking and embedding; a
+markup-only difference that changes no text should not count as a mismatch. The hash also depends on
+`htmltotext.py`, so a converter change shifts hashes even for identical HTML. That is correct, since the
+chunks would change too. Because the manifest is committed with the code that produced it, git history
+shows which converter version a hash belongs to.
+
+**Mode 1: fresh corpus** (`python -m python.ingest`, no manifest given):
+
+1. `select_articles()`, which lists each category in config order and applies the cap and the overlap rule.
+2. `fetch_article(pageid, revid)` for each selected article; skip and report any that return `None`.
+3. Chunk, embed and store.
+4. Only after the database writes succeed, write `corpus_manifest.csv`, replacing any existing one, with one
+   row per stored article. A fresh manifest is committed when results from that corpus are published,
+   together with them.
+
+**Mode 2: reproduction** (`python -m python.ingest --manifest corpus_manifest.csv`):
+
+1. Read the manifest. **Skip `category_members` and `select_articles` entirely.** The manifest already is
+   the resolved article list, and re-running the selection today would pick different articles.
+2. For each row, `fetch_article(pageid, revid)`, taking `category` and `title` from the row, not from the
+   API.
+3. Compare the SHA-256 of the converted text with `text_sha256`. A mismatch is a warning, not an error,
+   since the template limitation above makes it occasionally expected. The article is still ingested. A
+   revision that is gone is a warning too, and that article is skipped.
+4. Never write the manifest. End with a summary line: `N of M articles identical, K differ, J unavailable`,
+   listing the titles in the last two groups. All identical means the text going into chunking was
+   reproduced exactly. Chunking is deterministic from there; embedding is too for a pinned model, up to
+   floating-point differences across hardware or library versions, so recall numbers can still move very
+   slightly.
+
+The README then offers both modes, and says plainly which is which:
+
+- `python -m python.ingest` builds a fresh corpus from the current Wikipedia. Our numbers will not
   reproduce exactly, and that is expected.
-- `python -m python.ingest --manifest corpus_manifest.csv` — fetch the exact revisions we used. Our numbers
-  should reproduce.
+- `python -m python.ingest --manifest corpus_manifest.csv` renders the exact revisions we used. Our numbers
+  should reproduce, and the summary line says how closely.
 
 Offering only the first would make the results unverifiable. Offering only the second would make the
 project a museum piece. Both, clearly labelled, is the honest answer.
