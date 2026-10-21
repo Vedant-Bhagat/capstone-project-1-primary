@@ -40,7 +40,7 @@ In PowerShell `<` does not redirect — use `Get-Content sql/schema.sql | mariad
 
 For a fast run, `CALL load_fixture(200);` instead of re-running `fixture.sql`.
 
-**What the fixture is and is not.** 2,000 chunks, 16 categories at ~6% each, 384-dimension vectors that are
+**What the fixture is and is not.** 2,000 chunks, the real corpus's 9 categories at ~11% each, 384-dimension vectors that are
 deterministic and loosely clustered per category, with real words in `body` so `FULLTEXT` works. It exercises
 schema, query syntax and the measurement harness. **Any retrieval-quality number from it is meaningless** —
 the vectors are synthetic. It exists so A and C can work in parallel, and it gets replaced by A's real

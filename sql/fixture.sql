@@ -6,8 +6,11 @@
 --       mariadb -u root < sql/fixture.sql
 --   PowerShell:  Get-Content sql/fixture.sql | mariadb -u root
 --
--- Default 2000 chunks across 16 categories (6.25% each, below the ~7%
--- optimizer crossover in docs/main_dish_spec/09_verified_findings.md 7b).
+-- Default 2000 chunks across the same 9 categories as the real corpus
+-- (03_corpus.md), so each is ~11% of the table -- deliberately ABOVE the ~7%
+-- optimizer crossover in docs/main_dish_spec/09_verified_findings.md 7b, which
+-- is the regime the real corpus is in. A filtered query measured here without
+-- FORCE INDEX will under-return, and that is correct behaviour to reproduce.
 -- For a fast CI run:  CALL load_fixture(200);
 --
 -- shortcut: the vectors are synthetic and only loosely clustered by category,
@@ -28,11 +31,12 @@ RETURNS TEXT DETERMINISTIC
 BEGIN
     DECLARE s TEXT DEFAULT '';
     DECLARE j INT DEFAULT 0;
-    DECLARE lo INT DEFAULT p_cat * 24;
+    DECLARE lo INT DEFAULT p_cat * 42;
     DECLARE v DOUBLE;
     WHILE j < p_dims DO
-        -- 24 dimensions per category sit high; the rest is noise.
-        SET v = IF(j >= lo AND j < lo + 24, 1.0, 0.0)
+        -- 42 dimensions per category sit high; the rest is noise. 9 * 42 = 378,
+        -- so the clusters span nearly the whole vector rather than its head.
+        SET v = IF(j >= lo AND j < lo + 42, 1.0, 0.0)
                 + (RAND(p_seed * 1000 + j) * 0.4 - 0.2);
         SET s = CONCAT(s, IF(j = 0, '', ','), ROUND(v, 4));
         SET j = j + 1;
@@ -70,11 +74,10 @@ BEGIN
     -- Articles
     SET i = 0;
     WHILE i < n_art DO
-        SET c   = i MOD 16;
-        SET cat = ELT(c + 1, 'birds','flightless_birds','classical_physics',
-                      'quantum_physics','composers','conductors','prog_lang',
-                      'compilers','spaceflight','satellites','diseases',
-                      'vaccines','philosophy','ethics','architecture','bridges');
+        SET c   = i MOD 9;
+        SET cat = ELT(c + 1, 'birds','physics','composers','prog_lang',
+                      'space_telescopes','diseases','political_philosophy',
+                      'ethics','architecture');
         INSERT INTO articles (pageid, revid, title, url, category, word_count)
         VALUES (100000 + i, 900000000 + i,
                 CONCAT(cat, ' article ', i),
@@ -88,12 +91,10 @@ BEGIN
     WHILE i < p_chunks DO
         SET art = (i MOD n_art) + 1;
         SELECT a.category INTO cat FROM articles a WHERE a.id = art;
-        SET c   = (art - 1) MOD 16;
-        SET nxt = ELT(((c + 1) MOD 16) + 1, 'birds','flightless_birds',
-                      'classical_physics','quantum_physics','composers',
-                      'conductors','prog_lang','compilers','spaceflight',
-                      'satellites','diseases','vaccines','philosophy','ethics',
-                      'architecture','bridges');
+        SET c   = (art - 1) MOD 9;
+        SET nxt = ELT(((c + 1) MOD 9) + 1, 'birds','physics','composers',
+                      'prog_lang','space_telescopes','diseases',
+                      'political_philosophy','ethics','architecture');
         INSERT INTO chunks (article_id, section, ordinal, body, word_count,
                             category, embedding)
         VALUES (art,
@@ -115,7 +116,7 @@ BEGIN
     -- A few evaluation queries, one per category centre, so component C has
     -- something to measure against immediately.
     SET i = 0;
-    WHILE i < 16 DO
+    WHILE i < 9 DO
         INSERT INTO eval_queries (query_text, embedding)
         VALUES (CONCAT('fixture probe for category ', i),
                 VEC_FromText(fixture_vec(i, 500000 + i, 384)));
