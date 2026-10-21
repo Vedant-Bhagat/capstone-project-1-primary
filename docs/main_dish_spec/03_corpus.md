@@ -14,21 +14,51 @@ So the corpus is not sampled randomly — it is sampled **by category, deliberat
 
 ## Design: a category-stratified sample
 
-Fetch roughly 150 articles from each of eight Wikipedia categories:
+Fetch up to 150 articles from each of nine Wikipedia categories, in this order:
 
-| Category key | Wikipedia category | Why it is in the set |
-|---|---|---|
-| `birds` | Birds | Dense, factual, and gives the flightless-bird example that makes semantic search obvious to a non-technical reader |
-| `physics` | Concepts in physics | Abstract language; hard for literal search, easy for semantic |
-| `composers` | Classical composers | Biographical, lots of dates and places — good for hybrid date filters |
-| `prog_lang` | Programming languages | Technical vocabulary that overlaps heavily between articles; a stress test for retrieval precision |
-| `spaceflight` | Human spaceflight | Narrative and chronological |
-| `diseases` | Infectious diseases | Terminology-heavy; where an embedding model's domain coverage shows |
-| `philosophy` | Philosophical concepts | Deliberately the fuzziest category in the set |
-| `architecture` | Architectural styles | Visual and descriptive language |
+| Category key | Wikipedia category | Articles (live, 2026-10-21) | Fetched | Why it is in the set |
+|---|---|---|---|---|
+| `birds` | Birds described in 1758 | 463 | 150 | Dense, factual, and includes the flightless birds (penguins, ostrich) whose example makes semantic search obvious to a non-technical reader |
+| `physics` | Concepts in physics | 113 | 113 | Abstract language; hard for literal search, easy for semantic |
+| `composers` | Composers for piano | 458 | 150 | Biographical, lots of dates and places — good for hybrid date filters |
+| `prog_lang` | Programming languages | 175 | 150 | Technical vocabulary that overlaps heavily between articles; a stress test for retrieval precision |
+| `space_telescopes` | Space telescopes | 138 | 138 | Narrative and chronological |
+| `diseases` | Infectious diseases | 144 | 144 | Terminology-heavy; where an embedding model's domain coverage shows |
+| `political_philosophy` | Concepts in political philosophy | 248 | 150 | Abstract and contested vocabulary; with `ethics`, the fuzziest part of the set |
+| `ethics` | Concepts in ethics | 178 | 150 | Close neighbour of `political_philosophy`, so the retriever has a real chance to confuse the two |
+| `architecture` | Architectural styles | 197 | 150 | Visual and descriptive language |
 
-Eight categories at ~150 articles each is ~1,200 articles, clearing B1 with margin for articles that fail to
-fetch or turn out to be stubs.
+"Articles" counts pages directly in the category (subcategories are not followed), excluding
+List/Lists/Outline/Index/Glossary/Timeline pages, as returned by `list=categorymembers` on the date shown.
+They will drift as Wikipedia changes; the manifest records what was actually used.
+
+Nine categories capped at 150 is ~1,295 articles, clearing B1 with margin for articles that fail to fetch or
+produce no chunk above the minimum size.
+
+**Why these categories and not the original eight.** The first draft named Birds, Classical composers,
+Human spaceflight and Philosophical concepts. Measured live, they hold 28, 22, 85 and 5 articles directly,
+too few to sample from. Each was replaced by a topically similar category rather than by crawling
+subcategories, which would have pulled in loosely related pages. Philosophy became two categories, since no
+single one was both large enough and coherent. Space Shuttle missions (137 articles) was rejected for
+spaceflight because its near-identical "STS-xx" articles make a poor semantic-search test.
+
+### Fetch cap: 150 per category, longest first
+
+When a category has more than 150 eligible articles, take the **150 with the largest source size** (`length`
+from `prop=info`, in bytes of wikitext), breaking ties by lower `pageid`. Longest-first favours substantial
+articles over stubs, which produce one short chunk or none. Source size is measured at fetch time, so a
+fresh fetch may pick a slightly different 150; the manifest pins the selection that was actually used.
+
+### Overlap rule: first category in config order wins
+
+An article can sit in more than one chosen category (e.g. `political_philosophy` and `ethics` share 16
+articles), but the schema gives each article exactly one `category`. So it is assigned to the **first**
+category in config order that contains it, and is never stored twice or counted twice.
+
+- **The order** is the order of the category list in `python/config.py`, which matches the table above.
+- **The assignment** happens in `fetch.py`: categories are processed in that order, an article already
+  assigned to an earlier category is skipped, and the 150-article cap is applied *after* skipping. A later
+  category therefore still gets its full 150 if it has enough articles left.
 
 **Why eight and not one.** A single-topic corpus makes retrieval look better than it is: if everything is
 about birds, any bird-related chunk is a plausible hit and precision is unmeasurable. Multiple distinct
