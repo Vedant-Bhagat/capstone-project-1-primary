@@ -1,0 +1,36 @@
+# OS
+Thumbs.db
+.DS_Store
+
+# Editors
+.vscode/
+.idea/
+
+# MariaDB local data/logs (don't commit database files)
+*.err
+*.pid
+data/
+
+# Env/secrets -- the answering model's API key lives here
+.env
+
+# Course PDFs kept local only -- this repo goes public, and these are the
+# professor's course materials, not ours to redistribute.
+todo_cp_01.pdf
+todo_cp_02.pdf
+team_guide.pdf
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Fetched corpus -- NOT committed. The corpus is reproduced from
+# corpus_manifest.csv by a documented step; see docs/main_dish_spec/03_corpus.md.
+raw/
+embeddings/
+*.npy
+
+# Downloaded embedding model weights
+models/
