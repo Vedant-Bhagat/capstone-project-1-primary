@@ -1,0 +1,55 @@
+id,query_text,intended_category
+1,Which birds were first given scientific names by Linnaeus in 1758?,birds
+2,How do owls manage to hunt silently at night?,birds
+3,Why do some songbirds migrate thousands of kilometres every year?,birds
+4,What does a woodpecker eat and how does it find food inside trees?,birds
+5,How do swans and geese choose a mate and raise their young?,birds
+6,Which European birds of prey nest on cliffs?,birds
+7,Why does time pass more slowly for an object moving close to the speed of light?,physics
+8,What is the difference between mass and weight?,physics
+9,How does a particle tunnel through a barrier it does not have the energy to cross?,physics
+10,Why can energy never be created or destroyed?,physics
+11,What happens to entropy in an isolated system over time?,physics
+12,How do waves interfere to produce bright and dark bands?,physics
+13,Which composers wrote études to train a pianist's technique?,composers
+14,Who wrote nocturnes for solo piano in the nineteenth century?,composers
+15,Which piano composers were also famous touring virtuosos?,composers
+16,How did Romantic composers change the form of the piano sonata?,composers
+17,Which twentieth-century composers wrote for prepared piano?,composers
+18,Who composed piano music inspired by national folk dances?,composers
+19,Which programming language was designed for teaching structured programming?,prog_lang
+20,What is the difference between a compiled and an interpreted language?,prog_lang
+21,Which languages manage memory automatically with garbage collection?,prog_lang
+22,What is a functional programming language and why avoid mutable state?,prog_lang
+23,Which language was created for numerical and scientific computing in the 1950s?,prog_lang
+24,How does static typing catch errors before a program runs?,prog_lang
+25,Why are telescopes placed in orbit instead of on the ground?,space_telescopes
+26,Which space observatory detects infrared light from the earliest galaxies?,space_telescopes
+27,How was the blurred mirror of an orbiting telescope repaired by astronauts?,space_telescopes
+28,Which satellites observe X-rays from black holes and neutron stars?,space_telescopes
+29,Where is a telescope parked at a Lagrange point and why?,space_telescopes
+30,How do astronomers find planets orbiting other stars from space?,space_telescopes
+31,How is malaria transmitted from one person to another?,diseases
+32,Why do antibiotics not work against viral infections?,diseases
+33,Which disease was eradicated worldwide through vaccination?,diseases
+34,How does tuberculosis damage the lungs?,diseases
+35,What causes cholera outbreaks after floods?,diseases
+36,How do mosquito-borne viruses spread to new regions?,diseases
+37,What gives a government the right to rule over its citizens?,political_philosophy
+38,What is the social contract between people and the state?,political_philosophy
+39,How does a separation of powers prevent tyranny?,political_philosophy
+40,What is the difference between liberty from interference and liberty to act?,political_philosophy
+41,Why do some thinkers argue property is a natural right?,political_philosophy
+42,What does it mean for a society to be just?,political_philosophy
+43,Is an action right if it produces the greatest happiness for the greatest number?,ethics
+44,What is the difference between doing harm and allowing harm to happen?,ethics
+45,Can lying ever be morally acceptable?,ethics
+46,What are virtues and how does a person acquire them?,ethics
+47,Do we have moral duties toward animals?,ethics
+48,Is morality relative to culture or the same everywhere?,ethics
+49,What are the features of Gothic cathedrals such as pointed arches and flying buttresses?,architecture
+50,Why did modernist architects reject ornament?,architecture
+51,How did Roman architecture use the arch and concrete domes?,architecture
+52,What distinguishes Baroque buildings from Renaissance ones?,architecture
+53,Which architectural style is known for steel frames and glass curtain walls?,architecture
+54,What is Brutalist architecture and why was it built with raw concrete?,architecture
