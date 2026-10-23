@@ -1,0 +1,123 @@
+name: Schema, retrieval and evaluation
+
+# Builds the schema on a clean MariaDB, loads the synthetic fixture, runs
+# every retrieval query, builds the ground truth, runs a short recall sweep,
+# and runs the tests that gate the build (T1-T10).
+#
+# Spec: docs/main_dish_spec/07_evaluation.md, "Tests that gate CI" and
+# "CI corpus".
+#
+# Version matrix: 11.8 is the first LTS with the VECTOR type, 12.3 is what the
+# team develops on, and `latest` tracks the current release. 11.4 -- in the
+# starter's matrix -- is deliberately absent: it predates VECTOR.
+#
+# Every SQL file is run with the client INSIDE the server container, so the
+# client always matches the server version. Ubuntu's packaged mariadb-client
+# is older than the VECTOR type.
+#
+# CORPUS. CI uses sql/fixture.sql (2,000 synthetic chunks, ~13 s), not the
+# real ingest -- fast, deterministic, and no load on Wikipedia. Its retrieval
+# quality numbers mean nothing (see fixture.sql); CI checks the harness and
+# the invariants, not the headline result. T5 (recall@10 >= 0.98) needs the
+# real corpus and is skipped here; the full-corpus run lands with component
+# A's ingest.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        mariadb: ['11.8', '12.3', 'latest']
+
+    services:
+      mariadb:
+        image: mariadb:${{ matrix.mariadb }}
+        env:
+          MARIADB_ROOT_PASSWORD: ci-root-password
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # The `job` context is only available inside steps, not in a job-level
+      # env block, so the container id is resolved here and exported.
+      - name: Point the client at the server container
+        run: echo "DB=docker exec -i -e MYSQL_PWD=ci-root-password ${{ job.services.mariadb.id }} mariadb -u root" >> "$GITHUB_ENV"
+
+      - name: Report server version
+        run: $DB -e "SELECT VERSION();"
+
+      - name: Create the schema
+        run: $DB < sql/schema.sql
+
+      - name: Load the fixture corpus
+        run: $DB -t < sql/fixture.sql
+
+      - name: Run the retrieval queries
+        run: |
+          for script in sql/retrieval/semantic.sql sql/retrieval/hybrid_filter.sql \
+                        sql/retrieval/hybrid_fulltext.sql sql/retrieval/under_return.sql; do
+            echo "::group::$script"
+            $DB -t < "$script"
+            echo "::endgroup::"
+          done
+
+      - name: Build the ground truth
+        run: $DB -t < sql/evaluation/ground_truth.sql
+
+      - name: Recall sweep (3 repetitions -- a harness check, not a measurement)
+        run: |
+          { echo "SET @reps = 3;"; cat sql/evaluation/recall_sweep.sql; } | $DB -t
+
+      - name: SQL tests (T1-T7, T10)
+        run: $DB -t < sql/evaluation/tests.sql
+
+      # T8: semantic search must use the vector index. A plan regression would
+      # quietly turn every query into a full table scan and still return
+      # correct rows, so only the plan can catch it. Column 6 of EXPLAIN is
+      # `key`.
+      - name: T8 -- semantic search uses the vector index
+        run: |
+          key=$($DB -N wikirag -e "
+            SET @q = (SELECT embedding FROM eval_queries WHERE id = 1);
+            EXPLAIN SELECT c.id FROM chunks c
+                    ORDER BY VEC_DISTANCE_COSINE(c.embedding, @q) LIMIT 10;" | awk -F'\t' '{print $6}')
+          echo "EXPLAIN key: $key"
+          if [ "$key" != "embedding" ]; then
+            echo "::error::T8 FAIL: expected key 'embedding', got '$key'"
+            exit 1
+          fi
+          echo "T8 PASS"
+
+      # T9: every committed hybrid query that filters on category keeps its
+      # FORCE INDEX. Without the hint, a filter above ~7% selectivity can
+      # silently return too few rows (09_verified_findings.md, 7b), and
+      # "tidying" it away would reintroduce that with no error anywhere.
+      - name: T9 -- hybrid queries keep FORCE INDEX
+        run: |
+          fail=0
+          for f in sql/retrieval/hybrid_*.sql; do
+            if grep -qiE "category[[:space:]]*=" "$f"; then
+              if grep -q "FORCE INDEX (ix_category)" "$f"; then
+                echo "PASS: $f"
+              else
+                echo "::error file=$f::T9 FAIL: filters on category without FORCE INDEX (ix_category)"
+                fail=1
+              fi
+            else
+              echo "n/a:  $f (no category filter)"
+            fi
+          done
+          exit $fail
