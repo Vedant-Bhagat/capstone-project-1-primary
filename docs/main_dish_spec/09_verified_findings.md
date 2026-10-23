@@ -302,41 +302,65 @@ written into the query.
    and the vector index earns nothing. That is a sharper and more useful finding than anything in the
    original draft, and it came from a teammate's review.
 
-### 7c. At 384 dimensions it does not reproduce
+### 7c. A false negative at 384 dimensions, and what it was hiding — *withdrawn 2026-10-22*
 
-Checked 2026-10-21 against the real schema and a 2,000-chunk fixture of 384-dimension vectors
-(`sql/fixture.sql`), using `sql/retrieval/under_return.sql`. **Every configuration returned the full 10
-rows:**
+**This finding originally recorded a non-reproduction at 384 dimensions. That was wrong, and the error was
+ours, not the server's.** It is kept here rather than deleted, because how we got it wrong is the useful
+part.
 
-| scenario | filter | selectivity | plan | returned |
+The original test used a 16-category fixture and reported that every configuration returned the full 10
+rows. Two of its three scenarios filtered on the same category the query vector pointed at, and the third
+(`body LIKE '%compilers passage%'`) used clusters packed into the first 168 of 384 dimensions, too weakly
+separated to starve the graph walk. All three were easy cases wearing the costume of hard ones.
+
+Rebuilding the fixture on component A's real nine categories — which Pranesh's review prompted — made the
+test real. Re-measured 2026-10-22, same server, same schema, 2,000 chunks of 384-dimension vectors:
+
+| scenario | filter | selectivity | direction vs query | returned |
 |---|---|---|---|---|
-| A | `category` (indexed) | 6.4% | btree pre-filter | 10 of 10 |
-| B | `section` (unindexed) | 12.5% | vector index, post-filter | 10 of 10 |
-| C | `body LIKE` (unindexed), selecting only rows **far** from the query | 6.4% | vector index, post-filter | 10 of 10 |
+| A | `category` (indexed) | 11.2% | **toward** | 10 of 10 |
+| B | `section` (unindexed) | 12.5% | uncorrelated | 10 of 10 |
+| C | `body LIKE` (unindexed) | 10.8% | **away** | **0 of 10** |
+| D | `category` (**indexed**) | 10.8% | **away** | **0 of 10** |
+| E | as D, `mhnsw_ef_search` 50 / 500 / 2000 | 10.8% | away | **0, 0, 0** |
+| F | as D, with `FORCE INDEX (ix_category)` | 10.8% | away | 10 of 10, identical to exhaustive |
 
-C is the worst case for post-filtering by construction — the graph walk heads toward `birds` while the
-predicate keeps only `compilers` — and it still came back full. The forced plan was also confirmed
-identical to exhaustive search.
+A and D are the controlled pair: same column, same index, same selectivity to within half a point. Only the
+direction of the predicate relative to the query differs. One returns everything, the other nothing.
+D held at 0 across **four consecutive index rebuilds**, so unlike finding 7 this is deterministic.
 
-**So the shortfall is not established as general MariaDB behaviour.** It is real and reproducible at 3
-dimensions, and absent at 384 on this data. The most likely explanation is that a 3-dimensional HNSW graph
-over 2,000 points is degenerate — `m = 6` neighbours cannot navigate a space that crowded — but that is a
-hypothesis we have not tested.
+**What the variable actually is.** Not dimensionality, and not selectivity — both were held constant between
+A and D. It is whether the predicate selects rows the graph walk would visit anyway. Post-filtering explores
+the neighbourhood of the query and discards what fails the predicate; when the predicate keeps only distant
+rows, every candidate it finds is discarded and it returns an empty set rather than widening its search.
+
+**`mhnsw_ef_search` does not mitigate it (E).** At 2000 — larger than the entire table — the result is still
+zero. This matters for file 07: the shortfall is *not* a point on a recall/latency curve, and no setting on
+that curve recovers the missing rows. Any recall harness that treats `ef_search` as the remedy will measure
+the wrong thing.
 
 What this changes:
 
-- **The README must not present the shortfall as a MariaDB defect**, only as behaviour observed at low
-  dimensionality. Corrected.
-- **Filing a Jira issue is off the table for now.** A report that does not reproduce at a realistic
-  dimensionality would cost us more credibility than the finding is worth (risk R10).
-- **`FORCE INDEX` stays** in `hybrid_filter.sql`. It costs nothing, it buys a guaranteed exact plan rather
-  than a cost estimate, and the behaviour it defends against was genuinely observed.
-- **The honest headline survives intact**, because it never depended on the shortfall: a filtered vector
-  query is served by the *relational* index, exhaustively, with the vector index contributing nothing. That
-  is a real limitation of the feature and it is measurable regardless.
+- **`FORCE INDEX` is promoted from prudence to load-bearing.** It was previously justified as costing
+  nothing and buying a guaranteed plan. It is now the only known mitigation, and the one the real corpus
+  depends on, because nine categories put every filter above the 7% crossover (file 03).
+- **Filing a Jira issue is back on the table**, gated on the checklist below. The blocker was always that it
+  did not reproduce at realistic dimensionality; that blocker is gone.
+- **The honest headline is unchanged and better supported.** A filtered vector query is either exact via the
+  relational index with the vector index contributing nothing, or approximate-and-sometimes-empty. We can
+  now show the "sometimes empty" half at 384 dimensions.
 
-The remaining open question is real embeddings. Synthetic clustered vectors are not real ones, and
-component A's output is what finally settles this.
+**Still synthetic.** These clusters are near-orthogonal blocks of 42 dimensions, a harsher geometry than real
+embeddings produce — real BGE vectors for *architecture* and *birds* are far apart but not orthogonal. So the
+mechanism is demonstrated at realistic dimensionality; whether real embeddings separate enough to trigger it
+is component A's measurement to make.
+
+**The process lesson, which is the reason this section was not simply overwritten.** 7c was a negative result
+that we published honestly and that happened to be false. Publishing it was still right — it was what the
+evidence showed. What made it wrong was a test whose three scenarios were correlated with the query by
+accident, and nothing in the result itself revealed that. A non-reproduction is only as strong as the
+hardest case you actually constructed, and ours were soft. The fix came from an unrelated review comment
+about category *names*.
 
 **Credit where it is due.** This is the second time Janhavi's review has caught a wrong assumption of ours —
 the first was the IATA-code join in the starter, which silently inflated 66,770 routes to 76,277 rows. Both
@@ -377,15 +401,22 @@ generalise:
 
 ### Required before finding 7 goes in a public README or a bug report
 
-- [~] 384 dimensions — **checked on a synthetic 2,000-chunk fixture: did NOT reproduce** (7c). Still
-      open for ~12,000 *real* embeddings from component A
-- [ ] Reproduce with genuinely random vectors, to rule out the patterned-data artifact
+- [x] 384 dimensions — **reproduced 2026-10-22**, deterministically across four index rebuilds, on a
+      synthetic 2,000-chunk fixture using the real nine categories (7c). The earlier non-reproduction was
+      a false negative from correlated test filters
+- [x] Confirm `FORCE INDEX` still gives exhaustive-equivalent results at 384 dimensions — **yes**, 10 of 10
+      and byte-identical to `IGNORE INDEX (embedding)` (7c scenario F)
+- [x] Establish whether `mhnsw_ef_search` mitigates it — **it does not**, at any value up to the table size
+      (7c scenario E). This is the strongest part of the finding and was not previously tested
 - [x] Reproduce on a third MariaDB version — **Pranesh confirmed finding 7 on 13.0.2**, 2026-10-15
+- [ ] **Reproduce on real embeddings** — the one that decides whether this is reportable. The fixture's
+      clusters are near-orthogonal; real BGE vectors are not. Component A, blocking
+- [ ] Reproduce with genuinely random vectors, to rule out the patterned-data artifact
 - [ ] Reproduce on MariaDB 11.8, the minimum version this project supports
 - [ ] Reproduce on Linux, to rule out anything platform-specific
-- [ ] Re-measure the 7b crossover at 384 dimensions — the threshold is likely cost-model dependent and so
-      may sit elsewhere on real data, which matters because file 03's category sizing depends on it
-- [ ] Confirm `FORCE INDEX` still gives exhaustive-equivalent results at 384 dimensions
+- [ ] Re-measure the 7b crossover at 384 dimensions — the plan flip reproduces (7c scenario A chooses the
+      vector index at 11.2%), but the threshold itself has not been swept at 384 dims, and file 03's
+      category sizing depends on where it sits
 - [ ] Search MariaDB's Jira for an existing report before filing — Robert asked for this explicitly
 - [ ] Reduce to the smallest possible reproduction case
 

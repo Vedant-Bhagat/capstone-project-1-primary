@@ -149,17 +149,40 @@ reasoning is in [`05_schema.md`](docs/main_dish_spec/05_schema.md) and the measu
 Credit: Janhavi found this reviewing the specification, and it is the second time her review has caught us
 generalising from one convenient test — the first was an IATA-code join in the starter that silently
 inflated 66,770 routes to 76,277 rows. Pranesh independently reproduced the original defect on MariaDB
-13.0.2, confirming it on a third version.
+13.0.2, confirming it on a third version — and a review note of his about category naming is what exposed
+the false negative described next.
 
-**This is not a claim about MariaDB in general — and we have since narrowed it ourselves.** It was observed
-on 12.3.3 on Windows with 3-dimensional synthetic vectors. Re-checked at **384 dimensions** against the real
-schema and a 2,000-chunk fixture, **it did not reproduce**: every configuration returned the full 10 rows,
-including a filter deliberately selecting only rows far from the query. So the shortfall is low-dimensional
-behaviour on current evidence, not a defect we are prepared to report, and whether it affects real
-embeddings is still open (finding 7c). There is a six-item verification checklist at the end of
-[`09_verified_findings.md`](docs/main_dish_spec/09_verified_findings.md) — reproduce at 384 dimensions on
-real embeddings, with genuinely random vectors, on 11.8 and the current release, on Linux, and search
-MariaDB's Jira for duplicates — which gates it before it goes anywhere public.
+### What actually governs it is the direction of the filter, not the dimensionality
+
+We first re-checked this at **384 dimensions** and recorded that it did not reproduce. **That was a false
+negative, and we found it ourselves two days later.** Two of the three test scenarios had filtered on the
+same category the query vector pointed at — easy cases that looked like hard ones. Rebuilding the fixture on
+the real nine-category corpus made the test honest, and the result inverted:
+
+| | filter | selectivity | points | returned |
+|---|---|---|---|---|
+| A | `category`, indexed | 11.2% | **toward** the query | 10 of 10 |
+| D | `category`, indexed | 10.8% | **away** from it | **0 of 10** |
+| E | as D, at `mhnsw_ef_search` 50 / 500 / 2000 | 10.8% | away | **0, 0, 0** |
+| F | as D, with `FORCE INDEX (ix_category)` | 10.8% | away | 10 of 10, equal to exhaustive |
+
+A and D are a controlled pair — same column, same index, same selectivity to within half a point. Only the
+direction differs. D returned nothing across four consecutive index rebuilds, so unlike the 3-dimensional
+case this is deterministic.
+
+The mechanism follows: post-filtering explores the graph near the query and discards rows failing the
+predicate. When the predicate keeps only distant rows, every candidate is discarded and the query returns an
+empty set rather than widening its search.
+
+**`mhnsw_ef_search` does not mitigate it.** At 2000 — more than the entire table — the answer is still zero.
+That is the part with teeth: this is not a point on a recall/latency curve that tuning can move. `FORCE
+INDEX` is the only mitigation we have found, which makes it load-bearing rather than merely prudent, because
+nine categories put every filter in our corpus above the 7% crossover.
+
+**It is still synthetic.** The fixture's clusters are near-orthogonal; real embeddings are not. Reproducing
+this on real BGE vectors is the open item that decides whether it gets reported, and the checklist at the end
+of [`09_verified_findings.md`](docs/main_dish_spec/09_verified_findings.md) gates it — real embeddings,
+genuinely random vectors, 11.8 and the current release, Linux, and a search of MariaDB's Jira for duplicates.
 
 ## Repository layout
 

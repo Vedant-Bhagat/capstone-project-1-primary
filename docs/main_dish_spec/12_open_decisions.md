@@ -70,8 +70,18 @@ Not urgent — M4 is late, and nothing before it depends on the answer.
 Gated on the file-09 checklist. The decision is not "is it a bug" but "have we verified it enough to put our
 names on it", and R10 is the reason that distinction matters.
 
+**Status changed 2026-10-22.** This was off the table while finding 7c recorded a non-reproduction at 384
+dimensions. 7c was withdrawn as a false negative: the defect reproduces at 384 dimensions, deterministically,
+and `mhnsw_ef_search` does not mitigate it at any value. Four checklist items are now ticked. **Real
+embeddings are the single remaining blocker**, and they are component A's output, so this decision becomes
+answerable at M2 rather than M6.
+
+One caution against our own enthusiasm: we have now been wrong about this finding in both directions inside
+48 hours. The next move is one careful measurement on real vectors, not a report.
+
 If it verifies: file it, and the Jira link goes in the README and every self-assessment. If it does not:
-`docs/limitations.md` records what we saw and why it did not generalise, which is still a result.
+`docs/limitations.md` records that it reproduces on near-orthogonal synthetic clusters and not on real
+embeddings, which locates the boundary and is a better result than either outcome alone.
 
 ## D7 — Whether to switch to the fallback *(team, end of M2)*
 

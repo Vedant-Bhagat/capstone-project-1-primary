@@ -154,11 +154,19 @@ SELECT COUNT(*) AS rows_returned FROM (
 ) t;
 ```
 
-Alongside it, the corrected form filtering on the indexed `chunks.category`, returning the full 10 every
-time. Side by side, with `EXPLAIN` for both, the behaviour is self-explanatory and the schema decision in
-file 05 justifies itself.
+Alongside it, the same query with `FORCE INDEX (ix_category)` on the denormalised `chunks.category`,
+returning the full 10 every time and identically to exhaustive search. Side by side, with `EXPLAIN` for both,
+the behaviour is self-explanatory and the schema decision in file 05 justifies itself.
 
-See file 09 for the measured numbers, including the non-monotonic behaviour across `ef_search`.
+**Moving the filter onto the indexed column is not by itself the fix** — this is the correction of 2026-10-22
+and the script demonstrates it in scenario D. An indexed `chunks.category` predicate at ~11% selectivity
+still returns 0 of 10 when it selects rows *away* from the query, because above the ~7% crossover the
+optimizer post-filters through the vector index regardless of the btree being available. Two things are
+needed together: the column denormalised onto `chunks` (file 05) **and** `FORCE INDEX` naming it (section 3
+above). Either alone is insufficient.
+
+And `ef_search` is not a third option: at 2000, larger than the whole table, the shortfall is unchanged.
+See file 09 finding 7c for the measurements.
 
 ## 5. The `ef_search` dial
 

@@ -117,6 +117,10 @@ table already exists in `schema.sql`, so nothing blocks you.
   `STDDEV_SAMP`, and state the hardware. A single timing is not a measurement.
 - **`mhnsw_ef_search` must be set explicitly in every measurement.** Inheriting the default silently makes
   the results depend on server config instead of on stated parameters.
+- **Do not treat `ef_search` as the remedy for the under-return.** Finding 7c measured it at 50, 500 and
+  2000 — more than the whole table — and the shortfall stayed at 0 of 10. Recall and the under-return are
+  two different axes, and a sweep that conflates them reports a tuning problem where there is a correctness
+  one. Report `returned` alongside `hits` at every point, which is what separates them.
 
 **The deliverable is a curve, not a number:** the smallest `ef_search` at which recall@10 ≥ 0.98, with its
 latency cost. Include a brute-force row — if exhaustive search is already fast enough, the index is not
@@ -127,9 +131,17 @@ and CI is green on all three versions.
 
 **One ask specifically for you.** You have now twice caught us generalising from a single test point — the
 IATA join in the starter, and the selectivity crossover in this spec. Component C is that instinct as a
-deliverable. In particular: finding 7c records that the filtered-search shortfall **did not** reproduce at
-384 dimensions on the synthetic fixture. Whether it reproduces on real embeddings is the open question, and
-T7 is where that gets settled.
+deliverable.
+
+Worth knowing before you start: finding 7c originally recorded that the shortfall **did not** reproduce at
+384 dimensions. That was a false negative of ours, withdrawn on 2026-10-22 — the test's filters happened to
+point the same way as the query vector, so all three scenarios were easy cases dressed as hard ones. It now
+reproduces deterministically, and the governing variable turns out to be the filter's *direction*, not
+dimensionality or selectivity.
+
+Which is to say the failure mode your instinct guards against has now bitten us twice from the inside. T7 is
+where it gets settled on real embeddings, and the case you construct matters more than the number of runs:
+a filter correlated with the query will pass no matter how many times you repeat it.
 
 ---
 
