@@ -40,7 +40,7 @@ In PowerShell `<` does not redirect — use `Get-Content sql/schema.sql | mariad
 
 For a fast run, `CALL load_fixture(200);` instead of re-running `fixture.sql`.
 
-**What the fixture is and is not.** 2,000 chunks, 16 categories at ~6% each, 384-dimension vectors that are
+**What the fixture is and is not.** 2,000 chunks, the real corpus's 9 categories at ~11% each, 384-dimension vectors that are
 deterministic and loosely clustered per category, with real words in `body` so `FULLTEXT` works. It exercises
 schema, query syntax and the measurement harness. **Any retrieval-quality number from it is meaningless** —
 the vectors are synthetic. It exists so A and C can work in parallel, and it gets replaced by A's real
@@ -87,6 +87,49 @@ framework. One script that runs start to finish.
 **Done when:** a clean machine runs `python -m python.ingest` from the README and ends up with ~12,000
 indexed chunks, and `sql/retrieval/semantic.sql` returns sensible neighbours on real text.
 
+### Read this before you merge `pranesh/ingest-pipeline` — added 2026-10-23
+
+Your branch and `main` have both moved, and the overlap is not a normal conflict: **resolving it the obvious
+way silently reintroduces a claim we have since disproved.**
+
+On 2026-10-22, acting on your own note about the fixture's category keys, `main` withdrew **finding 7c**. It
+had recorded that the filtered-search shortfall did *not* reproduce at 384 dimensions. It does — determini
+stically, and `mhnsw_ef_search` does not mitigate it at any value up to the table size. Details in
+`09_verified_findings.md` 7c and `sql/retrieval/under_return.sql`.
+
+Your branch predates that, so **your side of these seven files still contains the old claim**:
+
+```
+AI_USE_LOG.md   README.md   WORK_DIVISION.md
+docs/main_dish_spec/06_retrieval.md   09_verified_findings.md
+10_risks.md   12_open_decisions.md
+```
+
+Taking "your version" wholesale for the spec files is the natural instinct, since most of the edits in them
+are yours. Please don't — resolve line by line on this rule:
+
+| Topic | Take |
+|---|---|
+| Corpus figures: 8 → 9 categories, ~1,200 → ~1,295 articles, ~12,000 → ~13,000 chunks | **Yours** |
+| Anything about finding 7c, `ef_search`, `FORCE INDEX`, or the 09 verification checklist | **`main`'s** |
+| `AI_USE_LOG.md` | **Both**, all rows, yours first — and resolve your `PENDING` hash |
+
+Two specific traps:
+
+- `09_verified_findings.md` — your sweep edits the checklist item that now reads `[x] reproduced
+  2026-10-22`. Your version reads `[~] did NOT reproduce`. Keep `main`'s.
+- `06_retrieval.md` §4 — `main` corrected a sentence claiming that filtering on the indexed
+  `chunks.category` returns the full 10 every time. It does not, and that one was actionably wrong. Keep
+  `main`'s wording and your figures around it.
+
+Everything else on your branch merges normally. `03_corpus.md`, `04`, `05`, `07`, `11` and all of `python/`
+are untouched on `main` — **and `03_corpus.md` on `main` still says eight categories, so your PR is what
+makes the repository internally consistent again.** That makes landing it the highest-value thing on your
+list, ahead of `embed.py`.
+
+Open it as a draft if `ingest.py` is not ready. Seven commits and ~700 lines have no reviewer yet, and code
+review is graded.
+
 ---
 
 ## C — Evaluation & CI — Janhavi
@@ -117,6 +160,10 @@ table already exists in `schema.sql`, so nothing blocks you.
   `STDDEV_SAMP`, and state the hardware. A single timing is not a measurement.
 - **`mhnsw_ef_search` must be set explicitly in every measurement.** Inheriting the default silently makes
   the results depend on server config instead of on stated parameters.
+- **Do not treat `ef_search` as the remedy for the under-return.** Finding 7c measured it at 50, 500 and
+  2000 — more than the whole table — and the shortfall stayed at 0 of 10. Recall and the under-return are
+  two different axes, and a sweep that conflates them reports a tuning problem where there is a correctness
+  one. Report `returned` alongside `hits` at every point, which is what separates them.
 
 **The deliverable is a curve, not a number:** the smallest `ef_search` at which recall@10 ≥ 0.98, with its
 latency cost. Include a brute-force row — if exhaustive search is already fast enough, the index is not
@@ -127,9 +174,17 @@ and CI is green on all three versions.
 
 **One ask specifically for you.** You have now twice caught us generalising from a single test point — the
 IATA join in the starter, and the selectivity crossover in this spec. Component C is that instinct as a
-deliverable. In particular: finding 7c records that the filtered-search shortfall **did not** reproduce at
-384 dimensions on the synthetic fixture. Whether it reproduces on real embeddings is the open question, and
-T7 is where that gets settled.
+deliverable.
+
+Worth knowing before you start: finding 7c originally recorded that the shortfall **did not** reproduce at
+384 dimensions. That was a false negative of ours, withdrawn on 2026-10-22 — the test's filters happened to
+point the same way as the query vector, so all three scenarios were easy cases dressed as hard ones. It now
+reproduces deterministically, and the governing variable turns out to be the filter's *direction*, not
+dimensionality or selectivity.
+
+Which is to say the failure mode your instinct guards against has now bitten us twice from the inside. T7 is
+where it gets settled on real embeddings, and the case you construct matters more than the number of runs:
+a filter correlated with the query will pass no matter how many times you repeat it.
 
 ---
 

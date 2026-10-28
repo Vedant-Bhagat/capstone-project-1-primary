@@ -36,15 +36,22 @@ hollow. Kaj warned about exactly this when he set the 1,000-article floor.
 
 ## R4 — The under-return defect does not reproduce on real embeddings
 
-File 09's finding is currently on 3-dimensional patterned vectors. The schema in file 05, a planned CI test
-(T7), and a possible bug report all rest on it.
+As of 2026-10-22 the defect reproduces at 384 dimensions on synthetic vectors, deterministically, and
+`mhnsw_ef_search` does not mitigate it (finding 7c). What remains unverified is **real embeddings**: the
+fixture's clusters are near-orthogonal, and real BGE vectors may not separate sharply enough to starve the
+graph walk. The schema in file 05, a planned CI test (T7), and a possible bug report all rest on it.
 
-- *Signal*: the real corpus returns the full `k` with an unindexed filter, across many builds.
-- *Response*: this is **good news**, not a setback. Rewrite the finding as "we observed this on synthetic
-  data and it did not reproduce at 384 dimensions", which is still a genuine result and still justifies
-  the schema. Nothing in the design has to change; the denormalisation is harmless either way. The outcome
-  to avoid is leaving the file-09 claim in the README unverified at scale — hence the checklist at the end
-  of file 09.
+- *Signal*: the real corpus returns the full `k` with a filter pointing away from the query, across many
+  index builds.
+- *Response*: this is **good news**, not a setback, and it costs nothing we have already spent. Rewrite the
+  finding as "reproducible at 384 dimensions on near-orthogonal synthetic clusters, absent on real
+  embeddings", which is itself a publishable result — it would locate the boundary rather than lose the
+  finding. Nothing in the design changes: the denormalisation and `FORCE INDEX` are harmless either way, and
+  `FORCE INDEX` is independently justified by the plan flip at 11% selectivity (7b), which *is* confirmed at
+  384 dimensions.
+- *What would be a genuine setback* is the reverse — discovering it on real embeddings **after** publishing
+  recall numbers measured without `FORCE INDEX`, because every one of those numbers would be wrong rather
+  than merely incomplete. That is why T7 exists and why file 07 must not treat `ef_search` as the remedy.
 
 ## R5 — Vector search is a year old
 
