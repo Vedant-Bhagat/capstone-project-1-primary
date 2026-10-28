@@ -63,6 +63,11 @@ the ceiling is the graph, not the search. One `SET GLOBAL` and 19 seconds of ext
 faster** for 1.1% of the correct results given up. On our 2,000-chunk fixture it did not — brute force took
 2.2 ms there, and we say so.
 
+**The pipeline ends in a generated answer, and refuses when it should.** Asked something the corpus cannot
+answer, retrieval still returns its nearest passage — it always does — and the model declines rather than
+confabulating from it. Every citation in every answer resolved to a passage actually shown. Generation is
+optional: `--no-llm` needs no API key, and every number in this repository is reproducible without one.
+
 **And filtered semantic search is still not trustworthy without an index hint.** On real embeddings, at the
 shipped default, a `LIMIT 10` query filtered to a category distant from the question returned **0 rows for
 two of nine categories** with no error. What predicts it is the filter's *distance from the query*, not its

@@ -54,7 +54,14 @@ REFUSAL = "The retrieved passages do not answer this question."
 # Cheap for extractive answering, and the answering model need not match the
 # embedding model (08_rag_pipeline.md). Override with ANSWER_MODEL.
 DEFAULT_ANSWER_MODEL = "claude-haiku-5-5"
-DEFAULT_GEMINI_MODEL = "gemini-3.8-flash"
+# The ALIAS, not a pinned version. Pinned names rot fast here and the failure
+# is confusing: `gemini-2.0-flash` 404s as retired, and `gemini-2.5-flash` is
+# still listed by the models endpoint but returns "no longer available to new
+# users" -- so the listing cannot be trusted as a capability check either.
+# `gemini-flash-latest` tracks the current flash model. The answering model is
+# explicitly free to be anything (08_rag_pipeline.md); override with
+# ANSWER_MODEL.
+DEFAULT_GEMINI_MODEL = "gemini-flash-latest"
 
 
 def check_corpus(cur):
@@ -127,9 +134,25 @@ def format_passages(passages, width=600):
         for i, p in enumerate(passages, 1))
 
 
-def _gemini(prompt, key, model, timeout=300):
-    """Gemini via plain HTTP, so no extra dependency for an optional step."""
+def _backoff(model, why, attempt, attempts):
+    import time
+    wait = 5 * (2 ** attempt)
+    print(f"  {model}: {why}, retrying in {wait}s "
+          f"({attempt + 1}/{attempts - 1})", file=sys.stderr)
+    time.sleep(wait)
+
+
+def _gemini(prompt, key, model, timeout=300, attempts=4):
+    """Gemini via plain HTTP, so no extra dependency for an optional step.
+
+    Retries on 429 and 5xx with exponential backoff. The free tier returns 503
+    "high demand" often enough that a single attempt makes the whole step look
+    broken, and a failed answer is indistinguishable from a bad one if the
+    caller never sees why.
+    """
     import json
+    import time
+    import urllib.error
     import urllib.request
     url = ("https://generativelanguage.googleapis.com/v1beta/models/"
            f"{model}:generateContent")
@@ -137,13 +160,27 @@ def _gemini(prompt, key, model, timeout=300):
         "contents": [{"parts": [{"text": prompt}]}],
         "generationConfig": {"maxOutputTokens": 2000, "temperature": 0},
     }).encode()
-    req = urllib.request.Request(
-        url, data=body,
-        headers={"Content-Type": "application/json", "x-goog-api-key": key})
-    with urllib.request.urlopen(req, timeout=timeout) as r:
-        data = json.load(r)
-    parts = data["candidates"][0]["content"].get("parts", [])
-    return "".join(p.get("text", "") for p in parts).strip()
+    for attempt in range(attempts):
+        req = urllib.request.Request(
+            url, data=body,
+            headers={"Content-Type": "application/json",
+                     "x-goog-api-key": key})
+        try:
+            with urllib.request.urlopen(req, timeout=timeout) as r:
+                data = json.load(r)
+            parts = data["candidates"][0]["content"].get("parts", [])
+            return "".join(p.get("text", "") for p in parts).strip()
+        except urllib.error.HTTPError as e:
+            retryable = e.code == 429 or 500 <= e.code < 600
+            if not retryable or attempt == attempts - 1:
+                raise
+            _backoff(model, f"HTTP {e.code}", attempt, attempts)
+        except (TimeoutError, urllib.error.URLError, OSError) as e:
+            # A slow or dropped connection is as transient as a 503, and the
+            # free tier does both.
+            if attempt == attempts - 1:
+                raise
+            _backoff(model, type(e).__name__, attempt, attempts)
 
 
 def _anthropic(prompt, key, model):

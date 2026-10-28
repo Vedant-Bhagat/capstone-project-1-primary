@@ -201,6 +201,48 @@ makes much worse. It does not disappear entirely, so `FORCE INDEX` stays.
 without removing the instability. **We cannot currently explain that**, and it is recorded as an open
 question rather than attributed to a cause we have not demonstrated.
 
+## Answer generation — end to end, 2026-10-29
+
+Requirement B4: the pipeline must end in a generated answer. It does.
+`python/answer.py` retrieves in one SQL statement, formats the passages with article and section labels,
+applies the prompt from [`08_rag_pipeline.md`](main_dish_spec/08_rag_pipeline.md) unchanged, and checks that
+every `[n]` citation resolves to a passage that was actually shown.
+
+Generated with Gemini (`gemini-flash-latest`) at temperature 0. **The whole step is optional**: without a key
+`--no-llm` prints the passages, and every measured number above is reproducible with no account.
+
+| # | question | result | citations |
+|---|---|---|---|
+| 1 | *How tall and how heavy is the common ostrich?* | **Answered**, correct, grounded | all resolve |
+| 2 | *What is the difference between a compiled and an interpreted programming language?* | **Answered**, correct, grounded | all resolve |
+| 3 | *What makes the ostrich different from most other birds?* | **Refused** | — |
+| 4 | *What was the closing price of Tesla stock last Friday?* | **Refused** | — |
+
+Answer 2, in full, from `prog_lang` passages — so retrieval and grounding are not bird-specific:
+
+> In compilation, programs are translated ahead-of-time into machine code, whereas in interpretation,
+> programs are directly executed [2]. Additionally, a compiler translates source code into an executable
+> machine code, which runs more quickly than with other implementation methods [1].
+
+**Citation faithfulness: no out-of-range citation in any answer.** This is the check worth automating — it
+is objective, needs no judgement, and catches a model citing a passage it was never shown.
+
+**Case 4 is the one that matters most.** A question the corpus cannot possibly answer retrieved a spacecraft
+cancellation notice at cosine 0.419 — retrieval always returns *something* — and the model refused with the
+exact string rather than confabulating from it. That is the failure mode RAG exists to prevent, and it is the
+cheapest thing in this project to measure.
+
+**Case 3 is an honest negative.** The question is answerable from the retrieved passages: one of them states
+the ostrich is the tallest and heaviest living bird. The model refused anyway. So the prompt's combination of
+*"use only information in the passages"* and an explicit refusal string buys safety at the cost of some
+abstention on questions it could have answered. With four questions we cannot put a rate on that, and we do
+not. It is a prompt-design trade-off, visible because the refusal string is exact and countable.
+
+**Not done: answer-quality grading at scale.** `eval_qa_pairs.csv` does not exist, and the free-tier endpoint
+returned 503s and timeouts often enough that `answer.py` now retries with backoff — which makes a 54-question
+graded run a slow proposition rather than an impossible one. Four questions demonstrate the pipeline; they do
+not measure it.
+
 ## Tests
 
 `sql/evaluation/tests.sql`, with T8 and T9 in `.github/workflows/ci.yml`. On the **real corpus**, 2026-10-28, exit status 0:
