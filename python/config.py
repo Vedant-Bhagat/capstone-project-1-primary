@@ -48,6 +48,13 @@ SKIP_SECTIONS = frozenset({
 
 # Embedding. The prefix goes on the QUERY side only; passages are embedded
 # bare. Wording checked against the model card on 2026-10-21.
+# HNSW graph degree. MariaDB's default is 6, which is too low for this
+# corpus: measured, m=6 caps recall@10 at 0.94 and never reaches the 0.98
+# target at any ef_search, while m=16 reaches 0.99 at the DEFAULT ef_search
+# for about 0.1 ms more per query and 19 extra seconds of index build
+# (docs/findings.md). m=32 gains 0.4 points for 6x the build time.
+HNSW_M = 16
+
 EMBED_MODEL  = "BAAI/bge-small-en-v1.5"
 EMBED_DIMS   = 384
 QUERY_PREFIX = "Represent this sentence for searching relevant passages: "

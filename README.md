@@ -43,9 +43,31 @@ SQL statement, then measures honestly what the approximate index costs in accura
 
 ## Status
 
-**All three components implemented and running. CI green on MariaDB 11.8, 12.3 and the current release.
-The headline numbers on the real corpus are the remaining gap** — the ingest is a multi-hour CPU-bound job
-and `docs/findings.md` marks every real-corpus cell as pending rather than guessing it.
+**Complete and measured.** 1,289 Wikipedia articles, **18,651 chunks**, real `bge-small-en-v1.5`
+embeddings, CI green on MariaDB 11.8, 12.3 and the current release.
+
+### The result
+
+**MariaDB's default `mhnsw_default_m = 6` cannot reach 98% recall@10 on this corpus at any `ef_search`.
+Setting `m = 16` reaches 99.4% at the default `ef_search`, for 0.1 ms more per query.**
+
+| `mhnsw_default_m` | recall@10 at default `ef_search` | mean ms | smallest `ef` reaching 0.98 |
+|---|---|---|---|
+| **6 — the shipped default** | **0.8333** | 0.112 | **never** (0.937 at `ef` 1000) |
+| **16 — our recommendation** | **0.9944** | 0.215 | **10** |
+
+At the shipped default, one correct result in six is missing and no amount of search width recovers it —
+the ceiling is the graph, not the search. One `SET GLOBAL` and 19 seconds of extra index build fixes it.
+
+**The index does earn its place at this scale:** 0.179 ms against 14.45 ms for exhaustive search, **81×
+faster** for 1.1% of the correct results given up. On our 2,000-chunk fixture it did not — brute force took
+2.2 ms there, and we say so.
+
+**And filtered semantic search is still not trustworthy without an index hint.** On real embeddings, at the
+shipped default, a `LIMIT 10` query filtered to a category distant from the question returned **0 rows for
+two of nine categories** with no error. What predicts it is the filter's *distance from the query*, not its
+selectivity — the 5%-selectivity category returned nothing while the 16.7% one returned everything. See
+[`docs/findings.md`](docs/findings.md).
 
 | | Component | Owner | State |
 |---|---|---|---|

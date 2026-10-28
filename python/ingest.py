@@ -142,14 +142,33 @@ def flush_batch(conn, batch):
     conn.commit()
 
 
-def add_vector_index(cur):
+def has_vector_index(cur):
     cur.execute("""SELECT COUNT(*) FROM information_schema.STATISTICS
                    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'chunks'
                      AND INDEX_NAME = 'embedding'""")
-    if cur.fetchone()[0]:
-        print("vector index already present")
+    return bool(cur.fetchone()[0])
+
+
+def drop_vector_index(cur):
+    """Drop the index before loading, so rows are inserted into an unindexed
+    table. An earlier partial run (say `--limit 20`) leaves an index behind,
+    and without this the rest of the corpus is inserted the slow way -- HNSW
+    rebuilt per row -- silently, since the result is still correct."""
+    if has_vector_index(cur):
+        print("dropping the existing vector index; it is rebuilt after the "
+              "load", flush=True)
+        cur.execute("ALTER TABLE chunks DROP INDEX embedding")
+
+
+def add_vector_index(cur):
+    if has_vector_index(cur):
         return
     print("building the vector index ...", flush=True)
+    # m = 16, not MariaDB's default 6. Measured on this corpus: m=6 caps
+    # recall@10 at 0.94 and cannot reach 0.98 at any ef_search, while m=16
+    # reaches 0.99 at the default ef_search for ~0.1 ms more per query
+    # (docs/findings.md). It is a global, so it is set, used, and reported.
+    cur.execute("SET GLOBAL mhnsw_default_m = %s", (config.HNSW_M,))
     cur.execute("ALTER TABLE chunks ADD VECTOR INDEX (embedding) "
                 "DISTANCE=cosine")
 
@@ -210,6 +229,7 @@ def main(argv=None):
     try:
         with conn.cursor() as cur:
             write_corpus_meta(cur)
+            drop_vector_index(cur)
             seen = already_loaded(cur)
             if seen:
                 print(f"{len(seen)} articles already loaded; skipping those")

@@ -3,10 +3,15 @@
 Every measured result in the project, with the method that produced it. Spec:
 [`main_dish_spec/07_evaluation.md`](main_dish_spec/07_evaluation.md).
 
-**Status (2026-10-28): the harness is built and validated; the headline numbers do not exist yet.** They need
-component A's real corpus. Everything below that carries a number was measured on the synthetic fixture
-(`sql/fixture.sql`), whose vectors are generated, not embedded — so those numbers show that the measurement
-works, **not** how MariaDB's vector index performs on text. Do not quote them as results.
+**Status (2026-10-28): complete.** The corpus is ingested — 1,289 Wikipedia articles, 18,651 chunks, real
+`bge-small-en-v1.5` embeddings — and every number below is measured.
+
+**The one-sentence result: MariaDB's default `mhnsw_default_m = 6` cannot reach 98% recall@10 on this corpus
+at any `ef_search`, and `m = 16` reaches 99.4% at the default `ef_search` for 0.1 ms more per query.**
+
+Two sections follow. The **fixture** numbers come from `sql/fixture.sql`, whose vectors are generated rather
+than embedded — they show the measurement works, **not** how the index performs on text, and must not be
+quoted as results. The **real corpus** numbers are the result.
 
 ## How to reproduce
 
@@ -58,7 +63,7 @@ categories on 2026-10-22, which changes both the per-category selectivity and th
 queries. The table below is a re-run on the current fixture. Re-running it on her machine is a useful cheap
 check that the curve is not hardware-specific.
 
-## Recall and latency — fixture, harness check only
+## Fixture — harness check only, not a result
 
 Measured 2026-10-28 on the nine-category fixture. **Not a result** — see the status note at the top.
 
@@ -102,25 +107,103 @@ What this does establish, about the harness rather than about MariaDB:
 At 2,000 chunks brute force takes under 2 ms, so the index cannot earn its place on this fixture whatever the
 curve says. Whether it does on ~13,000 real chunks is exactly what the real run must answer.
 
-## Real corpus — to be filled when component A lands
+## Real corpus — measured 2026-10-28
+
+1,289 Wikipedia articles, **18,651 chunks**, 54 evaluation questions, `BAAI/bge-small-en-v1.5` at 384
+dimensions. Six articles produced no chunk and were skipped. Hardware and server as in the table above;
+`mhnsw_max_cache_size` left at its 16 MB default, which is below the 27.3 MB index.
+
+### The headline: MariaDB's default `mhnsw_default_m = 6` cannot reach 98% recall
+
+This is the most useful thing we measured, and it is a one-line fix for anyone using the feature.
+
+| `mhnsw_default_m` | index build | **recall@10 at the default `ef_search = 20`** | mean ms | smallest `ef` reaching 0.98 |
+|---|---|---|---|---|
+| **6 — MariaDB's default** | 6.8 s | **0.8333** | 0.112 | **never** (0.937 at `ef` 1000) |
+| **16 — our recommendation** | 25.4 s | **0.9944** | 0.215 | **10** |
+| 32 | 161.3 s | 0.9981 | 0.568 | 10 |
+
+At `m = 6` a filtered-free semantic search loses **one correct result in six** at default settings, and no
+`ef_search` recovers it — the ceiling is the graph, not the search width. Raising `m` to 16 costs **0.1 ms
+per query and 19 seconds of one-off index build**, and takes recall from 0.83 to 0.99.
+
+`m = 32` buys another 0.4 points of recall for 6× the build time and 2.6× the latency. Not worth it here.
+
+### Recall and latency at `m = 16`, k = 10
 
 | `ef_search` | recall@10 | mean ms | min ms | max ms | sd ms | truncated |
 |---|---|---|---|---|---|---|
-| 10 | | | | | | |
-| 20 (default) | | | | | | |
-| 50 | | | | | | |
-| 100 | | | | | | |
-| 200 | | | | | | |
-| 500 | | | | | | |
-| 1000 | | | | | | |
-| brute force | 1.0000 | | | | | |
+| 10 | 0.9889 | 0.179 | 0.076 | 4.141 | 0.303 | 0 |
+| **20 (default)** | **0.9944** | **0.215** | 0.095 | 5.586 | 0.409 | 0 |
+| 50 | 0.9963 | 0.300 | 0.132 | 7.773 | 0.570 | 0 |
+| 100 | 0.9981 | 0.385 | 0.164 | 8.066 | 0.732 | 0 |
+| 200 | 1.0000 | 0.617 | 0.237 | 12.851 | 1.382 | 0 |
+| 500 | 1.0000 | 2.360 | 0.326 | 27.159 | 5.397 | 0 |
+| 1000 | 1.0000 | 8.916 | 0.588 | 71.239 | 12.821 | 0 |
+| **brute force** | 1.0000 | **14.450** | 12.790 | 34.636 | 1.685 | 0 |
 
-**Smallest `ef_search` with recall@10 ≥ 0.98:** _pending_. Per-category recall@10: _pending_ (each query is
-assigned the category of its exact nearest chunk, since `eval_queries` has no category column).
+**Smallest `ef_search` with recall@10 ≥ 0.98: 10**, at 0.179 ms — **81× faster than exhaustive search** for
+1.1% of the correct results given up.
+
+**The index earns its place on this corpus**, which it did not on the 2,000-chunk fixture where brute force
+took 2.2 ms. At 18,651 chunks exhaustive search costs 14.5 ms and the index costs 0.2 ms. That is the
+honest form of the answer: *at this scale, with this many dimensions*.
+
+Note `ef_search = 1000` is **slower than brute force would suggest it should be** — 8.9 ms against 14.5 ms —
+so the useful range of the dial is narrow. Past about 200 the graph walk is visiting enough of the index
+that it stops being a shortcut.
+
+### Per-category recall@10 at `m = 16`, `ef_search = 20`
+
+| category | recall@10 |
+|---|---|
+| `architecture`, `birds`, `composers`, `diseases`, `prog_lang`, `space_telescopes` | 1.0000 |
+| `ethics`, `physics`, `political_philosophy` | 0.9833 |
+
+For comparison, the same table at MariaDB's default `m = 6` ranges from **0.5167** (`prog_lang`) to 1.0000
+(`birds`) — a spread that a single mean of 0.83 completely hides.
+
+### Filtered search on real embeddings — the defect reproduces
+
+The open question since 2026-10-21 was whether the under-return affects real embeddings. **It does.** Query:
+*"Which birds were first given scientific names by Linnaeus in 1758?"*, `LIMIT 10`, `ef_search = 20`, at
+MariaDB's default `m = 6`:
+
+| category | selectivity | distance to query | unhinted | `ef` 2000 | `FORCE INDEX` |
+|---|---|---|---|---|---|
+| `birds` | 16.72% | 0.2419 | 10 | 10 | 10 ✓ |
+| `diseases` | 8.66% | 0.3965 | 10 | 10 | 10 ✓ |
+| `prog_lang` | 9.19% | 0.4271 | 10 | 10 | 10 ✓ |
+| `political_philosophy` | 12.76% | 0.4292 | 10 | 10 | 10 ✓ |
+| `physics` | 7.63% | 0.4351 | 10 | 10 | 10 ✓ |
+| `architecture` | 11.27% | 0.4366 | **4** | 10 | 10 ✓ |
+| `ethics` | 9.99% | 0.4563 | **2** | 10 | 10 ✓ |
+| `composers` | 18.78% | 0.4583 | **0** | 10 | 10 ✓ |
+| `space_telescopes` | **5.00%** | 0.4624 | **0** | 10 | 10 ✓ |
+
+Three things this settles:
+
+1. **Distance from the query predicts the shortfall; selectivity does not.** Sorted by distance the table is
+   monotonic. `space_telescopes` at 5% selectivity — *below* the ~7% crossover of finding 7b — returns
+   nothing, while `birds` at 16.7% returns everything. The crossover framing was measuring a correlate.
+2. **On real embeddings `ef_search` does recover it** (every category is whole by `ef` 200). On the
+   synthetic near-orthogonal fixture it never did, at any value. The fixture was the harsher geometry, and
+   our earlier "tuning cannot fix this" was true only there. Corrected.
+3. **`FORCE INDEX` returned the exact answer in all nine cases**, identical to exhaustive search.
+
+At `m = 16` the shortfall mostly disappears — only `prog_lang` (2 of 10) and `space_telescopes` (8 of 10)
+remain short — which is consistent with it being a reachability problem that MariaDB's low default `m`
+makes much worse. It does not disappear entirely, so `FORCE INDEX` stays.
+
+**Stability.** Repeating the identical query five times on one index build, most categories are stable
+(`composers` 0,0,0,0,0; `architecture` 4,4,4,4,4) but two of nine flipped on the fifth run. Raising
+`mhnsw_max_cache_size` from 16 MB to 128 MB — above the 27.3 MB index — changed *which* categories failed
+without removing the instability. **We cannot currently explain that**, and it is recorded as an open
+question rather than attributed to a cause we have not demonstrated.
 
 ## Tests
 
-`sql/evaluation/tests.sql`, with T8 and T9 in `.github/workflows/ci.yml`. On the fixture, 2026-10-28:
+`sql/evaluation/tests.sql`, with T8 and T9 in `.github/workflows/ci.yml`. On the **real corpus**, 2026-10-28, exit status 0:
 
 | # | Result | Note |
 |---|---|---|
@@ -128,9 +211,9 @@ assigned the category of its exact nearest chunk, since `eval_queries` has no ca
 | T2 no zero vectors | PASS | |
 | T3 category agrees | PASS | |
 | T4 index == brute force at ef 1000 | PASS | |
-| T5 recall@10 ≥ 0.98 | SKIP | Opt-in: `SET @run_t5 = 1; SET @documented_ef = …` on the real corpus |
+| T5 recall@10 ≥ 0.98 | **PASS** | **0.9944 at `ef_search` 20** on the real corpus, `m = 16`. Fails at MariaDB's default `m = 6` |
 | T6 forced hybrid == exhaustive, per category | PASS | Asserts row identity, not just the count |
-| T7 under-return still reproduces | PASS | Real schema, 384 dims; unhinted filter on `ethics` returned 0 of 10 with 216 matching |
+| T7 under-return still reproduces | PASS | Real corpus; unhinted filter on `space_telescopes` returned 10, 10, **8** across three index builds. The retry loop earned itself again — one build would have reported no defect |
 | T8 semantic search uses the index | PASS | `EXPLAIN` key `embedding` |
 | T9 hybrid queries keep `FORCE INDEX` | PASS | |
 | T10 category selectivity | REPORT | Not a gate. 9 of 9 categories above 7%, so `FORCE INDEX` is load-bearing for all of them |
@@ -145,14 +228,16 @@ with status 1 (`ERROR 1644 (45000)`). A test suite that has never been seen to f
    fails. Retiring it outright would have lost the number, which is worth watching — it says how far above the
    crossover the corpus sits, and therefore how much the design leans on the hint. T9 and T6 are the gates
    the design actually rests on. Raising it before the test could redden a build was the right call.
-2. **The evaluation questions need embedding.** `eval_queries.csv` holds 54 questions, six per category. They
-   have to be embedded with the same model as the corpus **and with the query prefix** (`QUERY_PREFIX` in
-   `python/config.py`) and loaded into `eval_queries`. That belongs in component A's ingest.
+2. ~~**The evaluation questions need embedding.**~~ **Done 2026-10-28** — `python/ingest.py` embeds all 54
+   with `encode_queries()`, which applies the prefix on the query side only, and loads them into
+   `eval_queries`.
 3. ~~**T7 asserts the defect on the 3-dimension harness.**~~ **Moved 2026-10-28.** Finding 7c, which recorded
    that the shortfall did not reproduce at 384 dimensions, has been withdrawn as a false negative — its test
    filters pointed the same way as the query vector. T7 now runs against the real schema and the scratch
    database is gone. **The retry loop was kept, and it earned it:** an attempt to assert a single index build,
    on the strength of four consecutive failing ones, was wrong — a fifth build came back full, and five builds
    give 10, 0, 2, 3, 0. Whether it reproduces on real *embeddings* is still the open question.
-4. **No full-corpus workflow yet.** The spec's weekly run (full corpus, whole sweep, T5) needs the ingest to
+4. **Why two of nine categories flip between identical runs** (see the stability note above) is unexplained.
+   The cache was the obvious suspect and is not the cause. This is the most interesting loose end left.
+5. **No full-corpus workflow yet.** The spec's weekly run (full corpus, whole sweep, T5) needs the ingest to
    exist; it is a small addition to `ci.yml` once it does.

@@ -33,16 +33,21 @@ discards everything failing the predicate rather than widening its search.
 We initially called it deterministic on the strength of four consecutive failures and were wrong; a fifth
 build came back full. This is why `tests.sql` T7 retries across rebuilds instead of asserting one.
 
-**`mhnsw_ef_search` does not mitigate it** at any value up to the table size. It is a correctness problem,
-not a point on the recall/latency curve.
+**Whether `mhnsw_ef_search` mitigates it depends on the geometry, and we got this wrong once.** On the
+synthetic fixture's near-orthogonal clusters, no value up to the table size recovered the missing rows. On
+**real embeddings it does** — every category was whole by `ef_search = 200`. The fixture was the harsher
+case, and the earlier claim that tuning cannot fix this was true only there. Raising `mhnsw_default_m` from
+MariaDB's default of 6 to 16 also mostly removes it, which is consistent with a reachability problem; it does
+not remove it entirely, so the index hint stays.
 
 ### What we have NOT established about it
 
-- **Real embeddings.** Everything above was measured on `sql/fixture.sql`'s synthetic clusters, which are
-  near-orthogonal blocks — a harsher geometry than a sentence embedder produces. Real BGE vectors for
-  *architecture* and *birds* are far apart but not orthogonal, and whether that is far enough to starve the
-  graph walk is **the open question**. Until it is answered this is a statement about a synthetic geometry at
-  realistic dimensionality, not about text search.
+- **Why it is not perfectly repeatable.** Repeating an identical query five times against one index build,
+  most categories are stable but two of nine flipped. Raising `mhnsw_max_cache_size` from 16 MB to 128 MB —
+  above the 27.3 MB index — changed *which* categories failed without removing the instability, so the cache
+  is not the explanation we assumed. **We do not know the cause.** It is reported because a user hitting it
+  would see a query that works on Monday and returns nothing on Tuesday, which is worse than one that always
+  fails.
 - **Genuinely random vectors**, to rule out a patterned-data artifact. Our vectors come from seeded `RAND()`.
 - **Where the ~7% crossover actually sits at 384 dimensions.** The plan flip reproduces there, but the
   threshold itself was swept at 3 dimensions and is likely cost-model dependent.
@@ -79,13 +84,19 @@ hides it completely. Per-query reporting is not optional.
 - **The categories are deliberately close.** `ethics` and `political_philosophy` overlap on purpose, to give
   the retriever a real chance to confuse them. That makes recall harder than a well-separated corpus would,
   so our numbers are not comparable to benchmarks on distinct topics.
-- **The corpus is larger than the specification planned, and that was discovered by building it.**
-  `03_corpus.md` estimated ~13,000 chunks from Kaj's ~10-chunks-per-article figure. Measured, the first 20
-  articles produced **47 chunks each**, projecting to roughly **61,000 chunks** — four to five times the
-  estimate. The cause is the cap rule: taking the *longest* 150 articles per category systematically selects
-  the biggest articles on Wikipedia, so a per-article average drawn from typical articles does not apply. The
-  estimate was wrong, not the rule, but the consequence is real: every sizing figure derived from ~13,000
-  (index size, cache settings, ingest time) is understated by the same factor.
+- **The corpus came out 43% larger than planned: 18,651 chunks against `03_corpus.md`'s "~13,000
+  (unverified)", at 14.5 chunks per article.** Worth recording how we got that wrong twice over. The estimate
+  came from Kaj's ~10-chunks-per-article figure. Mid-ingest we extrapolated from the first 20 articles, which
+  gave 47 chunks each and a projection of ~61,000 — but the cap rule takes the *longest* 150 articles per
+  category, so the first articles processed are the biggest on Wikipedia and the worst possible sample. The
+  real average is 14.5. **Both the original estimate and our correction to it were wrong, in opposite
+  directions, and only the completed ingest settled it.** The index is 27.3 MB, which still exceeds the
+  16 MB default `mhnsw_max_cache_size`.
+
+- **Category sizes are uneven, from 5.0% to 18.8% of chunks**, because articles differ in length far more
+  than counts suggest: `space_telescopes` has 137 articles but 932 chunks, `composers` has 149 and 3,503.
+  Any per-category comparison is across unequal samples of six questions each, which is too few to rank
+  categories by.
 - **Templates are not pinned.** A revision id fixes the wikitext, but templates such as unit conversions
   render with today's template code, so a reproduction can differ in formatting. `corpus_manifest.csv` records
   a SHA-256 per article so a reproduction can *report* how closely it matched instead of assuming.
