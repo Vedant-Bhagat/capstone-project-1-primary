@@ -84,52 +84,9 @@ decision, not making one. If you disagree with a parameter, change the spec in t
 graded depth is in SQL. No abstraction layers, no plugin architecture for embedding backends, no CLI
 framework. One script that runs start to finish.
 
-**Done when:** a clean machine runs `python -m python.ingest` from the README and ends up with ~12,000
-indexed chunks, and `sql/retrieval/semantic.sql` returns sensible neighbours on real text.
-
-### Read this before you merge `pranesh/ingest-pipeline` — added 2026-10-23
-
-Your branch and `main` have both moved, and the overlap is not a normal conflict: **resolving it the obvious
-way silently reintroduces a claim we have since disproved.**
-
-On 2026-10-22, acting on your own note about the fixture's category keys, `main` withdrew **finding 7c**. It
-had recorded that the filtered-search shortfall did *not* reproduce at 384 dimensions. It does, varying per
-index build (10/0/2/3/0 across five rebuilds), and on a build where it occurs `mhnsw_ef_search` does not
-mitigate it at any value up to the table size. Details in
-`09_verified_findings.md` 7c and `sql/retrieval/under_return.sql`.
-
-Your branch predates that, so **your side of these seven files still contains the old claim**:
-
-```
-AI_USE_LOG.md   README.md   WORK_DIVISION.md
-docs/main_dish_spec/06_retrieval.md   09_verified_findings.md
-10_risks.md   12_open_decisions.md
-```
-
-Taking "your version" wholesale for the spec files is the natural instinct, since most of the edits in them
-are yours. Please don't — resolve line by line on this rule:
-
-| Topic | Take |
-|---|---|
-| Corpus figures: 8 → 9 categories, ~1,200 → ~1,295 articles, ~12,000 → ~13,000 chunks | **Yours** |
-| Anything about finding 7c, `ef_search`, `FORCE INDEX`, or the 09 verification checklist | **`main`'s** |
-| `AI_USE_LOG.md` | **Both**, all rows, yours first — and resolve your `PENDING` hash |
-
-Two specific traps:
-
-- `09_verified_findings.md` — your sweep edits the checklist item that now reads `[x] reproduced
-  2026-10-22`. Your version reads `[~] did NOT reproduce`. Keep `main`'s.
-- `06_retrieval.md` §4 — `main` corrected a sentence claiming that filtering on the indexed
-  `chunks.category` returns the full 10 every time. It does not, and that one was actionably wrong. Keep
-  `main`'s wording and your figures around it.
-
-Everything else on your branch merges normally. `03_corpus.md`, `04`, `05`, `07`, `11` and all of `python/`
-are untouched on `main` — **and `03_corpus.md` on `main` still says eight categories, so your PR is what
-makes the repository internally consistent again.** That makes landing it the highest-value thing on your
-list, ahead of `embed.py`.
-
-Open it as a draft if `ingest.py` is not ready. Seven commits and ~700 lines have no reviewer yet, and code
-review is graded.
+**Done when:** a clean machine runs `python -m python.ingest` from the README and ends up with ~13,000
+indexed chunks (an unverified estimate; replace with the measured count after the first full ingest), and
+`sql/retrieval/semantic.sql` returns sensible neighbours on real text.
 
 ---
 

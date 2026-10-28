@@ -26,7 +26,7 @@ Kaj's bar is specific and we cannot be sure in advance that it is reachable on o
 
 ## R3 — The corpus is too small for the index to matter
 
-If brute force over 12,000 chunks is already fast, HNSW has nothing to prove and the central comparison is
+If brute force over ~13,000 chunks is already fast, HNSW has nothing to prove and the central comparison is
 hollow. Kaj warned about exactly this when he set the 1,000-article floor.
 
 - *Signal*: the brute-force row in the file-07 table is within noise of the indexed rows.

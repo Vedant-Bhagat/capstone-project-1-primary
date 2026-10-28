@@ -29,6 +29,8 @@ The trade-off runs in both directions:
 | Boundary rule | **Never split mid-sentence** | Pack whole sentences until adding the next would exceed 300 words. A chunk truncated mid-clause embeds badly and reads worse when cited. |
 | Section awareness | **Never span a section heading** | Wikipedia section headings are a free, human-authored signal that the topic has changed. Crossing one merges two topics into one embedding for no benefit. |
 | Minimum chunk | **40 words** | Below that, discard. Wikipedia has many short stubs and navigation fragments which add noise and dilute recall. |
+| Skipped sections | **See also, References, Notes, Footnotes, Citations, Sources, Bibliography, Further reading, External links** (and their subsections) | Added at implementation. These are link lists and citations, not prose; a long "See also" list clears the 40-word minimum and would otherwise be embedded as a chunk of bare article titles. |
+| Run-on sentences | **Cut at word boundaries if one exceeds 300 words** | Added at implementation. The one exception to "never split mid-sentence": a flattened list or table with no full stops would otherwise exceed the model's 512-token limit and be silently truncated, which is worse. |
 | Stored with each chunk | section heading, ordinal position, word count | The heading goes into the embedded text (see below); position and count are for analysis. |
 
 ### The one non-obvious choice: prepending context to the embedded text
@@ -118,9 +120,9 @@ pipeline step is required — a good, concrete illustration of why limitation C3
 
 ## Batching and cost
 
-12,000 chunks on CPU at batch size 32 should run in single-digit minutes; a GPU makes it seconds. Fast
-enough that re-embedding the whole corpus to test a chunking change is a coffee break, not a blocker, which
-is what makes the file-07 experiments affordable.
+~13,000 chunks (an unverified estimate, file 03) on CPU at batch size 32 should run in single-digit minutes;
+a GPU makes it seconds. Fast enough that re-embedding the whole corpus to test a chunking change is a coffee
+break, not a blocker, which is what makes the file-07 experiments affordable.
 
 `embed.py` must show a progress indicator and be resumable — writing vectors to disk as it goes — so an
 interrupted run does not start over. Readers judge an ingest that appears to hang.
@@ -134,6 +136,7 @@ CHUNK_TARGET_WORDS   = 300
 CHUNK_OVERLAP_WORDS  = 50
 CHUNK_MIN_WORDS      = 40
 PREPEND_TITLE        = True
+SKIP_SECTIONS        = {"see also", "references", ...}
 EMBED_MODEL          = "BAAI/bge-small-en-v1.5"
 EMBED_DIMS           = 384
 QUERY_PREFIX         = "Represent this sentence for searching relevant passages: "

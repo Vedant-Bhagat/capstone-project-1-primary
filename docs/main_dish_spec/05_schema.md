@@ -190,7 +190,7 @@ rather than a design decision, which is worth quoting in the limitations write-u
 | `DISTANCE` | `euclidean` | **`cosine`** | Cosine is the right metric for text embeddings, and models like BGE are trained for it. **The default is the wrong one for our use**, which is why it is stated explicitly. See the trap below. |
 | `mhnsw_default_m` | `6` | `6` initially, swept | The graph's connections per node. Higher means better recall and a bigger index. We sweep it in file 07 rather than guess. |
 | `mhnsw_ef_search` | `20` | **determined by experiment** | The recall/latency dial. Finding its right value *is* the project's central result. |
-| `mhnsw_max_cache_size` | `16777216` (16 MB) | **raised, value measured** | Our index exceeds 16 MB at 384 dims over ~12,000 chunks (file 03). Leaving the default means paying disk I/O on every search, which would make every latency number we publish a measurement of the wrong thing. |
+| `mhnsw_max_cache_size` | `16777216` (16 MB) | **raised, value measured** | Our index exceeds 16 MB at 384 dims over ~13,000 chunks (file 03; an unverified estimate until the first full ingest). Leaving the default means paying disk I/O on every search, which would make every latency number we publish a measurement of the wrong thing. |
 | `VECTOR` max dims | `16383` | 384 used | Verified: `VECTOR(65533)` fails with `ERROR 1074 ... max = 16383`. Ample headroom; recorded for completeness. |
 
 ### The trap worth the most marks

@@ -138,7 +138,7 @@ The forced results are identical to exhaustive search, not merely the right coun
 So the honest headline, which is sharper than what we started with: **MariaDB's vector index does not
 currently serve selective filtered queries.** You either accept approximate results that are sometimes
 empty, or you force an exact scan over the filtered subset and the vector index contributes nothing. For a
-12% slice of 12,000 chunks the exact scan is cheap and is clearly the right trade — but it is a real
+12% slice of ~13,000 chunks the exact scan is cheap and is clearly the right trade — but it is a real
 limitation of the feature, not a detail.
 
 This is why the schema denormalises the filter column onto the vector-indexed table *and* why every hybrid

@@ -57,7 +57,7 @@ FROM (
 WHERE rank_pos <= 50;          -- 50, so recall@k is available for every k <= 50
 ```
 
-50 queries x 12,000 chunks is 600,000 distance computations in one statement — slow by design, and the point.
+50 queries x ~13,000 chunks is ~650,000 distance computations in one statement — slow by design, and the point.
 Store to 50 so recall@1, @5, @10 and @20 all come from one build.
 
 Keeping this set-based rather than looping in Python is deliberate. It is the "SQL deep, Python thin"
@@ -146,7 +146,7 @@ This table is the project's single most important artifact and belongs high in t
 | brute force | 1.0000 | ? | ? | 0 |
 
 The brute-force row matters as much as the rest: it is the "is the index earning its place?" check. If
-exhaustive search over 12,000 chunks is already fast enough, the index is not justified on this corpus and
+exhaustive search over ~13,000 chunks is already fast enough, the index is not justified on this corpus and
 we must say so plainly — which would mean growing the corpus until it is, or reporting the crossover point
 as the finding. Either is honest; silently omitting the comparison is not.
 
@@ -157,7 +157,8 @@ That one sentence is requirement B2, and arriving at it by measurement rather th
 difference between this project and a tutorial.
 
 Per-category recall is a cheap second cut — group by `category` and report it. The prediction from file 03
-is that `philosophy` and `physics` will trail `birds` and `composers`. Confirmed or refuted, it is a result.
+is that `political_philosophy`, `ethics` and `physics` will trail `birds` and `composers`. Confirmed or
+refuted, it is a result.
 
 ## Measuring latency honestly
 
@@ -219,7 +220,7 @@ in CI is the likely fallback. Flagged rather than assumed.
 
 ## CI corpus
 
-A full 1,200-article ingest on every push is too slow and hammers Wikipedia. CI uses a
+A full ~1,295-article ingest on every push is too slow and hammers Wikipedia. CI uses a
 **100-article subset pinned by the committed manifest**, enough for every test except the recall threshold,
 which needs the real corpus to be meaningful.
 

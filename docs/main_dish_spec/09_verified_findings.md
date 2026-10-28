@@ -116,7 +116,7 @@ indexed : 382,386,390,394,398,1749,1753,1757,1761,1765
 brute   : 382,386,390,394,398,1749,1753,1757,1761,1765
 ```
 
-Recall 1.00 unfiltered. Expected on a corpus this small; the interesting question is what happens at 12,000
+Recall 1.00 unfiltered. Expected on a corpus this small; the interesting question is what happens at ~13,000
 rows and 384 dimensions, which is file 07's job.
 
 ## 7. The headline finding — filtered vector queries can silently under-return
@@ -227,8 +227,9 @@ no way to detect it. This reads as a defect rather than an accuracy trade-off.
 2026-10-21. Her probe is committed as [`probe/selectivity_probe.sql`](probe/selectivity_probe.sql).
 
 Finding 7 concluded that indexing the filter column fixes the problem. That conclusion was drawn from a
-filter matching 1% of rows. Janhavi pointed out that file 03 plans eight categories at roughly **12%** each,
-tested at that selectivity, and found the mitigation does not hold.
+filter matching 1% of rows. Janhavi pointed out that file 03 then planned eight categories at roughly
+**12%** each (it now plans nine, still ~12% each), tested at that selectivity, and found the mitigation does
+not hold.
 
 Reproduced — 250 of 2,000 rows matching, `category` indexed, three rebuilds:
 
@@ -291,10 +292,11 @@ written into the query.
    superstition.
 2. **Denormalising the filter column is still necessary** — the hint cannot name an index on another table.
    It is just not sufficient on its own.
-3. **File 03's category sizing is now a correctness constraint, not a presentation choice.** Eight
+3. **File 03's category sizing is now a correctness constraint, not a presentation choice.** Nine
    categories at ~12% each sit above the crossover. Either the categories get finer-grained, or the hint
-   does the work. We should do both: finer categories keep us in the safe region, and the hint protects us
-   when a category grows.
+   does the work. This file originally recommended both: finer categories keep us in the safe region, and
+   the hint protects us when a category grows. **Decided since:** the team chose nine categories of up to
+   150 articles, so the hint alone does the work (file 03).
 4. **The trade-off is now explicit and worth stating.** The forced plan is exhaustive over the matching
    subset — exact but linear in the filtered rows, with no HNSW involvement at all. Which means the honest
    headline for filtered search is that **MariaDB's vector index does not currently serve selective
@@ -385,7 +387,7 @@ times the error was a case of testing one convenient point and generalising from
 The probe was a deliberately minimal harness, and three of its properties limit how far these results
 generalise:
 
-1. **3-dimensional vectors, 2,000 rows.** Real embeddings are 384-dimensional over ~12,000 rows. HNSW graph
+1. **3-dimensional vectors, 2,000 rows.** Real embeddings are 384-dimensional over ~13,000 rows. HNSW graph
    behaviour is strongly dimension-dependent, so **none of the recall or under-return numbers should be
    assumed to transfer.** The *mechanisms* — pre-filter versus post-filter, the metric mismatch falling back
    to a scan — are structural and will transfer. The specific counts are not.

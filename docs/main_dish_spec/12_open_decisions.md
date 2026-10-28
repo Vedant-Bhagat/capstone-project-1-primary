@@ -47,16 +47,21 @@ What remains open is only the quality claim, which comes from published benchmar
 The file-07 experiment settles it on our corpus. If MiniLM matches BGE here, we say so and keep whichever is
 simpler.
 
-## D4 — Corpus categories *(whoever owns component A, at M1)*
+## D4 — Corpus categories *(decided 2026-10-21, team)*
 
-File 03 proposes eight. The set is a suggestion and the only real constraints are:
+**Decided: nine categories, up to 150 articles each, ~1,295 articles in total** (file 03 has the table and
+the live counts). Four of the original eight were too thin to sample from and were replaced by topically
+similar categories rather than by crawling subcategories. Each category is capped at 150 articles, longest
+first, and an article in several categories belongs to the first in config order.
+
+The constraints the choice had to meet, which still apply to any later swap:
 
 - enough categories that retrieval has a genuine chance to be wrong
 - each category selective enough to make the hybrid filter interesting (~10–15% of the corpus)
 - a spread of difficulty, so per-category recall says something
 
-Swap any category for one the team finds more interesting. The structure matters; the particular topics do
-not.
+At ~12% each, every category sits above the ~7% under-return crossover, so filtered queries rely on the
+index hint (file 03).
 
 ## D5 — Answering model *(team, at M4)*
 
@@ -92,6 +97,15 @@ substantial implementation exists, so the decision point is the end of M2 and no
 Switch only if vector search proves genuinely unworkable — not merely surprising. Surprises are the
 deliverable here; Kaj said so explicitly. The bar for switching is something that blocks the area's own
 criteria, such as being unable to build a working index at our corpus size at all.
+
+## D8 — Revision pinning and the corpus manifest *(decided 2026-10-21, team)*
+
+**Decided: every article is fetched by revision id, and the corpus is reproduced from a committed
+manifest** (file 03, "Fetching" and "The manifest"). Articles are rendered with `action=parse&oldid=` and
+converted by our own `htmltotext.py`, because the TextExtracts API silently ignores the requested revision.
+`corpus_manifest.csv` records each article's category, pageid, revid, title, fetch time and a SHA-256 of its
+text. `--manifest` re-fetches exactly those revisions and reports how many hashes match. Accepted
+limitation: templates render with today's template code, so a reproduction can rarely differ in formatting.
 
 ## Stretch goals, if time somehow allows
 
