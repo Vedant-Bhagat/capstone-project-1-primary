@@ -41,3 +41,7 @@ models/
 .env
 .env.*
 *.key
+# ...but .env.example is a deliverable (file 11) and holds no real values.
+# Without this negation the `.env.*` rule above silently swallows it, which is
+# exactly what happened: the file was listed, written and never committed.
+!.env.example
