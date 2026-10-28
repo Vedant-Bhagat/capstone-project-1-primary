@@ -414,13 +414,28 @@ generalise:
 - [ ] **Reproduce on real embeddings** — the one that decides whether this is reportable. The fixture's
       clusters are near-orthogonal; real BGE vectors are not. Component A, blocking
 - [ ] Reproduce with genuinely random vectors, to rule out the patterned-data artifact
-- [ ] Reproduce on MariaDB 11.8, the minimum version this project supports
-- [ ] Reproduce on Linux, to rule out anything platform-specific
+- [x] Reproduce on MariaDB 11.8, the minimum version this project supports — **yes**, and on 12.3 and the
+      current release, in CI
+- [x] Reproduce on Linux, to rule out anything platform-specific — **yes**, same CI run (`ubuntu-latest`)
 - [ ] Re-measure the 7b crossover at 384 dimensions — the plan flip reproduces (7c scenario A chooses the
       vector index at 11.2%), but the threshold itself has not been swept at 384 dims, and file 03's
       category sizing depends on where it sits
 - [ ] Search MariaDB's Jira for an existing report before filing — Robert asked for this explicitly
 - [ ] Reduce to the smallest possible reproduction case
+
+**Ticked by CI, 2026-10-28.** T7 in `sql/evaluation/tests.sql` asserts the shortfall against the real schema,
+and the workflow runs it on a matrix of 11.8, 12.3 and `latest` on `ubuntu-latest`. All three reported the
+same thing on their first index build:
+
+> `PASS: unhinted filter on ethics returned 0 of 10 requested across builds, 216 rows matching`
+
+So at 384 dimensions the shortfall now reproduces on **three MariaDB versions and two operating systems**,
+and it is checked on every push rather than asserted once. Run 40668429883.
+
+That leaves **real embeddings** as the only blocking item, plus the two cheap desk jobs — genuinely random
+vectors, and searching Jira. Note what CI cannot establish: its vectors are still `sql/fixture.sql`'s
+near-orthogonal synthetic clusters, so a green T7 says the mechanism is live on that geometry, not that it
+affects text.
 
 Until those boxes are ticked, finding 7 is a strong lead, not a published result. Writing it up as more than
 that would be exactly the kind of overclaiming the project is otherwise designed to avoid.
