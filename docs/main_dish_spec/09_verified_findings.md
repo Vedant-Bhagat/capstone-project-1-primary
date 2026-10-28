@@ -410,11 +410,17 @@ generalise:
       Nondeterministic per index build — 10, 0, 2, 3, 0 across five rebuilds — like finding 7
 - [x] Confirm `FORCE INDEX` still gives exhaustive-equivalent results at 384 dimensions — **yes**, 10 of 10
       and byte-identical to `IGNORE INDEX (embedding)` (7c scenario F)
-- [x] Establish whether `mhnsw_ef_search` mitigates it — **it does not**, at any value up to the table size
-      (7c scenario E). This is the strongest part of the finding and was not previously tested
+- [x] Establish whether `mhnsw_ef_search` mitigates it — **it depends on the geometry**, and the
+      unqualified "it does not" recorded here was corrected on 2026-10-28. On the synthetic fixture no value
+      up to the table size recovered the missing rows (7c scenario E); on **real embeddings every category is
+      whole by `ef_search = 200`** (`findings.md`). The fixture's near-orthogonal clusters were the harsher
+      case, so the mitigation claim holds only there
 - [x] Reproduce on a third MariaDB version — **Pranesh confirmed finding 7 on 13.0.2**, 2026-10-15
-- [ ] **Reproduce on real embeddings** — the one that decides whether this is reportable. The fixture's
-      clusters are near-orthogonal; real BGE vectors are not. Component A, blocking
+- [x] **Reproduce on real embeddings** — **yes, 2026-10-28**, on 18,651 `bge-small-en-v1.5` chunks at
+      `LIMIT 10` and default settings: `composers` and `space_telescopes` returned 0 rows, `ethics` 2,
+      `architecture` 4. What predicts the shortfall is the filter's **distance from the query, not its
+      selectivity** — the 5.0% category returned nothing while the 16.7% one returned everything, which
+      retires our own crossover framing. `findings.md` has the table
 - [ ] Reproduce with genuinely random vectors, to rule out the patterned-data artifact
 - [x] Reproduce on MariaDB 11.8, the minimum version this project supports — **yes**, and on 12.3 and the
       current release, in CI
