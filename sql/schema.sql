@@ -40,6 +40,12 @@ CREATE TABLE articles (
     url         VARCHAR(512) NOT NULL,
     category    VARCHAR(32)  NOT NULL,
     word_count  INT          NOT NULL,
+
+    -- SHA-256 of the extracted text. Lets corpus_manifest.csv be written from
+    -- the database rather than from whatever one run happened to fetch, so a
+    -- resumed ingest still produces a complete manifest. '' for the fixture.
+    text_sha256 CHAR(64)     NOT NULL DEFAULT '',
+
     fetched_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     UNIQUE KEY uq_pageid (pageid),
     KEY ix_category (category)

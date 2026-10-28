@@ -43,8 +43,15 @@ SQL statement, then measures honestly what the approximate index costs in accura
 
 ## Status
 
-**Specification complete. Schema and retrieval (component B) implemented; ingest and evaluation in
-progress.**
+**All three components implemented and running. CI green on MariaDB 11.8, 12.3 and the current release.
+The headline numbers on the real corpus are the remaining gap** — the ingest is a multi-hour CPU-bound job
+and `docs/findings.md` marks every real-corpus cell as pending rather than guessing it.
+
+| | Component | Owner | State |
+|---|---|---|---|
+| **A** | Corpus & ingest | Pranesh | `python/` fetches by pinned revision, chunks, embeds and loads; 36 unit tests |
+| **B** | Schema & retrieval | Vedant | `sql/schema.sql` and four retrieval queries, each one statement |
+| **C** | Evaluation & CI | Janhavi | brute-force ground truth, recall sweep, T1–T10, three-version CI |
 
 Work is split three ways — see [`WORK_DIVISION.md`](WORK_DIVISION.md) for who owns what and how to start.
 
@@ -208,6 +215,17 @@ docs/main_dish_spec/        the specification; start at its README
   probe/vector_probe.sql        reproduces findings 1-7
   probe/selectivity_probe.sql   reproduces finding 7b (Janhavi)
 
+python/                     component A: the ingest. Runs with no API key
+  config.py                 every tunable parameter, and nowhere else
+  fetch.py                  Wikipedia by pinned revision id, cached and resumable
+  htmltotext.py             rendered HTML to plain text, standard library only
+  chunk.py                  pure function, 300 words with 50 overlap, unit-tested
+  embed.py                  BAAI/bge-small-en-v1.5 locally; GPU if there is one
+  ingest.py                 one command: fetch, chunk, embed, load, then index
+  answer.py                 retrieval in one SQL statement, generation optional
+  test_chunk.py             15 tests
+  test_htmltotext.py        21 tests, each drop rule mutation-checked
+
 sql/schema.sql              all tables; idempotent
 sql/fixture.sql             2,000 synthetic chunks, so no component waits on the ingest
 sql/retrieval/
@@ -215,6 +233,17 @@ sql/retrieval/
   hybrid_filter.sql         relational predicate + vector, one statement
   hybrid_fulltext.sql       full-text + vector, fused with RRF
   under_return.sql          the filtered-search behaviour, checked at 384 dims
+sql/evaluation/
+  ground_truth.sql          exact neighbours by brute force; the index is graded against this
+  recall_sweep.sql          recall and latency across ef_search, with variance
+  tests.sql                 T1-T10, gating CI via SIGNAL SQLSTATE '45000'
+
+.github/workflows/ci.yml    11.8, 12.3 and current; unit tests, then every SQL script
+docs/findings.md            every measured number, with the method that produced it
+docs/limitations.md         what this does NOT establish, and where the numbers stop
+corpus_manifest.csv         revision id and text SHA-256 per article; reproducibility
+eval_queries.csv            54 evaluation questions, six per category
+requirements.txt            pinned, because unpinned deps make a corpus unreproducible
 
 self_assessment/            weekly self-assessment, one section per contributor
 WORK_DIVISION.md            who owns which component, and how to start
@@ -222,8 +251,8 @@ AI_USE_LOG.md               record of AI tool use, traced per change
 CONTRIBUTING.md             branching, commits, PR and review workflow
 ```
 
-Still to come: `python/` (ingest), `sql/evaluation/` (recall harness) and `.github/workflows/`, per the
-milestones in [`11_deliverables.md`](docs/main_dish_spec/11_deliverables.md).
+Still to come: the real-corpus numbers in `docs/findings.md`, and `docs/bug_report_draft.md` if the
+under-return survives the checks in [`09_verified_findings.md`](docs/main_dish_spec/09_verified_findings.md).
 
 ## Our other project
 

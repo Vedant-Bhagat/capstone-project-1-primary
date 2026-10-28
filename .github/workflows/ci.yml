@@ -51,6 +51,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
       # The `job` context is only available inside steps, not in a job-level
       # env block, so the container id is resolved here and exported.
       - name: Point the client at the server container
@@ -58,6 +62,12 @@ jobs:
 
       - name: Report server version
         run: $DB -e "SELECT VERSION();"
+
+      # The chunker and the HTML converter are pure functions with 36 unit
+      # tests and no database or network dependency, so they run first and
+      # fail fast. Nothing was running them before.
+      - name: Python unit tests (chunker, HTML converter)
+        run: python -m unittest discover -s python -p "test_*.py" -v
 
       - name: Create the schema
         run: $DB < sql/schema.sql

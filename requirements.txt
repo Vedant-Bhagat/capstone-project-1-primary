@@ -1,0 +1,18 @@
+# Pinned, because an unpinned dependency makes a corpus unreproducible: a
+# different sentence-transformers or torch can change the embeddings, and the
+# whole project is a comparison against exact nearest neighbours.
+#
+#   python -m pip install -r requirements.txt
+#
+# No API key is needed for any of this. The embedding model is downloaded once
+# (~130 MB) and runs locally, so the ingest, retrieval and every measured
+# number work offline after that. `anthropic` is listed last and is OPTIONAL:
+# only python/answer.py uses it, and only without --no-llm.
+
+requests==2.31.0              # the Wikipedia API; fetch.py
+sentence-transformers==3.0.1  # BAAI/bge-small-en-v1.5; embed.py
+torch==2.2.1                  # sentence-transformers backend, CPU is enough
+PyMySQL==1.1.1                # pure-Python MariaDB client; no build step
+
+# Optional -- answer generation only. Everything else runs without it.
+# anthropic==0.40.0
