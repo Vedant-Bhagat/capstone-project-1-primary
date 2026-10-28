@@ -71,7 +71,8 @@ Gated on the file-09 checklist. The decision is not "is it a bug" but "have we v
 names on it", and R10 is the reason that distinction matters.
 
 **Status changed 2026-10-22.** This was off the table while finding 7c recorded a non-reproduction at 384
-dimensions. 7c was withdrawn as a false negative: the defect reproduces at 384 dimensions, deterministically,
+dimensions. 7c was withdrawn as a false negative: the defect reproduces at 384 dimensions (varying per index
+build, 10/0/2/3/0 across five rebuilds),
 and `mhnsw_ef_search` does not mitigate it at any value. Four checklist items are now ticked. **Real
 embeddings are the single remaining blocker**, and they are component A's output, so this decision becomes
 answerable at M2 rather than M6.

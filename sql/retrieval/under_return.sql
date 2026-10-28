@@ -20,8 +20,11 @@
 --
 -- Filter on the category the query points at and you get 10 of 10. Filter on a
 -- distant category, at the same 11.2% selectivity, on the same indexed column,
--- and you get 0 of 10 -- deterministically, across four index rebuilds, and at
--- every `mhnsw_ef_search` from 20 up to 2000, which exceeds the whole table.
+-- and you can get 0 of 10. Across five rebuilds of the same index on the same
+-- data the far-filter count was 10, 0, 2, 3, 0 -- so it VARIES PER INDEX BUILD,
+-- exactly as finding 7 does at 3 dimensions. On a build where it occurs, every
+-- `mhnsw_ef_search` from 20 up to 2000 -- more than the whole table -- still
+-- returns 0, so it is not an approximation that tuning reaches.
 -- It is not an approximation that can be tuned away; the post-filter walks the
 -- graph near the query and every candidate it finds fails the predicate.
 --
