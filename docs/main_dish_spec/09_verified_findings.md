@@ -327,7 +327,9 @@ test real. Re-measured 2026-10-22, same server, same schema, 2,000 chunks of 384
 
 A and D are the controlled pair: same column, same index, same selectivity to within half a point. Only the
 direction of the predicate relative to the query differs. One returns everything, the other nothing.
-D held at 0 across **four consecutive index rebuilds**, so unlike finding 7 this is deterministic.
+D varies per index build, exactly as finding 7 does: five rebuilds of the same index on the same data gave
+**10, 0, 2, 3, 0**. Our first write-up of this called it deterministic on the strength of four consecutive
+failing builds — corrected 2026-10-28 when a fifth build came back full. One build is not a sample.
 
 **What the variable actually is.** Not dimensionality, and not selectivity — both were held constant between
 A and D. It is whether the predicate selects rows the graph walk would visit anyway. Post-filtering explores
@@ -401,9 +403,9 @@ generalise:
 
 ### Required before finding 7 goes in a public README or a bug report
 
-- [x] 384 dimensions — **reproduced 2026-10-22**, deterministically across four index rebuilds, on a
-      synthetic 2,000-chunk fixture using the real nine categories (7c). The earlier non-reproduction was
-      a false negative from correlated test filters
+- [x] 384 dimensions — **reproduced 2026-10-22**, on a synthetic 2,000-chunk fixture using the real nine
+      categories (7c). The earlier non-reproduction was a false negative from correlated test filters.
+      Nondeterministic per index build — 10, 0, 2, 3, 0 across five rebuilds — like finding 7
 - [x] Confirm `FORCE INDEX` still gives exhaustive-equivalent results at 384 dimensions — **yes**, 10 of 10
       and byte-identical to `IGNORE INDEX (embedding)` (7c scenario F)
 - [x] Establish whether `mhnsw_ef_search` mitigates it — **it does not**, at any value up to the table size

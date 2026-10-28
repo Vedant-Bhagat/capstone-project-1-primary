@@ -16,10 +16,10 @@
 --   T4  indexed top-10 == brute-force top-10 for a fixed query at high ef
 --   T5  recall@10 >= 0.98 at the documented ef_search   (opt-in, see below)
 --   T6  the FORCE INDEX hybrid query returns the exact top-k, per category
---   T7  the documented under-return still reproduces at 3 dimensions
+--   T7  the documented under-return still reproduces on the real schema
 --   T8  semantic search uses the vector index           -> ci.yml (EXPLAIN)
 --   T9  every committed hybrid query keeps FORCE INDEX   -> ci.yml (grep)
---   T10 no category exceeds the optimizer crossover selectivity
+--   T10 category selectivity vs the crossover            (reports, never fails)
 --
 -- T8 and T9 inspect EXPLAIN output and file text, which SQL cannot read, so
 -- they are thin shell assertions in .github/workflows/ci.yml instead.
@@ -189,23 +189,43 @@ SET @failures = @failures + @t6_fail;
 -- MariaDB's behaviour; this test's job is to say when that claim stops being
 -- true. If it fails, MariaDB has changed and the write-up needs updating.
 --
--- Where it is tested matters. Finding 7c: at 384 dimensions on the fixture the
--- shortfall does NOT reproduce, so asserting it on `wikirag` would fail for
--- the wrong reason. It is asserted where it was established -- the 3-dimension
--- harness of docs/main_dish_spec/probe/vector_probe.sql, sections 8 and 13 --
--- in a scratch database that is dropped afterwards.
+-- WHERE it is asserted changed on 2026-10-28. This test originally built a
+-- separate 3-dimension harness in a scratch database, because finding 7c
+-- recorded a NON-reproduction at 384 dimensions. 7c was withdrawn: the
+-- shortfall does reproduce at 384 dimensions, so the test now runs against the
+-- real schema and the scratch database is gone.
 --
--- HNSW levels are random per build, so a single build is a coin toss. The
--- index is rebuilt up to three times and the test passes if ANY build returns
--- fewer than the 10 rows requested (20 match). Across 11 builds observed so
--- far at ef_search = 20, none returned 10.
+-- THE RETRY LOOP IS KEPT, and the reason is worth recording. A first attempt
+-- at this test asserted a single index build, on the strength of four
+-- consecutive builds that all under-returned. Widening to five builds gave
+-- 10, 0, 2, 3, 0 -- so a single build really is a coin toss at 384 dimensions
+-- too, exactly as it is at 3, and the original author's loop was right. HNSW
+-- assigns node levels randomly per build, and `fixture.sql`'s own index build
+-- is as likely as any other to be a good one.
 --
--- Whether it reproduces on REAL embeddings is the open question (finding 7c);
--- under_return.sql answers that once component A's corpus is loaded.
-SELECT 'T7: under-return still reproduces on the 3-dimension harness' AS test;
+-- The filter is the category whose nearest chunk is FURTHEST from the query:
+-- post-filtering explores the graph near the query and discards what fails the
+-- predicate, so a predicate keeping only distant rows is what starves it.
+-- Chosen by measurement rather than hardcoded, so the test still means
+-- something when the corpus changes or on real embeddings.
+--
+-- NOTE: this rebuilds the vector index, up to @t7_builds times. Later tests
+-- see the last build. It is the only test that mutates the index.
+SELECT 'T7: under-return still reproduces on the real schema' AS test;
 
-DROP DATABASE IF EXISTS wikirag_t7;
-CREATE DATABASE wikirag_t7;
+SET @t7_builds = IFNULL(@t7_builds, 5);
+SET @qv = (SELECT embedding FROM eval_queries ORDER BY id LIMIT 1);
+
+-- The category pointing furthest away from this query.
+SELECT category INTO @t7_far
+FROM (SELECT c.category, MIN(VEC_DISTANCE_COSINE(c.embedding, @qv)) AS d
+      FROM chunks c IGNORE INDEX (embedding)
+      GROUP BY c.category) s
+ORDER BY d DESC
+LIMIT 1;
+
+SELECT COUNT(*) INTO @t7_match FROM chunks WHERE category = @t7_far;
+
 SET @t7_min = 10;
 SET @t7_seen = '';
 
@@ -213,27 +233,16 @@ DELIMITER //
 BEGIN NOT ATOMIC
     DECLARE b INT DEFAULT 0;
     DECLARE v_got INT;
-    SET max_recursive_iterations = 100000;
     SET SESSION mhnsw_ef_search = 20;
-    WHILE b < 3 AND @t7_min = 10 DO
-        DROP TABLE IF EXISTS wikirag_t7.docs;
-        CREATE TABLE wikirag_t7.docs (
-            id  INT         NOT NULL PRIMARY KEY,
-            tag VARCHAR(16) NOT NULL,                 -- UNINDEXED filter column
-            v   VECTOR(3)   NOT NULL,
-            VECTOR INDEX (v) DISTANCE=cosine
-        );
-        INSERT INTO wikirag_t7.docs (id, tag, v)
-        WITH RECURSIVE n AS (SELECT 1 AS i UNION ALL SELECT i + 1 FROM n WHERE i < 2000)
-        SELECT i, IF(i % 100 = 0, 'needle', 'bulk'),
-               VEC_FromText(CONCAT('[', RAND(i)*2-1, ',', RAND(i*7)*2-1, ',', RAND(i*13)*2-1, ']'))
-        FROM n;
-
-        SET @q3 = VEC_FromText('[1,0,0]');
+    WHILE b < @t7_builds AND @t7_min = 10 DO
+        IF b > 0 THEN
+            ALTER TABLE chunks DROP INDEX embedding;
+            ALTER TABLE chunks ADD VECTOR INDEX (embedding) DISTANCE=cosine;
+        END IF;
         SELECT COUNT(*) INTO v_got
-        FROM (SELECT id FROM wikirag_t7.docs WHERE tag = 'needle'
-              ORDER BY VEC_DISTANCE_COSINE(v, @q3) LIMIT 10) t;
-
+        FROM (SELECT c.id FROM chunks c
+              WHERE c.category = @t7_far
+              ORDER BY VEC_DISTANCE_COSINE(c.embedding, @qv) LIMIT 10) t;
         SET @t7_seen = CONCAT(@t7_seen, IF(b = 0, '', ','), v_got);
         SET @t7_min = LEAST(@t7_min, v_got);
         SET b = b + 1;
@@ -242,46 +251,63 @@ BEGIN NOT ATOMIC
 END //
 DELIMITER ;
 
-DROP DATABASE wikirag_t7;
-USE wikirag;
-
-SET @t7_fail = (@t7_min >= 10);
-SELECT IF(@t7_fail,
-          CONCAT('FAIL: three builds returned the full 10 (', @t7_seen,
-                 ') -- the documented defect no longer reproduces; update 09_verified_findings.md and the README'),
-          CONCAT('PASS: rows returned per build: ', @t7_seen, ' of 10 requested, 20 matching')) AS result;
+-- @t7_match guards against passing for the trivial reason that the category
+-- holds fewer than the 10 rows requested.
+SET @t7_fail = (@t7_match < 10 OR @t7_min >= 10);
+SELECT CASE
+         WHEN @t7_match < 10
+           THEN CONCAT('FAIL: category ', @t7_far, ' has only ', @t7_match,
+                       ' chunks -- cannot test a LIMIT 10 shortfall')
+         WHEN @t7_min >= 10
+           THEN CONCAT('FAIL: ', @t7_builds, ' builds on ', @t7_far,
+                       ' all returned the full 10 (', @t7_seen,
+                       ') -- the documented defect no longer reproduces;',
+                       ' update 09_verified_findings.md 7c and the README')
+         ELSE CONCAT('PASS: unhinted filter on ', @t7_far,
+                     ' returned ', @t7_seen, ' of 10 requested across builds, ',
+                     @t7_match, ' rows matching')
+       END AS result;
 SET @failures = @failures + @t7_fail;
 
 -- ---------------------------------------------------------------------------
--- T10: no category is above the optimizer's crossover selectivity
+-- T10: category selectivity vs the optimizer's crossover -- REPORT ONLY
 -- ---------------------------------------------------------------------------
 -- Above ~7% an equality filter stops being pre-filtered and the unhinted
 -- query can silently under-return (09_verified_findings.md, 7b). FORCE INDEX
 -- protects the committed queries either way (T6, T9); this test guards the
 -- corpus sizing assumption in 03_corpus.md.
 --
--- NOTE: 03_corpus.md now plans nine categories at ~11.6% each, deliberately
--- above the crossover and relying on the hint. On that corpus this test FAILS
--- by design. The threshold is a session variable so the team can settle it --
--- either re-measure the crossover at 384 dimensions (09 checklist) and set
--- @crossover_pct to the measured value, or retire T10 in favour of T9.
-SELECT 'T10: no category exceeds the crossover selectivity' AS test;
+-- SETTLED 2026-10-22: this REPORTS, it does not gate. Janhavi raised the
+-- question in the PR that added it -- 03_corpus.md plans nine categories at
+-- ~11% each, deliberately above the crossover, so as a gate T10 would fail
+-- every run on the real corpus for a condition the design knowingly accepts.
+--
+-- Retiring it outright would lose the number, which is worth watching: it says
+-- how far above the crossover the corpus sits, and therefore how much the
+-- design is leaning on FORCE INDEX. So it prints the selectivity of every
+-- category and never fails. T9 (the hint is present) and T6 (the hinted query
+-- is exact) are the gates that the design actually rests on.
+SELECT 'T10: category selectivity vs the optimizer crossover (report only)' AS test;
 
 SET @crossover_pct = IFNULL(@crossover_pct, 7.0);
-SELECT COUNT(*), IFNULL(GROUP_CONCAT(CONCAT(category, '=', pct, '%') ORDER BY pct DESC), '')
-  INTO @t10_bad, @t10_detail
-FROM (SELECT category, ROUND(100 * COUNT(*) / (SELECT COUNT(*) FROM chunks), 2) AS pct
+
+SELECT category,
+       ROUND(100 * COUNT(*) / (SELECT COUNT(*) FROM chunks), 2) AS pct_of_corpus,
+       IF(100 * COUNT(*) / (SELECT COUNT(*) FROM chunks) > @crossover_pct,
+          'above -- relies on FORCE INDEX', 'below -- pre-filtered either way') AS vs_crossover
+FROM chunks
+GROUP BY category
+ORDER BY pct_of_corpus DESC;
+
+SELECT COUNT(*) INTO @t10_above
+FROM (SELECT category, 100 * COUNT(*) / (SELECT COUNT(*) FROM chunks) AS pct
       FROM chunks GROUP BY category) s
 WHERE pct > @crossover_pct;
 
-SELECT ROUND(MAX(pct), 2) INTO @t10_max
-FROM (SELECT 100 * COUNT(*) / (SELECT COUNT(*) FROM chunks) AS pct FROM chunks GROUP BY category) s;
-
-SET @t10_fail = (@t10_bad > 0);
-SELECT IF(@t10_fail,
-          CONCAT('FAIL: ', @t10_bad, ' category(ies) above ', @crossover_pct, '%: ', @t10_detail),
-          CONCAT('PASS: largest category is ', @t10_max, '% (threshold ', @crossover_pct, '%)')) AS result;
-SET @failures = @failures + @t10_fail;
+SELECT CONCAT('REPORT: ', @t10_above, ' of ',
+              (SELECT COUNT(DISTINCT category) FROM chunks),
+              ' categories sit above ', @crossover_pct,
+              '% selectivity, so FORCE INDEX is load-bearing for them') AS result;
 
 -- ---------------------------------------------------------------------------
 -- Fail the run if anything above failed

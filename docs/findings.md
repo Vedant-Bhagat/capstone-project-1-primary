@@ -3,7 +3,7 @@
 Every measured result in the project, with the method that produced it. Spec:
 [`main_dish_spec/07_evaluation.md`](main_dish_spec/07_evaluation.md).
 
-**Status (2026-10-23): the harness is built and validated; the headline numbers do not exist yet.** They need
+**Status (2026-10-28): the harness is built and validated; the headline numbers do not exist yet.** They need
 component A's real corpus. Everything below that carries a number was measured on the synthetic fixture
 (`sql/fixture.sql`), whose vectors are generated, not embedded — so those numbers show that the measurement
 works, **not** how MariaDB's vector index performs on text. Do not quote them as results.
@@ -45,40 +45,62 @@ In PowerShell, `<` does not redirect: `Get-Content sql/schema.sql | mariadb -u r
 
 | | |
 |---|---|
-| Machine | Janhavi's laptop: AMD Ryzen 5 5625U, 7.3 GB RAM, Windows 11 Home |
-| Server | MariaDB 12.3.3 (Win64), default configuration, port 3307 |
+| Machine | Vedant's laptop: AMD Ryzen 7 6800H, 8C/16T, 15.2 GB RAM, Windows 11 Home |
+| Server | MariaDB 12.3.3 (Win64), default configuration, port 3306 |
 | `mhnsw_default_m` | 6 (default) |
 | `mhnsw_max_cache_size` | 16,777,216 (default, 16 MB) |
-| Corpus | **synthetic fixture** — 2,000 chunks, 16 categories, 384 dimensions, 16 queries |
+| Corpus | **synthetic fixture** — 2,000 chunks, 9 categories, 384 dimensions, 9 queries |
 | Repetitions | 10 per query per configuration |
+
+The sweep was first run by Janhavi on her laptop (Ryzen 5 5625U, 7.3 GB, port 3307) against the earlier
+16-category fixture. Those numbers are superseded: `sql/fixture.sql` was rebuilt on the real corpus's nine
+categories on 2026-10-22, which changes both the per-category selectivity and the number of evaluation
+queries. The table below is a re-run on the current fixture. Re-running it on her machine is a useful cheap
+check that the curve is not hardware-specific.
 
 ## Recall and latency — fixture, harness check only
 
-Measured 2026-10-23. **Not a result** — see the status note at the top.
+Measured 2026-10-28 on the nine-category fixture. **Not a result** — see the status note at the top.
 
 | `ef_search` | recall@10 | mean ms | min ms | max ms | sd ms | truncated |
 |---|---|---|---|---|---|---|
-| 10 | 0.9563 | 0.131 | 0.100 | 0.287 | 0.034 | 0 |
-| 20 (default) | 0.9563 | 0.131 | 0.102 | 0.251 | 0.027 | 0 |
-| 50 | 0.9563 | 0.200 | 0.120 | 0.583 | 0.062 | 0 |
-| 100 | 1.0000 | 0.243 | 0.151 | 0.704 | 0.079 | 0 |
-| 200 | 1.0000 | 0.292 | 0.211 | 0.620 | 0.048 | 0 |
-| 500 | 1.0000 | 0.482 | 0.394 | 0.801 | 0.077 | 0 |
-| 1000 | 1.0000 | 1.049 | 0.749 | 22.180 | 1.691 | 0 |
-| brute force | 1.0000 | 1.901 | 1.747 | 3.062 | 0.237 | 0 |
+| 10 | 0.8667 | 0.125 | 0.096 | 0.286 | 0.032 | 0 |
+| 20 (default) | 0.8667 | 0.127 | 0.100 | 0.308 | 0.037 | 0 |
+| 50 | 0.9778 | 0.155 | 0.113 | 0.445 | 0.051 | 0 |
+| 100 | 0.9778 | 0.202 | 0.143 | 0.389 | 0.045 | 0 |
+| 200 | 0.9778 | 0.229 | 0.192 | 0.488 | 0.045 | 0 |
+| 500 | 1.0000 | 0.515 | 0.409 | 1.094 | 0.109 | 0 |
+| 1000 | 1.0000 | 0.963 | 0.774 | 1.381 | 0.163 | 0 |
+| brute force | 1.0000 | 2.249 | 1.843 | 3.391 | 0.427 | 0 |
+
+**Smallest `ef_search` with recall@10 ≥ 0.98 on this fixture: 500.** At k=1 the curve reaches 1.0 by 50.
+
+Per-category recall@10 at the default `ef_search = 20`, each query assigned the category of its exact
+nearest chunk:
+
+| category | recall@10 |
+|---|---|
+| `space_telescopes` | **0.0000** |
+| `architecture` | 0.9000 |
+| `ethics` | 0.9000 |
+| the other six | 1.0000 |
 
 What this does establish, about the harness rather than about MariaDB:
 
 - **Brute force scores exactly 1.0**, so the ground truth and the scoring agree.
-- **Recall responds to the dial** — below 0.98 up to `ef_search = 50`, 1.0 from 100. The sweep is sensitive
+- **Recall responds to the dial** — 0.87 at the default, 0.98 by 50, 1.0 by 500. The sweep is sensitive
   enough to find a crossover when there is one.
-- **No query was truncated** at any setting, consistent with finding 7c (no under-return at 384 dimensions on
-  this fixture).
-- One sample at `ef_search = 1000` took 22 ms against a mean of 1 ms — a single outlier that is why `sd_ms` is
-  reported and a single timing would have been misleading.
+- **One query scores 0.0000 at the default `ef_search`.** `space_telescopes` gets ten rows back, none of them
+  in its exact top ten. It is one of nine queries on synthetic vectors, so it is not a result about MariaDB —
+  but it is the same failure shape Janhavi recorded in finding 7b, where a query returned the right *number*
+  of rows and none of the right rows. A mean recall of 0.87 hides it; the per-category table is what shows it,
+  which is why the table is here and not just the mean.
+- **`truncated` is 0 everywhere, and cannot be anything else in this sweep.** The sweep's queries are
+  unfiltered, and the under-return needs a filter — so this column being zero is not evidence about finding 7
+  either way. T7 is where that is tested.
 
 At 2,000 chunks brute force takes under 2 ms, so the index cannot earn its place on this fixture whatever the
-curve says. Whether it does on ~12,000 real chunks is exactly what the real run must answer.
+curve says. Whether it does on ~13,000 real chunks is exactly what the real run must answer.
 
 ## Real corpus — to be filled when component A lands
 
@@ -98,7 +120,7 @@ assigned the category of its exact nearest chunk, since `eval_queries` has no ca
 
 ## Tests
 
-`sql/evaluation/tests.sql`, with T8 and T9 in `.github/workflows/ci.yml`. On the fixture, 2026-10-23:
+`sql/evaluation/tests.sql`, with T8 and T9 in `.github/workflows/ci.yml`. On the fixture, 2026-10-28:
 
 | # | Result | Note |
 |---|---|---|
@@ -108,10 +130,10 @@ assigned the category of its exact nearest chunk, since `eval_queries` has no ca
 | T4 index == brute force at ef 1000 | PASS | |
 | T5 recall@10 ≥ 0.98 | SKIP | Opt-in: `SET @run_t5 = 1; SET @documented_ef = …` on the real corpus |
 | T6 forced hybrid == exhaustive, per category | PASS | Asserts row identity, not just the count |
-| T7 under-return still reproduces | PASS | 3-dimension harness; returned 4 and 2 of 10 on two runs |
+| T7 under-return still reproduces | PASS | Real schema, 384 dims; unhinted filter on `ethics` returned 0 of 10 with 216 matching |
 | T8 semantic search uses the index | PASS | `EXPLAIN` key `embedding` |
 | T9 hybrid queries keep `FORCE INDEX` | PASS | |
-| T10 no category above crossover | PASS | Largest category 6.40%, threshold 7% |
+| T10 category selectivity | REPORT | Not a gate. 9 of 9 categories above 7%, so `FORCE INDEX` is load-bearing for all of them |
 
 **The tests were checked to fail.** With one chunk's category deliberately corrupted, T5 enabled at
 `ef_search = 20`, and the T10 threshold lowered to 5%, T3, T5 and T10 reported FAIL and the client exited
@@ -119,16 +141,18 @@ with status 1 (`ERROR 1644 (45000)`). A test suite that has never been seen to f
 
 ## Open questions for the team
 
-1. **T10 will fail on the real corpus, by design.** `03_corpus.md` now plans nine categories at ~11.6% each,
-   deliberately above the ~7% crossover and relying on `FORCE INDEX`. Either re-measure the crossover at 384
-   dimensions (it is on the file-09 checklist) and set `@crossover_pct` to the measured value, or retire T10
-   in favour of T9, which is the guard the design actually relies on.
+1. ~~**T10 will fail on the real corpus, by design.**~~ **Settled 2026-10-28:** T10 now reports and never
+   fails. Retiring it outright would have lost the number, which is worth watching — it says how far above the
+   crossover the corpus sits, and therefore how much the design leans on the hint. T9 and T6 are the gates
+   the design actually rests on. Raising it before the test could redden a build was the right call.
 2. **The evaluation questions need embedding.** `eval_queries.csv` holds 54 questions, six per category. They
    have to be embedded with the same model as the corpus **and with the query prefix** (`QUERY_PREFIX` in
    `python/config.py`) and loaded into `eval_queries`. That belongs in component A's ingest.
-3. **T7 asserts the defect on the 3-dimension harness**, because finding 7c showed it does not reproduce at 384
-   dimensions on the fixture. Whether it reproduces on real embeddings is still open; `under_return.sql`
-   answers that once the real corpus is loaded, and T7 should then move to whichever setting reproduces it,
-   if any.
+3. ~~**T7 asserts the defect on the 3-dimension harness.**~~ **Moved 2026-10-28.** Finding 7c, which recorded
+   that the shortfall did not reproduce at 384 dimensions, has been withdrawn as a false negative — its test
+   filters pointed the same way as the query vector. T7 now runs against the real schema and the scratch
+   database is gone. **The retry loop was kept, and it earned it:** an attempt to assert a single index build,
+   on the strength of four consecutive failing ones, was wrong — a fifth build came back full, and five builds
+   give 10, 0, 2, 3, 0. Whether it reproduces on real *embeddings* is still the open question.
 4. **No full-corpus workflow yet.** The spec's weekly run (full corpus, whole sweep, T5) needs the ingest to
    exist; it is a small addition to `ci.yml` once it does.

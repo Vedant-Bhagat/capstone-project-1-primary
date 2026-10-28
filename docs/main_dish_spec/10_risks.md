@@ -36,7 +36,7 @@ hollow. Kaj warned about exactly this when he set the 1,000-article floor.
 
 ## R4 — The under-return defect does not reproduce on real embeddings
 
-As of 2026-10-22 the defect reproduces at 384 dimensions on synthetic vectors, deterministically, and
+As of 2026-10-28 the defect reproduces at 384 dimensions on synthetic vectors, varying per index build, and
 `mhnsw_ef_search` does not mitigate it (finding 7c). What remains unverified is **real embeddings**: the
 fixture's clusters are near-orthogonal, and real BGE vectors may not separate sharply enough to starve the
 graph walk. The schema in file 05, a planned CI test (T7), and a possible bug report all rest on it.

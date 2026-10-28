@@ -93,8 +93,9 @@ Your branch and `main` have both moved, and the overlap is not a normal conflict
 way silently reintroduces a claim we have since disproved.**
 
 On 2026-10-22, acting on your own note about the fixture's category keys, `main` withdrew **finding 7c**. It
-had recorded that the filtered-search shortfall did *not* reproduce at 384 dimensions. It does — determini
-stically, and `mhnsw_ef_search` does not mitigate it at any value up to the table size. Details in
+had recorded that the filtered-search shortfall did *not* reproduce at 384 dimensions. It does, varying per
+index build (10/0/2/3/0 across five rebuilds), and on a build where it occurs `mhnsw_ef_search` does not
+mitigate it at any value up to the table size. Details in
 `09_verified_findings.md` 7c and `sql/retrieval/under_return.sql`.
 
 Your branch predates that, so **your side of these seven files still contains the old claim**:
@@ -179,8 +180,9 @@ deliverable.
 Worth knowing before you start: finding 7c originally recorded that the shortfall **did not** reproduce at
 384 dimensions. That was a false negative of ours, withdrawn on 2026-10-22 — the test's filters happened to
 point the same way as the query vector, so all three scenarios were easy cases dressed as hard ones. It now
-reproduces deterministically, and the governing variable turns out to be the filter's *direction*, not
-dimensionality or selectivity.
+reproduces — varying per index build, 10/0/2/3/0 across five rebuilds — and the governing variable turns out
+to be the filter's *direction*, not dimensionality or selectivity. Your instinct to retry across index
+builds rather than trust one was right, and T7 keeps it for that reason.
 
 Which is to say the failure mode your instinct guards against has now bitten us twice from the inside. T7 is
 where it gets settled on real embeddings, and the case you construct matters more than the number of runs:

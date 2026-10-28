@@ -167,8 +167,12 @@ the real nine-category corpus made the test honest, and the result inverted:
 | F | as D, with `FORCE INDEX (ix_category)` | 10.8% | away | 10 of 10, equal to exhaustive |
 
 A and D are a controlled pair — same column, same index, same selectivity to within half a point. Only the
-direction differs. D returned nothing across four consecutive index rebuilds, so unlike the 3-dimensional
-case this is deterministic.
+direction differs.
+
+**It varies per index build, as it does at 3 dimensions.** Five rebuilds of the same index on the same data
+returned **10, 0, 2, 3, 0** rows for D. We first called this deterministic on the strength of four
+consecutive failing builds; widening to five found the good one. A single build decides nothing, which is
+why the CI test for it rebuilds the index until it sees the shortfall or runs out of attempts.
 
 The mechanism follows: post-filtering explores the graph near the query and discards rows failing the
 predicate. When the predicate keeps only distant rows, every candidate is discarded and the query returns an
