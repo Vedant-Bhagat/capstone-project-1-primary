@@ -54,6 +54,7 @@ REFUSAL = "The retrieved passages do not answer this question."
 # Cheap for extractive answering, and the answering model need not match the
 # embedding model (08_rag_pipeline.md). Override with ANSWER_MODEL.
 DEFAULT_ANSWER_MODEL = "claude-haiku-5-5"
+DEFAULT_GEMINI_MODEL = "gemini-3.8-flash"
 
 
 def check_corpus(cur):
@@ -126,24 +127,57 @@ def format_passages(passages, width=600):
         for i, p in enumerate(passages, 1))
 
 
+def _gemini(prompt, key, model, timeout=300):
+    """Gemini via plain HTTP, so no extra dependency for an optional step."""
+    import json
+    import urllib.request
+    url = ("https://generativelanguage.googleapis.com/v1beta/models/"
+           f"{model}:generateContent")
+    body = json.dumps({
+        "contents": [{"parts": [{"text": prompt}]}],
+        "generationConfig": {"maxOutputTokens": 2000, "temperature": 0},
+    }).encode()
+    req = urllib.request.Request(
+        url, data=body,
+        headers={"Content-Type": "application/json", "x-goog-api-key": key})
+    with urllib.request.urlopen(req, timeout=timeout) as r:
+        data = json.load(r)
+    parts = data["candidates"][0]["content"].get("parts", [])
+    return "".join(p.get("text", "") for p in parts).strip()
+
+
+def _anthropic(prompt, key, model):
+    import anthropic
+    message = anthropic.Anthropic(api_key=key).messages.create(
+        model=model, max_tokens=2000,
+        messages=[{"role": "user", "content": prompt}])
+    return "".join(b.text for b in message.content if b.type == "text")
+
+
 def generate(question, passages):
-    """Ask the answering model. Returns None if no key is configured."""
+    """Ask the answering model. Returns None if no key is configured.
+
+    Two providers, because the answering model is explicitly free to be any
+    provider or a local one (08_rag_pipeline.md) and the whole step is
+    optional. The key is read from the environment and never written to a
+    file: nothing in this repository should ever contain one.
+    """
+    prompt = PROMPT.format(refusal=REFUSAL,
+                           passages=format_passages(passages),
+                           question=question)
+    gem = os.environ.get("GEMINI_API_KEY")
+    if gem:
+        return _gemini(prompt, gem,
+                       os.environ.get("ANSWER_MODEL", DEFAULT_GEMINI_MODEL))
     key = os.environ.get("ANTHROPIC_API_KEY")
     if not key:
         return None
     try:
-        import anthropic
+        return _anthropic(prompt, key,
+                          os.environ.get("ANSWER_MODEL", DEFAULT_ANSWER_MODEL))
     except ImportError:
         print("pip install anthropic, or use --no-llm", file=sys.stderr)
         return None
-    client = anthropic.Anthropic(api_key=key)
-    message = client.messages.create(
-        model=os.environ.get("ANSWER_MODEL", DEFAULT_ANSWER_MODEL),
-        max_tokens=600,
-        messages=[{"role": "user", "content": PROMPT.format(
-            refusal=REFUSAL, passages=format_passages(passages),
-            question=question)}])
-    return "".join(b.text for b in message.content if b.type == "text")
 
 
 def citation_check(answer, n_passages):
@@ -198,7 +232,8 @@ def main(argv=None):
 
     answer = generate(args.question, passages)
     if answer is None:
-        print("No ANTHROPIC_API_KEY set, so no answer was generated. The "
+        print("No GEMINI_API_KEY or ANTHROPIC_API_KEY set, so no answer was "
+              "generated. The "
               "passages above are the retrieval result, which is the part "
               "this project measures. Set the key, or pass --no-llm to make "
               "that explicit.")

@@ -34,3 +34,10 @@ embeddings/
 
 # Downloaded embedding model weights
 models/
+
+# Secrets. The answering step reads its key from the environment, never from a
+# file in the repository -- but belt and braces, because a leaked key in git
+# history is not fixable by deleting the file.
+.env
+.env.*
+*.key
