@@ -3,7 +3,16 @@
 What this spec deliberately does not settle. Each item says who decides, what the options are, and what the
 recommendation is, so that a decision is a short conversation rather than a fresh analysis.
 
-## D1 — Work distribution *(team, before M1)*
+## D1 — Work distribution *(decided 2026-10-22, team)*
+
+**Settled as it was carried out**, and recorded in `WORK_DIVISION.md`: A corpus and ingest (Pranesh), B
+schema and retrieval (Vedant), C evaluation and CI (Janhavi), with Vedant integrating. The RAG pipeline
+(file 08) stayed unassigned until the end and fell to the integrator, as planned. All three landed through
+pull requests reviewed by another contributor.
+
+The original note is kept below, because the reasoning in it is what produced the split.
+
+---
 
 Explicitly deferred at Vedant's request. The pipeline does not split into three independent files the way
 the starter did, so the split has to be along dependency lines instead.
@@ -37,7 +46,20 @@ repository is committed to area 2.
 his own expectation about how many repositories a team submits. The technical argument is one-sided; the
 course-administration side is his to confirm. Cheap to ask, expensive to get wrong after M3.
 
-## D3 — Embedding model *(whoever owns component A, at M1)*
+## D3 — Embedding model *(decided 2026-10-28, component A)*
+
+**`BAAI/bge-small-en-v1.5` at 384 dimensions, local, as recommended.** Implemented in `python/embed.py` and
+recorded in `corpus_meta` with its query prefix, so the query path refuses a mismatched model rather than
+returning confident nonsense. The query-side-only prefix is implemented as two functions rather than one
+with a flag, because that is the mistake that produces no error.
+
+Still open, as this entry always said: the *quality* claim, which rests on published benchmarks rather than
+our corpus. File 07's model-comparison experiment settles it. Unchanged conclusion either way — A7 forces a
+local model, and BGE is the best local option we found.
+
+The original note follows.
+
+---
 
 File 04 recommends `BAAI/bge-small-en-v1.5` at 384 dimensions, local. The reasoning is in that file, and the
 decision is effectively forced by requirement A7 — an ingest that stops to ask for an API key does not run

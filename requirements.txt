@@ -11,7 +11,18 @@
 
 requests==2.31.0              # the Wikipedia API; fetch.py
 sentence-transformers==3.0.1  # BAAI/bge-small-en-v1.5; embed.py
-torch==2.2.1                  # sentence-transformers backend, CPU is enough
+torch==2.2.1                  # sentence-transformers backend
+#
+# The CPU wheel above is correct and sufficient -- every result in this
+# repository was produced with the same weights either way. It is just slow:
+# measured 11 chunks/second on 8 CPU threads against 357 on an RTX 3050, which
+# is ~90 minutes of embedding for the full corpus versus ~3. On an NVIDIA GPU,
+# replace the line above with the CUDA wheel and nothing else changes --
+# embed.py detects the device:
+#
+#   python -m pip install --index-url https://download.pytorch.org/whl/cu121 #       "torch==2.2.1+cu121"
+#
+# EMBED_DEVICE=cpu forces the CPU path if you want to compare.
 PyMySQL==1.1.1                # pure-Python MariaDB client; no build step
 
 # Optional -- answer generation only. Everything else runs without it.

@@ -101,9 +101,19 @@ hides it completely. Per-query reporting is not optional.
 - **Windows for the manual runs, Linux only in CI.** CI covers 11.8, 12.3 and the current release on
   `ubuntu-latest`, which is what lets us say the under-return is not platform-specific. Every *timing* number,
   though, comes from one Windows laptop.
-- **CPU-only embedding.** Roughly 11 chunks/second measured, which makes a full ingest a multi-hour job and is
-  the single reason the real-corpus numbers lag the harness. A GPU removes this entirely; nothing about the
-  result depends on it.
+- **Embedding hardware changes the ingest time by more than an order of magnitude, and nothing else.**
+  Measured on the same machine, same model, same 300-word chunks:
+
+  | Device | chunks/second | full corpus |
+  |---|---|---|
+  | CPU, 8 threads (`torch==2.2.1`) | 11 | ~90 min of embedding |
+  | RTX 3050 Laptop, 4 GB (`torch==2.2.1+cu121`) | **357** | **~3 min**, 0.89 GB VRAM |
+
+  Throughput is flat above batch 32 on CPU and above batch 128 on the GPU, so neither number is a tuning
+  artefact. With a GPU the 1 request/second Wikipedia rate limit becomes the bottleneck, which is where it
+  belongs. **No measured result in this project depends on the device** — the same weights produce the same
+  vectors, to well below the precision stored — but a reader reproducing the corpus on a CPU should expect
+  hours, and `requirements.txt` says so.
 
 ## 6. Scope we deliberately did not enter
 
