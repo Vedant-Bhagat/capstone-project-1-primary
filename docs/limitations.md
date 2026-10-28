@@ -169,5 +169,21 @@ we could not have given it.
 
 `python/answer.py` runs with `--no-llm` and needs no API key, which is a hard requirement — every number in
 this repository is reproducible without an account. The consequence is that generation quality is the one
-thing we check least. Citation resolution is asserted automatically; answer correctness is not graded at
+thing we check least. Citation resolution is asserted automatically; answer correctness is **not** graded at
 scale, and the refusal rate is reported rather than optimised.
+
+What exists and what does not, precisely:
+
+- **Graded, and free to reproduce:** retrieval hit@k over 30 QA pairs with known source chunks — hit@10
+  1.000, hit@1 0.767 (`python -m python.grade_answers --no-llm`).
+- **Not graded:** the abstention rate over the 10 unanswerable questions, and answer correctness over the 30
+  answerable ones. `grade_answers.py` implements both; neither has been run over the full set, because doing
+  so needs an API key and no key is stored in this repository.
+- **The hit@10 of 1.000 is an upper bound, not a difficulty estimate.** Each question was written from the
+  chunk it is scored against, so its phrasing sits closer to that chunk than a real question would. Questions
+  written by someone who had not seen the passages would be a harder and more informative set, and that is
+  the obvious next improvement to this file rather than more API calls.
+- **Any LLM-as-judge score is unvalidated.** File 08 requires a human agreement rate before such a number is
+  published. There is none, so `grade_answers.py` prints the warning itself and leaves a `human` column for a
+  hand-scored sample. A judge figure in the README without that agreement rate would be a number with no
+  known relationship to the truth.

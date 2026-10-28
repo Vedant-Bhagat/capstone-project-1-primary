@@ -238,10 +238,40 @@ the ostrich is the tallest and heaviest living bird. The model refused anyway. S
 abstention on questions it could have answered. With four questions we cannot put a rate on that, and we do
 not. It is a prompt-design trade-off, visible because the refusal string is exact and countable.
 
-**Not done: answer-quality grading at scale.** `eval_qa_pairs.csv` does not exist, and the free-tier endpoint
-returned 503s and timeouts often enough that `answer.py` now retries with backoff — which makes a 54-question
-graded run a slow proposition rather than an impossible one. Four questions demonstrate the pipeline; they do
-not measure it.
+### Answer grading, level 0: retrieval hit@k against known source chunks
+
+`eval_qa_pairs.csv` now exists — 30 answerable questions, each written from one specific chunk whose id is
+recorded, plus 10 questions the corpus cannot answer. `python -m python.grade_answers --no-llm` grades the
+part that **needs no API key**, which file 08 calls the retrieval-quality metric that actually matters: did
+the chunk the answer was written from come back in the top k at all?
+
+| metric | result |
+|---|---|
+| hit@10 | **30 / 30 = 1.000** |
+| hit@1 | 23 / 30 = 0.767 |
+
+**Read that 1.000 with the caveat it deserves, because it is partly an artifact of how the pairs were
+built.** Each question was written *from* its source chunk, so its wording is closer to that chunk than a
+real user's question would be. The number is therefore an **upper bound** on retrieval difficulty, not a
+realistic estimate: it says the system reliably finds a passage when asked something that passage obviously
+answers. It is still worth having, for two reasons. A failure here would have been damning — it would mean
+an apparently correct answer had come from the model's memory rather than the corpus — and hit@1 at 0.767
+shows the metric is not saturated, so the ranking still has something to say. A harder set would need
+questions written by someone who had not seen the chunk.
+
+The 10 unanswerable questions exist for the abstention test, which file 08 rates as the single most valuable
+check and which is cheap: 10 generation calls.
+
+**Still not done: levels 1 and 3, both of which need an API key.** `grade_answers.py` implements them
+(`--abstention`, `--answers`, `--judge`) and they have not been run on the full set, because the key is
+deliberately never stored in this repository and the environment it was set in is gone. Concretely missing:
+the abstention rate over 10 questions, and answer correctness over the 30. Four hand-checked questions
+(above) demonstrate the pipeline; they do not measure it.
+
+One honesty constraint is wired into the tool rather than left to the writer. `--judge` is a model grading a
+model, which file 08 says must be validated against human scores before publication. It is not validated, so
+the script labels every judge number unvalidated in its own output and writes an empty `human` column for a
+hand-scored sample. **No judge figure should reach the README until that agreement rate exists.**
 
 ## Tests
 
