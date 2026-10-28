@@ -19,11 +19,14 @@ SET @q = (SELECT embedding FROM eval_queries WHERE id = 5);   -- composers probe
 -- index and post-filtered. Forcing the btree made it exact and deterministic.
 -- See docs/main_dish_spec/09_verified_findings.md finding 7b.
 --
--- That shortfall does NOT reproduce at 384 dimensions (see under_return.sql),
--- so today the hint changes nothing here. It stays because it costs nothing,
--- it guarantees the exact plan rather than relying on a cost estimate, and
--- the behaviour it defends against was really observed. Test T9 asserts it is
--- still present so nobody tidies it away.
+-- That shortfall DOES reproduce at 384 dimensions, on real embeddings, and on
+-- this corpus. An earlier version of this comment said it did not, on the
+-- strength of finding 7c, which was withdrawn as a false negative on
+-- 2026-10-22: its test filters happened to point the same way as the query
+-- vector. So the hint is not a free precaution here, it is load-bearing --
+-- without it, two of the nine categories returned zero rows at default
+-- settings. See docs/findings.md and sql/retrieval/minimal_repro.sql.
+-- Test T9 asserts the hint is still present so nobody tidies it away.
 -- ---------------------------------------------------------------------------
 SELECT a.title,
        c.category,

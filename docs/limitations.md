@@ -29,30 +29,61 @@ not the selectivity. A filter selecting rows the graph walk would visit anyway r
 selecting distant rows can return nothing, because post-filtering explores the query's neighbourhood and
 discards everything failing the predicate rather than widening its search.
 
-**It varies per index build.** Five rebuilds of the same index on the same data returned 10, 0, 2, 3, 0 rows.
-We initially called it deterministic on the strength of four consecutive failures and were wrong; a fifth
-build came back full. This is why `tests.sql` T7 retries across rebuilds instead of asserting one.
+**Distance ranks the risk; it does not draw a line, and we overstated this once.** On the real corpus the
+table happened to come out monotonic in distance, which made the rule look sharper than it is. The minimal
+reproduction shows it is not: two categories at 0.0326 and 0.0332 — a 2% difference, identical selectivity of
+12.5% — behave oppositely, one returning nothing and the other all ten. Selectivity is ruled out; distance
+is a good predictor and not a threshold.
+
+**It varies per index build — on real data.** Five rebuilds of the same index on the same data returned 10,
+0, 2, 3, 0 rows. We initially called it deterministic on the strength of four consecutive failures and were
+wrong; a fifth build came back full. This is why `tests.sql` T7 retries across rebuilds instead of asserting
+one. The minimal reproduction is the opposite — identical across five runs and five rebuilds — so the
+variation is a property of the real corpus, not of the defect, and the two cases are not interchangeable as
+test fixtures.
 
 **Whether `mhnsw_ef_search` mitigates it depends on the geometry, and we got this wrong once.** On the
 synthetic fixture's near-orthogonal clusters, no value up to the table size recovered the missing rows. On
 **real embeddings it does** — every category was whole by `ef_search = 200`. The fixture was the harsher
-case, and the earlier claim that tuning cannot fix this was true only there. Raising `mhnsw_default_m` from
-MariaDB's default of 6 to 16 also mostly removes it, which is consistent with a reachability problem; it does
-not remove it entirely, so the index hint stays.
+case, and the earlier claim that tuning cannot fix this was true only there. The minimal reproduction sides
+with the fixture: no value up to 2000, the size of the whole table, recovers a single row. **The practical
+consequence is the bad one — an operator cannot tell in advance which case they are in**, so raising
+`ef_search` is not a fix you can rely on.
+
+Raising `mhnsw_default_m` from MariaDB's default of 6 to 16 also mostly removes it on the real corpus, which
+is consistent with a reachability problem. It is not a fix either, and the minimal case shows why it is worse
+than "partial": sweeping `M` over 6, 16, 32 and 64, **one category that worked at `M = 6` breaks at
+`M = 16`**, and another is short at every value from 6 to 64. Raising `M` reshuffles which queries fail more
+than it stops them failing. The index hint stays.
 
 ### What we have NOT established about it
 
 - **Why it is not perfectly repeatable.** Repeating an identical query five times against one index build,
   most categories are stable but two of nine flipped. Raising `mhnsw_max_cache_size` from 16 MB to 128 MB —
   above the 27.3 MB index — changed *which* categories failed without removing the instability, so the cache
-  is not the explanation we assumed. **We do not know the cause.** It is reported because a user hitting it
-  would see a query that works on Monday and returns nothing on Tuesday, which is worse than one that always
-  fails.
+  is not the explanation we assumed. It is reported because a user hitting it would see a query that works on
+  Monday and returns nothing on Tuesday, which is worse than one that always fails.
+
+  **There is now a named candidate cause, and it is not ours.**
+  [MDEV-37559](https://jira.mariadb.org/browse/MDEV-37559) has Sergei Golubchik stating that MHNSW tracks
+  visited graph nodes with a Bloom filter keyed on **vector addresses in memory**, so "depending on where a
+  next malloc() places the vector data, hash values may happen to be particularly unlucky" and the search
+  skips a node it never visited. That would explain both the run-to-run variation and the thing that most
+  puzzled us — that changing the cache size changed *which* categories failed, since a different cache means
+  different allocations. We flag two limits on this. His own comment begins "Presuming this theory is
+  correct", and the ticket is **Stalled**, not fixed. And we cannot verify it from SQL: it needs a debug
+  build. **So the cause is no longer unexplained, but it is still unconfirmed, and it is someone else's
+  hypothesis rather than our finding.**
 - **Genuinely random vectors**, to rule out a patterned-data artifact. Our vectors come from seeded `RAND()`.
 - **Where the ~7% crossover actually sits at 384 dimensions.** The plan flip reproduces there, but the
   threshold itself was swept at 3 dimensions and is likely cost-model dependent.
-- **Whether it is already reported.** MariaDB's Jira has not been searched, which is a precondition we set
-  ourselves before filing anything.
+- **Whether it is already reported — it is, and we had this backwards.** Searched 2026-10-28. The symptom
+  is on record three times and unfixed: MDEV-34774 (our exact case, **marked Fixed in 11.7.1**, still present
+  for us on 11.8 through the current release), MDEV-37709 (closed **Incomplete** for lack of a small test
+  case) and MDEV-41342 (confirmed, a different trigger). Two recall reports, MDEV-35071 and MDEV-36317, were
+  closed **Won't Fix** as artifacts of uniform-random vectors. `docs/bug_report_draft.md` has the full table.
+  What this project adds is therefore not the discovery but **the minimal reproduction**
+  (`sql/retrieval/minimal_repro.sql`) and the measurement on real embeddings.
 
 ## 2. Nothing here measures the embedding model, and nothing here should be read as doing so
 
@@ -138,5 +169,21 @@ we could not have given it.
 
 `python/answer.py` runs with `--no-llm` and needs no API key, which is a hard requirement — every number in
 this repository is reproducible without an account. The consequence is that generation quality is the one
-thing we check least. Citation resolution is asserted automatically; answer correctness is not graded at
+thing we check least. Citation resolution is asserted automatically; answer correctness is **not** graded at
 scale, and the refusal rate is reported rather than optimised.
+
+What exists and what does not, precisely:
+
+- **Graded, and free to reproduce:** retrieval hit@k over 30 QA pairs with known source chunks — hit@10
+  1.000, hit@1 0.767 (`python -m python.grade_answers --no-llm`).
+- **Not graded:** the abstention rate over the 10 unanswerable questions, and answer correctness over the 30
+  answerable ones. `grade_answers.py` implements both; neither has been run over the full set, because doing
+  so needs an API key and no key is stored in this repository.
+- **The hit@10 of 1.000 is an upper bound, not a difficulty estimate.** Each question was written from the
+  chunk it is scored against, so its phrasing sits closer to that chunk than a real question would. Questions
+  written by someone who had not seen the passages would be a harder and more informative set, and that is
+  the obvious next improvement to this file rather than more API calls.
+- **Any LLM-as-judge score is unvalidated.** File 08 requires a human agreement rate before such a number is
+  published. There is none, so `grade_answers.py` prints the warning itself and leaves a `human` column for a
+  hand-scored sample. A judge figure in the README without that agreement rate would be a number with no
+  known relationship to the truth.

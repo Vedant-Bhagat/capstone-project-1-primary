@@ -97,19 +97,36 @@ Not urgent — M4 is late, and nothing before it depends on the answer.
 Gated on the file-09 checklist. The decision is not "is it a bug" but "have we verified it enough to put our
 names on it", and R10 is the reason that distinction matters.
 
-**Status changed 2026-10-22.** This was off the table while finding 7c recorded a non-reproduction at 384
-dimensions. 7c was withdrawn as a false negative: the defect reproduces at 384 dimensions (varying per index
-build, 10/0/2/3/0 across five rebuilds),
-and `mhnsw_ef_search` does not mitigate it at any value. Four checklist items are now ticked. **Real
-embeddings are the single remaining blocker**, and they are component A's output, so this decision becomes
-answerable at M2 rather than M6.
+**Status changed 2026-10-28: both technical gates are closed and this is now purely a team decision.**
 
-One caution against our own enthusiasm: we have now been wrong about this finding in both directions inside
-48 hours. The next move is one careful measurement on real vectors, not a report.
+The history is worth keeping, because the swings were the whole lesson. This was off the table while finding
+7c recorded a non-reproduction at 384 dimensions; 7c was withdrawn as a false negative; the defect was then
+called deterministic and that was withdrawn too (10/0/2/3/0 across five rebuilds); and the claim that
+`mhnsw_ef_search` cannot mitigate it turned out to be true of the synthetic fixture only. It reproduces on
+real embeddings. Every checklist item in file 09 is now ticked or consciously declined.
 
-If it verifies: file it, and the Jira link goes in the README and every self-assessment. If it does not:
-`docs/limitations.md` records that it reproduces on near-orthogonal synthetic clusters and not on real
-embeddings, which locates the boundary and is a better result than either outcome alone.
+**The Jira search changed what we would be filing, and it is no longer mainly a new report.** The symptom is
+already on record three times and is not fixed:
+
+- **MDEV-34774** is our exact case and is **marked Fixed in 11.7.1**. We reproduce it on 11.8, 12.3 and the
+  current release, so the fix is incomplete or it regressed.
+- **MDEV-37709** is the same symptom, closed **Incomplete** only because the reporter could not shrink a
+  250 MB dump. `sql/retrieval/minimal_repro.sql` is that missing test case, at 2,048 rows of pure SQL.
+- **MDEV-35071** and **MDEV-36317** are recall reports closed **Won't Fix** as artifacts of uniform-random
+  vectors — which is the main risk to the second half of our report and dictates how it must be framed.
+
+So the recommended action is no longer "file a bug". It is: comment on MDEV-37709 with the script, comment
+on MDEV-34774 that the symptom is still present, and only then raise the `m = 6` default as its own issue.
+`docs/bug_report_draft.md` has the full prior-art table and the reasoning for that order.
+
+**What is left is a judgement call, not a measurement.** Three things argue for caution even now: we have
+been wrong about this finding twice in public; the instability we cannot explain is probably MDEV-37559's
+Bloom-filter theory, which we have no way to verify without a debug build; and MariaDB's own documentation
+describes silent truncation for *threshold* filters, which a triager might reasonably extend to ours. None
+of that makes the report wrong. It means it should go out with those three caveats in it, and with all three
+of our names on the decision — R10 is exactly this risk.
+
+**Needs: Vedant, Janhavi and Pranesh to agree before anything is posted.** Nobody should file this alone.
 
 ## D7 — Whether to switch to the fallback *(team, end of M2)*
 

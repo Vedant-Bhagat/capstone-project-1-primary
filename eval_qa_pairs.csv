@@ -1,0 +1,41 @@
+id,question,expected,source_chunk
+1,Whose work is Palladian architecture derived from and when did he live?,"The Venetian architect Andrea Palladio, who lived 1508-1580.",17090
+2,What is an Inca kancha?,"A rectangular or trapezoidal walled enclosure of single-room buildings facing a common open courtyard or inner patio, normally with only one entrance gate.",18419
+3,How many UNESCO World Heritage sites does Mexico have?,"Twenty-nine, more than any other country in the Americas.",17943
+4,How much larger is the female Eurasian sparrowhawk than the male?,"Up to 25% larger, one of the greatest size differences between the sexes in any bird.",834
+5,When did the great auk become extinct and what caused it?,"The mid-19th century, driven to extinction by human exploitation.",915
+6,How long is the red-billed quelea and how much does it weigh?,"About 12 cm (4.7 in) long, weighing 15 to 26 g.",1947
+7,Under what binomial name did Linnaeus describe the great cormorant in 1758?,Pelecanus carbo.,2610
+8,When was Pierre Boulez born and who did he study with at the Paris Conservatoire?,"Born 26 March 1925 (died 5 January 2016); he studied with Olivier Messiaen.",4848
+9,Which work made Shostakovich internationally known and in what year was it premiered?,"His First Symphony, premiered in 1926.",5618
+10,How many operas did Charles Gounod write and which has been the most popular?,"Twelve operas; Faust (1859) has always been the most popular.",6185
+11,Who is credited with inventing the nocturne?,"John Field, the Irish pianist and composer (1782-1837).",7840
+12,Which bacterium causes syphilis and what are the stages of the disease?,"Treponema pallidum subspecies pallidum; the stages are primary, secondary, latent and tertiary.",11190
+13,How is travelers' diarrhea defined?,"The passage of unformed stool while travelling (one or more by some definitions, three or more by others), caused by lack of immunity to local food-borne pathogens.",11655
+14,What is coinfection and what is an example of it?,"Simultaneous infection of a host by multiple pathogen species; for example liver cells coinfected with hepatitis B virus and hepatitis D virus.",12091
+15,What must a person have before making a decision about accepting risk under informed consent?,"Sufficient information and understanding, which may include the risks and benefits of treatments, alternative treatments, the patient's role, and their right to refuse treatment.",15261
+16,What is the difference between instrumental and intrinsic value?,"Instrumental (extrinsic) value is value as a means to a particular end; intrinsic value is being desirable in and of itself, as an end in itself.",15782
+17,What makes a belief or an action rational?,"A belief is rational if it is based on strong evidence, and a person acts rationally if they have a good reason for what they do. Rationality is the quality of being guided by reason.",14984
+18,How much does a one-kilogram object weigh at the Earth's surface?,"About 9.81 newtons, the product of its mass and the gravitational field strength.",4100
+19,What makes a system nonlinear?,The change of the output is not proportional to the change of the input.,4166
+20,What does the path-integral formulation replace the single classical trajectory with?,"A sum, or functional integral, over an infinity of quantum-mechanically possible trajectories.",3420
+21,What characterises an authoritarian political system?,"Rejection of political plurality, use of strong central power to preserve the political status quo, and reductions in democracy, separation of powers, civil liberties and the rule of law.",12308
+22,What is democratic backsliding?,"A form of autocratization: a structural transition from democracy toward authoritarianism in which political power becomes broader, less based on democracy, and more arbitrary and repressive.",12703
+23,Under unified state power how is popular sovereignty expressed?,"Through a single representative organ, the supreme state organ of power, at the apex of a pyramid-like state structure.",12763
+24,Who created BASIC and where and when?,John G. Kemeny and Thomas E. Kurtz at Dartmouth College in 1964.,8634
+25,When was the LiveCode environment introduced and what was it inspired by?,"Introduced in 2001, inspired by HyperCard.",9248
+26,What kind of applications is the Jolie programming language for?,"Distributed applications based on microservices, where each program is a service that communicates with others by sending and receiving messages over a network.",9683
+27,What kind of astronomy is the James Webb Space Telescope designed for and how large is it?,"Infrared astronomy; it is the largest telescope in space.",9760
+28,When was WISE launched and what did it discover?,"Launched in December 2009; it discovered thousands of minor planets and numerous star clusters, and its observations supported the discovery of the first Y-type brown dwarf and Earth trojan asteroid.",9922
+29,What did WMAP measure and over what years did it operate?,"Temperature differences across the sky in the cosmic microwave background, the radiant heat remaining from the Big Bang; it operated from 2001 to 2010.",10068
+30,What was Small Astronomy Satellite 3 and when did it function?,"A NASA X-ray astronomy space telescope, which functioned from 7 May 1975 to 9 April 1979.",10368
+31,What is the capital of Mongolia?,REFUSE,
+32,What was Tesla's closing share price last Friday?,REFUSE,
+33,Who won the 2022 FIFA World Cup final?,REFUSE,
+34,What is the recipe for Neapolitan pizza dough?,REFUSE,
+35,How do I renew a German residence permit?,REFUSE,
+36,Which team won the most recent Super Bowl?,REFUSE,
+37,Who is the current chief executive of Siemens?,REFUSE,
+38,What was the GDP of Vietnam in 2025?,REFUSE,
+39,What is the best way to train for a marathon?,REFUSE,
+40,How do I change the oil in a Honda Civic?,REFUSE,

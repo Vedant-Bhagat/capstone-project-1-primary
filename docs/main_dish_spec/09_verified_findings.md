@@ -421,15 +421,29 @@ generalise:
       `architecture` 4. What predicts the shortfall is the filter's **distance from the query, not its
       selectivity** — the 5.0% category returned nothing while the 16.7% one returned everything, which
       retires our own crossover framing. `findings.md` has the table
-- [ ] Reproduce with genuinely random vectors, to rule out the patterned-data artifact
+- [~] Reproduce with genuinely random vectors — **deliberately not done, and the Jira search is why.**
+      MDEV-35071 and MDEV-36317 were both closed Won't Fix on the grounds that "many algorithms perform
+      poorly on uniformly distributed random vectors", with a request to test realistic clusters instead.
+      Uniform-random vectors would therefore weaken the report, not strengthen it. `minimal_repro.sql` uses
+      deterministic clustered vectors with a shared common direction, which is the geometry real text
+      embeddings have
 - [x] Reproduce on MariaDB 11.8, the minimum version this project supports — **yes**, and on 12.3 and the
       current release, in CI
 - [x] Reproduce on Linux, to rule out anything platform-specific — **yes**, same CI run (`ubuntu-latest`)
 - [ ] Re-measure the 7b crossover at 384 dimensions — the plan flip reproduces (7c scenario A chooses the
       vector index at 11.2%), but the threshold itself has not been swept at 384 dims, and file 03's
       category sizing depends on where it sits
-- [ ] Search MariaDB's Jira for an existing report before filing — Robert asked for this explicitly
-- [ ] Reduce to the smallest possible reproduction case
+- [x] Search MariaDB's Jira for an existing report before filing — **done 2026-10-28, and it changed the
+      report.** The symptom is already filed three times and is not fixed: MDEV-34774 is our exact case,
+      **marked Fixed in 11.7.1** while we reproduce it on 11.8 through the current release; MDEV-37709 is the
+      same thing closed **Incomplete** purely for want of a small test case; MDEV-41342, MDEV-41227 and
+      MDEV-41321 are the same reachability family with other triggers. MDEV-35071 and MDEV-36317 show that
+      *recall* reports get closed Won't Fix as artifacts of uniform-random vectors. Full table in
+      `docs/bug_report_draft.md`
+- [x] Reduce to the smallest possible reproduction case — **done**, `sql/retrieval/minimal_repro.sql`: 2,048
+      rows, 16 dimensions, pure SQL, no corpus and no `RAND()`, six of eight categories return 0 of 10.
+      Measured floor: at 512 rows the optimizer pre-filters on the b-tree and is correct, from 768 it picks
+      the vector index and the shortfall appears
 
 **Ticked by CI, 2026-10-28.** T7 in `sql/evaluation/tests.sql` asserts the shortfall against the real schema,
 and the workflow runs it on a matrix of 11.8, 12.3 and `latest` on `ubuntu-latest`. All three reported the

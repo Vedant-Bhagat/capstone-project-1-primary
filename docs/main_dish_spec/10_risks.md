@@ -34,7 +34,21 @@ hollow. Kaj warned about exactly this when he set the 1,000-article floor.
   it. Alternatively, report the crossover: *at what corpus size does the index start to pay?* That is a
   better finding than the one we set out to produce, so this risk has an upside.
 
-## R4 — The under-return defect does not reproduce on real embeddings
+## R4 — The under-return defect does not reproduce on real embeddings — **RETIRED 2026-10-28, it does**
+
+**This risk did not materialise.** Measured on the real corpus: at default settings two of the nine
+categories returned **zero** rows for a `LIMIT 10` filtered query, and `architecture` and `ethics` returned 4
+and 2. The schema in file 05, test T7 and the bug report all stand. The paragraph below is kept as written
+for the record, because the contingency it planned for is a better example of risk-register discipline than
+the outcome is.
+
+One part of it was wrong in our favour and is worth separating out: it says `mhnsw_ef_search` "does not
+mitigate it (finding 7c)". That was true of the fixture only. On real embeddings every category is whole by
+`ef_search = 200` — but not on the minimal reproduction, where no value up to the table size helps. So
+tuning sometimes rescues it and an operator cannot tell in advance, which is worse for a user than a clean
+failure and is the form the bug report now takes.
+
+---
 
 As of 2026-10-28 the defect reproduces at 384 dimensions on synthetic vectors, varying per index build, and
 `mhnsw_ef_search` does not mitigate it (finding 7c). What remains unverified is **real embeddings**: the
