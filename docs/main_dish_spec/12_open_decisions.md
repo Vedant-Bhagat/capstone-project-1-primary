@@ -37,7 +37,21 @@ Three sequencing facts that constrain any split:
 Also to settle: who reviews whose pull requests. D5 asks for reviews between contributors and it was the
 team's weakest area in the starter. A fixed rotation decided now is easier than negotiating each time.
 
-## D2 — Separate repository, confirmed? *(Vedant, before M0)*
+## D2 — Separate repository — **RESOLVED 2026-10-28: two repositories, confirmed by the professor**
+
+**Asked and answered.** Submitting two repositories is accepted, so the split stands: the starter keeps its
+area 2 declaration and this repository keeps area 4. Nothing in the design changes — this was the assumption
+every other file was already built on — but it is no longer an assumption.
+
+This was the oldest unresolved item in the project, open since before M0, and it was the one that could not
+be settled by measurement. Worth noting for the process write-up: the technical argument was one-sided from
+the start and we still carried it as an open risk for a week, because the course-administration half was not
+ours to decide. That was the right call and it cost nothing, since the work proceeded on the assumption
+meanwhile.
+
+The original note follows.
+
+---
 
 File 01 concludes yes, because the evaluation prompt takes one declared area per README and the existing
 repository is committed to area 2.

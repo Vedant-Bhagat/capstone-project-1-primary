@@ -263,9 +263,23 @@ The 10 unanswerable questions exist for the abstention test, which file 08 rates
 check and which is cheap: 10 generation calls.
 
 **Still not done: levels 1 and 3, both of which need an API key.** `grade_answers.py` implements them
-(`--abstention`, `--answers`, `--judge`) and they have not been run on the full set, because the key is
-deliberately never stored in this repository and the environment it was set in is gone. Concretely missing:
-the abstention rate over 10 questions, and answer correctness over the 30. Four hand-checked questions
+(`--abstention`, `--answers`, `--judge`) and they have not been run, because the key is deliberately never
+stored in this repository and the environment it was set in is gone. Concretely missing: the abstention rate
+over the 10 unanswerable questions, and answer correctness.
+
+**Scope decided 2026-10-28: 10 graded prompts, not 30.** File 08 proposed 30 QA pairs for answer
+correctness; the team's judgement is that 10 is sufficient for what this half of the project is worth, and
+the free tier's 503s make a larger run slow rather than informative. So the intended run is:
+
+```
+python -m python.grade_answers --abstention            # 10 calls, all 10 unanswerable questions
+python -m python.grade_answers --answers --limit 10    # 10 calls, the first 10 answerable pairs
+```
+
+All 30 pairs stay committed, because level 0 is free and uses all of them, and because a later run can widen
+the sample without rebuilding the set. **What 10 graded answers cannot support is a per-category breakdown**
+— that would be one or two questions per category — so the result should be reported as one aggregate figure
+with its sample size attached, and not sliced. Four hand-checked questions
 (above) demonstrate the pipeline; they do not measure it.
 
 One honesty constraint is wired into the tool rather than left to the writer. `--judge` is a model grading a
