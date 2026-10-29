@@ -86,6 +86,32 @@ python -m unittest discover -s python -p "test_*.py"   # 36 unit tests, no datab
 python -m python.grade_answers --no-llm                # retrieval hit@k against known source chunks
 ```
 
+### How the numbers above were produced
+
+So that the method is here and not only behind a link. Full detail, including every figure we withdrew, is
+in [`docs/findings.md`](docs/findings.md); what this does **not** establish is in
+[`docs/limitations.md`](docs/limitations.md).
+
+- **The ground truth is exhaustive search over the same data with the same embeddings**
+  ([`ground_truth.sql`](sql/evaluation/ground_truth.sql)) — a cross join with a window function, with
+  `EXPLAIN` committed to prove the vector index cannot serve it, and a tie check at the rank-10 boundary.
+  So recall@10 is a question about **the index**, not about the embedding model.
+- **Latency is ten timed repetitions after a warm-up**, reporting mean, min, max and `STDDEV_SAMP` rather
+  than one number ([`recall_sweep.sql`](sql/evaluation/recall_sweep.sql)). Brute force is recorded as
+  `ef_search = 0` and its recall is asserted to be exactly 1.0, which checks the ground truth itself.
+- **One variable at a time.** `mhnsw_default_m` and `mhnsw_ef_search` were swept separately, with the corpus,
+  the model and the machine held fixed.
+- **Repeated where the result varies.** The under-return changes per index build, so it is measured across
+  five rebuilds, and `tests.sql` T7 retries rather than asserting one build.
+- **Someone else's machine.** CI runs the suite and
+  [`minimal_repro.sql`](sql/retrieval/minimal_repro.sql) on 11.8, 12.3 and the current release on Linux, so
+  the defect is reproducible from a public log. **Every *timing* figure, though, comes from one Windows
+  laptop** — stated wherever those numbers appear.
+- **What is weakest.** Answer *quality* is the least measured part: retrieval hit@k is graded with no API
+  key (`grade_answers.py --no-llm`, hit@10 1.000 / hit@1 0.767 over 30 pairs with known source chunks), but
+  the abstention rate and answer correctness need a key and have not been run over the full set. The hit@10
+  of 1.000 is an upper bound, because each question was written from the chunk it is scored against.
+
 ## Explained without the jargon
 
 > Imagine every paragraph of Wikipedia being given a position on an enormous map — not a map of the world,
