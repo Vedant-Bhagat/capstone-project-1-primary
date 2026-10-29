@@ -358,7 +358,8 @@ sql/evaluation/
 .github/workflows/ci.yml    11.8, 12.3 and current; unit tests, then every SQL script
 docs/findings.md            every measured number, with the method that produced it
 docs/limitations.md         what this does NOT establish, and where the numbers stop
-docs/bug_report_draft.md    the defect write-up, with the Jira prior art. Not filed
+docs/bug_report_draft.md    the defect write-up, with the Jira prior art
+docs/jira_submissions.md    the three posts as they go to Jira, in order, with a checkbox each
 corpus_manifest.csv         revision id and text SHA-256 per article; reproducibility
 eval_queries.csv            54 evaluation questions, six per category
 eval_qa_pairs.csv           30 QA pairs with known source chunks, plus 10 unanswerable
@@ -376,11 +377,18 @@ Both of the things this section used to list as "still to come" now exist. The r
 [`09_verified_findings.md`](docs/main_dish_spec/09_verified_findings.md), so
 [`docs/bug_report_draft.md`](docs/bug_report_draft.md) is written.
 
-**It has not been filed, deliberately.** Searching MariaDB's Jira first — which we had set ourselves as a
-precondition — found the symptom already reported three times and still unfixed, including one ticket
-(MDEV-37709) closed only because its reporter could not shrink a 250 MB dump into a test case. So the draft
-now recommends commenting on that ticket with `sql/retrieval/minimal_repro.sql` rather than opening a fourth
-report, and posting anything is a decision for all three of us.
+**What goes to MariaDB is not a fourth bug report.** Searching their Jira first — a precondition we had set
+ourselves — found the symptom already reported three times and still unfixed, including one ticket
+(MDEV-37709) closed only because its reporter could not shrink a 250 MB dump into a test case.
+`sql/retrieval/minimal_repro.sql` is that missing test case. So the contribution is: a comment on
+MDEV-37709 carrying the script, a comment on MDEV-34774 that the symptom survives the fix marked against it
+in 11.7.1, and only then the `mhnsw_default_m = 6` default as its own issue — contributions to open work
+first, an opinion about a default last.
+
+The three posts are written out verbatim in
+[`docs/jira_submissions.md`](docs/jira_submissions.md), which records which are up. All three of us agreed
+in person on 2026-10-29 that they should go, and that the three caveats listed at the end of that file —
+including the two retractions in our own history — travel with them.
 
 ## Our other project
 

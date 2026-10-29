@@ -1,8 +1,11 @@
-# Bug report — DRAFT, ready to file, not filed
+# Bug report — approved for filing 2026-10-29
 
-**Status: not submitted, and submitting is not one person's call.** Decision
-[D6](main_dish_spec/12_open_decisions.md) makes filing a team decision, and both of its technical gates are
-now closed:
+**Status: the team decision is made.** Vedant, Janhavi and Pranesh agreed in person on 2026-10-29 to post,
+which closes [D6](main_dish_spec/12_open_decisions.md). This file stays as the reasoning and the evidence;
+the text that actually goes to Jira, in posting order and with a checkbox per post, is
+[`jira_submissions.md`](jira_submissions.md).
+
+Both technical gates were closed before that decision:
 
 - [x] **Search MariaDB's Jira for an existing report.** Done 2026-10-28. It changed what this report is —
       see *Prior art* below, which is now the most important section in this file.

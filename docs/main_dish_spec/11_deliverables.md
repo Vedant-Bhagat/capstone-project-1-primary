@@ -59,7 +59,7 @@ Marked by what each one satisfies, so nothing is built that nothing asks for.
 | `eval_queries.csv`, `eval_qa_pairs.csv` | A5 |
 | `docs/findings.md` | A5, E5 |
 | `docs/limitations.md` | B6, C1–C3 |
-| `docs/bug_report_draft.md` | the possible contribution |
+| `docs/bug_report_draft.md`, `docs/jira_submissions.md` | the contribution to MariaDB |
 | `AI_USE_LOG.md` | D3 |
 | `self_assessment/` | D2 |
 | `CONTRIBUTING.md` | D4 |

@@ -106,7 +106,22 @@ have one, or do we use a local model through Ollama for the default path?
 
 Not urgent — M4 is late, and nothing before it depends on the answer.
 
-## D6 — Whether to file the bug *(team, at M6)*
+## D6 — Whether to file the bug — **RESOLVED 2026-10-29: yes, post it**
+
+**Decided in person by Vedant, Janhavi and Pranesh on 2026-10-29.** Both technical gates were already
+closed; what remained was the judgement call below, and all three of us agreed to go ahead with the three
+caveats carried into the text rather than left in this repository.
+
+The exact wording of all three posts, in the order they go up, is in
+[`../jira_submissions.md`](../jira_submissions.md) — comment on MDEV-37709 with the minimal test case,
+comment on MDEV-34774 that the symptom survives its 11.7.1 fix, then the `m = 6` default as its own new
+issue. That file carries a checkbox per post and is where the comment URLs get recorded, so the process
+write-up can cite what was posted instead of describing it.
+
+The original note follows, because the reasoning and the two public retractions behind it are the whole
+lesson of this decision.
+
+---
 
 Gated on the file-09 checklist. The decision is not "is it a bug" but "have we verified it enough to put our
 names on it", and R10 is the reason that distinction matters.

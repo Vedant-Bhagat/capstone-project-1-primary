@@ -162,7 +162,8 @@ sql/
 docs/
   findings.md                    every measured result, with method
   limitations.md                 what the feature will not do
-  bug_report_draft.md            the Jira report, if we file one
+  bug_report_draft.md            the defect write-up and the Jira prior art
+  jira_submissions.md            what we post, verbatim, in posting order
 ```
 
 Mirrors the starter's conventions, so a reader coming from the first repository is already oriented.
