@@ -11,6 +11,18 @@
 
 USE wikirag;
 SET @q = (SELECT embedding FROM eval_queries WHERE id = 1);
+-- A NULL @q is the one failure this script must not pass off as a result: the
+-- distances all come back NULL, ORDER BY leaves the rows in storage order, and
+-- ten plausible-looking rows are printed. Fail instead.
+DELIMITER //
+BEGIN NOT ATOMIC
+    IF @q IS NULL THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'No such eval query -- run python -m python.ingest, or mariadb < sql/fixture.sql, before this script';
+    END IF;
+END //
+DELIMITER ;
+
 
 -- Three things worth noticing, and they are the whole value proposition:
 --

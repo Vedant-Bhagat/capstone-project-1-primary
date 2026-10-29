@@ -287,6 +287,55 @@ model, which file 08 says must be validated against human scores before publicat
 the script labels every judge number unvalidated in its own output and writes an empty `human` column for a
 hand-scored sample. **No judge figure should reach the README until that agreement rate exists.**
 
+## A silent failure in our own committed examples
+
+Found 2026-10-29 while verifying that the README's new Quickstart commands actually run. Recorded here
+because it is the same failure shape this project exists to document, and we shipped it ourselves.
+
+`sql/retrieval/semantic.sql` and the three other probe scripts each begin
+`SET @q = (SELECT embedding FROM eval_queries WHERE id = 1)`. On the real corpus that row did not exist:
+`eval_queries.id` ran **55-108**, not 1-54. `fixture.sql` clears the table with `DELETE FROM`, which does not
+reset `AUTO_INCREMENT`, and `ingest.py` inserted without an explicit id, so loading the fixture and then
+ingesting shifted every id by 54.
+
+**What made it dangerous was the shape of the failure, not the cause.** `@q` was NULL, so every
+`VEC_DISTANCE_COSINE` returned NULL, so `ORDER BY distance` left the rows in storage order — and the
+articles were loaded category by category with `birds` first. The script printed ten bird paragraphs for a
+question about birds, with a `distance` column reading `NULL`. It looked completely correct. Nothing errored
+and the exit status was 0.
+
+Two fixes, because the root cause and the failure mode are separate problems:
+
+- `ingest.py` now inserts the id **from `eval_queries.csv`**, making the committed file authoritative, and
+  `fixture.sql` resets `AUTO_INCREMENT` after its `DELETE`.
+- All four probe scripts now `SIGNAL SQLSTATE '45000'` when `@q IS NULL`, so the next variant of this fails
+  loudly rather than printing plausible rows. Verified by running one against the broken state first: it
+  exits non-zero with a message naming the fix.
+
+After the repair the same query returns real distances (0.2419 for the nearest) and the ten paragraphs are
+genuinely the nearest ones.
+
+### T4 was asserting something HNSW does not promise
+
+The repair surfaced a second problem. T4 asserted that the indexed top-10 **equals** the brute-force top-10
+at `ef_search = 1000`. On the real corpus it failed: the index returned chunk 2036 at distance 0.27896 and
+missed chunk 3086 at 0.27309 — not a tie, a true neighbour 2% closer, genuinely skipped.
+
+That assertion had been green for weeks **because CI runs it against the 2,000-chunk fixture**, where a wide
+search really is exhaustive. It was measuring the fixture. It also contradicted our own README, which claims
+recall@10 of 0.9944 — not 1.0 — so a test demanding 10 of 10 every time was asserting a stronger guarantee
+than anything we published.
+
+Then, re-running the identical test minutes later on the identical index, it returned **10 of 10, nothing
+missed**. Same query, same data, different answer — which is MDEV-37559's visited-set Bloom filter, keyed on
+vector addresses in memory, showing up in our own suite. It is the cleanest instance of the instability we
+have.
+
+T4 now asserts an overlap of **at least 9 of 10** and prints which true neighbours were missed. Corruption
+or a metric mismatch returns a wildly different set, so the test still does its job; what it no longer does
+is fail the build for behaviour the algorithm never ruled out. Same correction as T10 (reports instead of
+gating) and T7 (retries across rebuilds).
+
 ## Tests
 
 `sql/evaluation/tests.sql`, with T8 and T9 in `.github/workflows/ci.yml`. On the **real corpus**, 2026-10-28, exit status 0:

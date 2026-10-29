@@ -35,6 +35,18 @@
 
 USE wikirag;
 SET @q = (SELECT embedding FROM eval_queries WHERE id = 1);   -- birds probe
+-- A NULL @q is the one failure this script must not pass off as a result: the
+-- distances all come back NULL, ORDER BY leaves the rows in storage order, and
+-- ten plausible-looking rows are printed. Fail instead.
+DELIMITER //
+BEGIN NOT ATOMIC
+    IF @q IS NULL THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'No such eval query -- run python -m python.ingest, or mariadb < sql/fixture.sql, before this script';
+    END IF;
+END //
+DELIMITER ;
+
 SET mhnsw_ef_search = 20;                                      -- the default
 
 -- 11.2% -- ABOVE the ~7% crossover, which is where the real 9-category corpus

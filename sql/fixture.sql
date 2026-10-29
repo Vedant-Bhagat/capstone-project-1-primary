@@ -59,6 +59,10 @@ BEGIN
     DELETE FROM eval_ground_truth;
     DELETE FROM recall_runs;
     DELETE FROM eval_queries;
+    -- DELETE does not reset AUTO_INCREMENT, and the fixture inserts without
+    -- explicit ids. Without this, a second load numbers the queries 55-108 and
+    -- every committed `WHERE id = 1` probe silently selects nothing.
+    ALTER TABLE eval_queries AUTO_INCREMENT = 1;
     DELETE FROM chunks;
     DELETE FROM articles;
     DELETE FROM corpus_meta;

@@ -13,7 +13,7 @@
 --   T1  corpus_meta.embed_dims matches the declared VECTOR(n) columns
 --   T2  no chunk has a zero vector
 --   T3  chunks.category agrees with articles.category
---   T4  indexed top-10 == brute-force top-10 for a fixed query at high ef
+--   T4  indexed top-10 overlaps brute-force top-10 by >= 9 at high ef
 --   T5  recall@10 >= 0.98 at the documented ef_search   (opt-in, see below)
 --   T6  the FORCE INDEX hybrid query returns the exact top-k, per category
 --   T7  the documented under-return still reproduces on the real schema
@@ -84,26 +84,52 @@ SELECT IF(@t3_fail, CONCAT('FAIL: ', @t3_bad, ' chunk(s) disagree'), 'PASS') AS 
 SET @failures = @failures + @t3_fail;
 
 -- ---------------------------------------------------------------------------
--- T4: at a wide search, the index agrees with brute force exactly
+-- T4: at a wide search, the index nearly agrees with brute force
 -- ---------------------------------------------------------------------------
--- Catches index corruption and a metric mismatch. Compared as sets of ids, so
--- a tie reordered at equal distance does not fail it.
-SELECT 'T4: indexed top-10 == brute-force top-10 at ef_search = 1000' AS test;
+-- Catches index corruption and a metric mismatch, both of which return a
+-- wildly different set, not a set that is off by one.
+--
+-- THIS TEST USED TO ASSERT EXACT SET EQUALITY AND THAT WAS WRONG. It passed
+-- for weeks because CI runs it against the 2,000-chunk synthetic fixture,
+-- where a wide search really is exhaustive. On the real 18,651-chunk corpus it
+-- fails: at ef_search = 1000 the index returned chunk 2036 at distance 0.27896
+-- and missed chunk 3086 at 0.27309. Not a tie -- a real neighbour, genuinely
+-- skipped, 2% closer than the row that displaced it.
+--
+-- HNSW never promised otherwise. Our own headline recall@10 is 0.9944, not
+-- 1.0, so a test demanding 10 of 10 every time contradicted the number in our
+-- own README, and MDEV-37559 (the visited-set Bloom filter, keyed on vector
+-- addresses) means which neighbour gets skipped can change between runs.
+-- A green T4 on the fixture was measuring the fixture.
+--
+-- So it asserts 9 of 10 and prints the difference. That still catches
+-- corruption -- which does not politely miss one row -- without asserting a
+-- guarantee the algorithm does not make. Same lesson as T10 and T7.
+SELECT 'T4: indexed top-10 overlaps brute-force top-10 by >= 9 at ef_search = 1000' AS test;
 
 SET SESSION mhnsw_ef_search = 1000;
 SET @qv = (SELECT embedding FROM eval_queries ORDER BY id LIMIT 1);
-SELECT GROUP_CONCAT(id ORDER BY id) INTO @t4_indexed
-FROM (SELECT id FROM chunks ORDER BY VEC_DISTANCE_COSINE(embedding, @qv) LIMIT 10) a;
-SELECT GROUP_CONCAT(id ORDER BY id) INTO @t4_exact
-FROM (SELECT id FROM chunks IGNORE INDEX (embedding)
-      ORDER BY VEC_DISTANCE_COSINE(embedding, @qv) LIMIT 10) b;
+DROP TEMPORARY TABLE IF EXISTS t4_idx;
+DROP TEMPORARY TABLE IF EXISTS t4_exa;
+CREATE TEMPORARY TABLE t4_idx AS
+SELECT id FROM chunks ORDER BY VEC_DISTANCE_COSINE(embedding, @qv) LIMIT 10;
+CREATE TEMPORARY TABLE t4_exa AS
+SELECT id FROM chunks IGNORE INDEX (embedding)
+ORDER BY VEC_DISTANCE_COSINE(embedding, @qv) LIMIT 10;
 SET SESSION mhnsw_ef_search = DEFAULT;
 
-SET @t4_fail = (@t4_indexed IS NULL OR NOT (@t4_indexed <=> @t4_exact));
-SELECT IF(@t4_fail, CONCAT('FAIL: indexed [', IFNULL(@t4_indexed, 'none'),
-                           '] vs exact [', IFNULL(@t4_exact, 'none'), ']'),
-                    'PASS') AS result;
+SET @t4_overlap = (SELECT COUNT(*) FROM t4_idx JOIN t4_exa USING (id));
+SET @t4_missed  = (SELECT IFNULL(GROUP_CONCAT(id ORDER BY id), 'none')
+                   FROM t4_exa WHERE id NOT IN (SELECT id FROM t4_idx));
+SET @t4_fail = (@t4_overlap IS NULL OR @t4_overlap < 9);
+SELECT IF(@t4_fail,
+          CONCAT('FAIL: overlap ', IFNULL(@t4_overlap, 0),
+                 '/10 at ef_search 1000; true neighbours missed: ', @t4_missed),
+          CONCAT('PASS: overlap ', @t4_overlap,
+                 '/10; true neighbours missed: ', @t4_missed)) AS result;
 SET @failures = @failures + @t4_fail;
+DROP TEMPORARY TABLE t4_idx;
+DROP TEMPORARY TABLE t4_exa;
 
 -- ---------------------------------------------------------------------------
 -- T5: the headline claim -- recall@10 >= 0.98 at the documented ef_search

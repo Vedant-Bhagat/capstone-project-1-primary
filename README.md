@@ -25,6 +25,67 @@ SQL statement, then measures honestly what the approximate index costs in accura
 
 **Capstone Project I**, Constructor University, in partnership with the MariaDB Foundation.
 
+## Quickstart
+
+**Requirements:** MariaDB **11.8 or later** (`VECTOR` does not exist before it) and Python **3.11**. No API
+key, and no account anywhere: every measured number below is produced with `--no-llm`.
+
+```bash
+pip install -r requirements.txt            # pinned; see .env.example for connection settings
+mariadb -u root < sql/schema.sql           # creates the `wikirag` database and every table
+```
+
+`schema.sql` is idempotent and creates its own database, so that one command is the whole database setup.
+**On PowerShell `<` does not redirect** — use `Get-Content sql/schema.sql | mariadb -u root`.
+
+> **Both of those are destructive, by design.** `schema.sql` begins `DROP DATABASE IF EXISTS wikirag`, and
+> `sql/fixture.sql` below does `DELETE FROM chunks` — the fixture and the real corpus share one set of
+> tables. That is what makes them idempotent and safe to re-run while developing, but it means **running
+> either one after a full ingest destroys the corpus**, which costs about 25 minutes to rebuild. If you have
+> ingested already and only want the synthetic examples, point the tools at a scratch database with
+> `WIKIRAG_DB` instead.
+
+### Try the feature in 30 seconds, without building the corpus
+
+```bash
+mariadb -u root -t < sql/fixture.sql                   # 2,000 synthetic chunks, ~11 s
+mariadb -u root -t < sql/retrieval/semantic.sql        # plain top-k semantic search
+mariadb -u root -t < sql/retrieval/hybrid_filter.sql   # vector + a SQL predicate, one statement
+mariadb -u root -t < sql/retrieval/minimal_repro.sql   # the defect below, self-contained
+```
+
+The fixture's vectors are generated, not embedded, so **it demonstrates the SQL and proves nothing about
+quality** — `docs/limitations.md` §3 is blunt about this. It exists so you can see the feature work without
+waiting on an ingest.
+
+### Build the real corpus and ask it questions
+
+```bash
+python -m python.ingest --manifest corpus_manifest.csv   # the exact 1,289 articles we measured
+python -m python.answer "why can't penguins fly?" --no-llm
+python -m python.answer "which birds did Linnaeus name in 1758?" --category birds --no-llm
+```
+
+Expect **about 25 minutes** with a GPU and **two hours or so** on a CPU. Wikipedia is fetched one request
+per second by courtesy, which is most of the first number; embedding 18,651 chunks is 3 minutes on an
+RTX 3050 against 90 on eight CPU threads (`docs/limitations.md` §5). The ingest caches to `raw/` and is
+resumable, so an interrupted run continues rather than restarting. Drop `--manifest` to build from today's
+Wikipedia instead of our pinned revisions — faster to start, but the numbers will not match ours exactly.
+
+Omit `--no-llm` to have an answering model write a cited answer from the retrieved passages. That is the
+**only** step needing a key; set `GEMINI_API_KEY` or `ANTHROPIC_API_KEY` in the environment (see
+`.env.example`), and without one `answer.py` prints the passages and says so rather than failing.
+
+### Reproduce the measurements
+
+```bash
+mariadb -u root -t < sql/evaluation/ground_truth.sql   # exact neighbours by brute force
+mariadb -u root -t < sql/evaluation/recall_sweep.sql   # recall and latency across ef_search
+mariadb -u root -t < sql/evaluation/tests.sql          # T1-T10; fails the build on a regression
+python -m unittest discover -s python -p "test_*.py"   # 36 unit tests, no database needed
+python -m python.grade_answers --no-llm                # retrieval hit@k against known source chunks
+```
+
 ## Explained without the jargon
 
 > Imagine every paragraph of Wikipedia being given a position on an enormous map — not a map of the world,
@@ -104,7 +165,8 @@ so nothing in this repository runs on anything earlier.
 Note this is a higher floor than our starter project, which runs on 10.3 or later. The starter's CI matrix
 includes 11.4; that version predates the vector type entirely and had to be dropped here.
 
-Probing and development so far: **12.3.3**. CI will run against **11.8, 12.3 and the current release**.
+Probing and development: **12.3.3**. CI **runs** against **11.8, 12.3 and the current release** on every
+push, and the whole test suite is green on all three.
 
 ## What we have already verified
 
@@ -250,6 +312,7 @@ python/                     component A: the ingest. Runs with no API key
   embed.py                  BAAI/bge-small-en-v1.5 locally; GPU if there is one
   ingest.py                 one command: fetch, chunk, embed, load, then index
   answer.py                 retrieval in one SQL statement, generation optional
+  grade_answers.py          answer grading; level 0 needs no API key
   test_chunk.py             15 tests
   test_htmltotext.py        21 tests, each drop rule mutation-checked
 
@@ -259,7 +322,8 @@ sql/retrieval/
   semantic.sql              plain top-k semantic search
   hybrid_filter.sql         relational predicate + vector, one statement
   hybrid_fulltext.sql       full-text + vector, fused with RRF
-  under_return.sql          the filtered-search behaviour, checked at 384 dims
+  under_return.sql          the filtered-search behaviour, on the real corpus
+  minimal_repro.sql         the same defect in 2,048 rows of pure SQL, no corpus needed
 sql/evaluation/
   ground_truth.sql          exact neighbours by brute force; the index is graded against this
   recall_sweep.sql          recall and latency across ef_search, with variance
@@ -268,8 +332,11 @@ sql/evaluation/
 .github/workflows/ci.yml    11.8, 12.3 and current; unit tests, then every SQL script
 docs/findings.md            every measured number, with the method that produced it
 docs/limitations.md         what this does NOT establish, and where the numbers stop
+docs/bug_report_draft.md    the defect write-up, with the Jira prior art. Not filed
 corpus_manifest.csv         revision id and text SHA-256 per article; reproducibility
 eval_queries.csv            54 evaluation questions, six per category
+eval_qa_pairs.csv           30 QA pairs with known source chunks, plus 10 unanswerable
+.env.example                connection settings; shows which steps need no key
 requirements.txt            pinned, because unpinned deps make a corpus unreproducible
 
 self_assessment/            weekly self-assessment, one section per contributor
@@ -278,8 +345,16 @@ AI_USE_LOG.md               record of AI tool use, traced per change
 CONTRIBUTING.md             branching, commits, PR and review workflow
 ```
 
-Still to come: the real-corpus numbers in `docs/findings.md`, and `docs/bug_report_draft.md` if the
-under-return survives the checks in [`09_verified_findings.md`](docs/main_dish_spec/09_verified_findings.md).
+Both of the things this section used to list as "still to come" now exist. The real-corpus numbers are in
+[`docs/findings.md`](docs/findings.md), and the under-return survived every check in
+[`09_verified_findings.md`](docs/main_dish_spec/09_verified_findings.md), so
+[`docs/bug_report_draft.md`](docs/bug_report_draft.md) is written.
+
+**It has not been filed, deliberately.** Searching MariaDB's Jira first — which we had set ourselves as a
+precondition — found the symptom already reported three times and still unfixed, including one ticket
+(MDEV-37709) closed only because its reporter could not shrink a 250 MB dump into a test case. So the draft
+now recommends commenting on that ticket with `sql/retrieval/minimal_repro.sql` rather than opening a fourth
+report, and posting anything is a decision for all three of us.
 
 ## Our other project
 

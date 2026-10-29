@@ -207,10 +207,18 @@ def load_eval_queries(cur):
     cur.execute("DELETE FROM recall_runs")
     cur.execute("DELETE FROM eval_queries")
     vectors = embed.encode_queries([r["query_text"] for r in rows])
+    # The id comes FROM THE CSV and is not left to AUTO_INCREMENT. Every
+    # committed query selects its probe by id (`WHERE id = 1`), and
+    # `DELETE FROM` does not reset AUTO_INCREMENT -- so loading the fixture and
+    # then ingesting used to leave these rows numbered 55-108. `WHERE id = 1`
+    # then matched nothing, @q became NULL, every VEC_DISTANCE_COSINE returned
+    # NULL, and ORDER BY on a column of NULLs returned the first ten rows of
+    # the table in storage order. Which are all birds, so the output looked
+    # entirely plausible. Making the CSV authoritative is what stops that.
     cur.executemany(
-        "INSERT INTO eval_queries (query_text, embedding) "
-        "VALUES (%s, VEC_FromText(%s))",
-        [(r["query_text"], embed.to_vec_text(v))
+        "INSERT INTO eval_queries (id, query_text, embedding) "
+        "VALUES (%s, %s, VEC_FromText(%s))",
+        [(int(r["id"]), r["query_text"], embed.to_vec_text(v))
          for r, v in zip(rows, vectors)])
     return len(rows)
 

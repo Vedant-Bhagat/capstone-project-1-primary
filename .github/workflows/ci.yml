@@ -131,3 +131,21 @@ jobs:
             fi
           done
           exit $fail
+
+      # The minimal reproduction, run on a machine that is not ours. It needs
+      # no corpus and no embedding model, so it costs about a second.
+      #
+      # It REPORTS rather than gates, on the same reasoning as T10: whether the
+      # optimizer picks the vector index depends on a cost estimate, so a
+      # future version that pre-filters instead would correctly return all ten
+      # rows and redden every build for doing the right thing. The script
+      # prints its own verdict and its EXPLAIN, so the log says which plan this
+      # server chose and whether the shortfall appeared.
+      #
+      # This is the step that makes docs/bug_report_draft.md's version claim
+      # checkable by someone else: three servers, one script, verdict in the log.
+      - name: Minimal reproduction of the filtered under-return (reports only)
+        run: |
+          echo "::group::minimal_repro.sql on mariadb:${{ matrix.mariadb }}"
+          $DB -t < sql/retrieval/minimal_repro.sql             || echo "::warning::minimal_repro.sql did not complete on ${{ matrix.mariadb }} -- it needs the SEQUENCE plugin for seq_1_to_2048"
+          echo "::endgroup::"
