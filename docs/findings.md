@@ -287,6 +287,23 @@ model, which file 08 says must be validated against human scores before publicat
 the script labels every judge number unvalidated in its own output and writes an empty `human` column for a
 hand-scored sample. **No judge figure should reach the README until that agreement rate exists.**
 
+## The minimal reproduction runs in CI, on three versions, on somebody else's machine
+
+`sql/retrieval/minimal_repro.sql` is a CI step as of 2026-10-29. It needs no corpus, so it costs about a
+second per server. It **reports rather than gates**, for T10's reason: whether the optimizer picks the
+vector index is a cost decision, and a future version that pre-filters instead would correctly return all
+ten rows and redden the build for doing the right thing.
+
+| server (`ubuntu-latest`, official image) | verdict |
+|---|---|
+| `mariadb:11.8` | REPRODUCED — 6 of 8 categories short, worst 0 |
+| `mariadb:12.3` | REPRODUCED — 6 of 8 categories short, worst 0 |
+| `mariadb:latest` | REPRODUCED — **7 of 8** categories short, worst 0 |
+
+Every latency figure in this file still comes from one Windows laptop. The *defect*, though, no longer rests
+on our hardware at all: it reproduces from a public log on three versions and a different operating system,
+and `latest` is the worst of the three.
+
 ## A silent failure in our own committed examples
 
 Found 2026-10-29 while verifying that the README's new Quickstart commands actually run. Recorded here

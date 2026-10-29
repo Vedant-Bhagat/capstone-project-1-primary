@@ -111,6 +111,22 @@ Two details that matter for anyone trying to predict this:
   to our own earlier framing, which the real corpus (where the table happened to be monotonic in distance)
   had let us state too strongly.
 
+### Reproduced in CI on three server versions, on hardware that is not ours
+
+`minimal_repro.sql` runs in the CI matrix as a reporting step, so every push produces this on
+`ubuntu-latest` with the official `mariadb` images. Run 2026-10-29:
+
+| server | verdict |
+|---|---|
+| `mariadb:11.8` | REPRODUCED — 6 of 8 categories short, worst returned 0 |
+| `mariadb:12.3` | REPRODUCED — 6 of 8 categories short, worst returned 0 |
+| `mariadb:latest` | REPRODUCED — **7 of 8** categories short, worst returned 0 |
+
+`FORCE INDEX` and `IGNORE INDEX` returned all 10 for every category on all three. This matters for the
+report in two ways: the version claim is now checkable by anyone from a public log rather than resting on
+our laptop, and **the newest release is the worst of the three**, which is the opposite of what a reader
+would assume about a defect marked fixed in 11.7.1.
+
 ### The table must be large enough for the vector plan to be chosen
 
 Worth stating because it is the first thing that will make a reproduction attempt fail:
