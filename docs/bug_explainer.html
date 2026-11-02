@@ -1,0 +1,577 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="The case for reporting MariaDB's silent empty result on filtered vector search, written for a reader with no background in the project.">
+<style>
+  :root { color-scheme: light }
+  * { box-sizing: border-box }
+  body { margin: 0; font: 14px system-ui, sans-serif }
+  img { max-width: 100% }
+  [hidden] { display: none !important }
+</style>
+<title>Zero Rows Returned</title>
+</head>
+<body>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap">
+<style>
+  /* Layout: one reading column of argument; evidence breaks out wider than the prose. */
+  :root {
+    --bg: #f3f4f7;
+    --surface: #ffffff;
+    --surface-2: #fafbfc;
+    --fg: #15181e;
+    --muted: #596273;
+    --line: #d8dde5;
+    --line-strong: #bcc4d0;
+    --accent: #1f4fa8;
+    --accent-soft: #e8eef9;
+    --bad: #a3203a;
+    --bad-soft: #fbe8ec;
+    --good: #1c6347;
+    --good-soft: #e5f1eb;
+
+    --display: "Newsreader", Georgia, "Times New Roman", serif;
+    --body: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0e1116;
+      --surface: #161a21;
+      --surface-2: #1b2029;
+      --fg: #e9ebef;
+      --muted: #9ba4b2;
+      --line: #262d37;
+      --line-strong: #39424f;
+      --accent: #8fb3f2;
+      --accent-soft: #17243a;
+      --bad: #f2899c;
+      --bad-soft: #341a20;
+      --good: #76c9a0;
+      --good-soft: #142620;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0e1116;
+    --surface: #161a21;
+    --surface-2: #1b2029;
+    --fg: #e9ebef;
+    --muted: #9ba4b2;
+    --line: #262d37;
+    --line-strong: #39424f;
+    --accent: #8fb3f2;
+    --accent-soft: #17243a;
+    --bad: #f2899c;
+    --bad-soft: #341a20;
+    --good: #76c9a0;
+    --good-soft: #142620;
+    color-scheme: dark;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--body);
+    font-size: 1rem;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap {
+    max-width: 54rem;
+    margin: 0 auto;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-block: 0 4rem;
+  }
+  .prose { max-width: 36rem; }
+
+  h1, h2, h3 { font-family: var(--display); font-weight: 500; text-wrap: balance; margin: 0; }
+  h1 { font-size: clamp(2.1rem, 6vw, 3.1rem); line-height: 1.08; letter-spacing: -0.01em; }
+  h2 { font-size: clamp(1.4rem, 3.4vw, 1.8rem); line-height: 1.2; }
+  h3 { font-size: 1.08rem; line-height: 1.3; font-family: var(--body); font-weight: 600; }
+  p { margin: 0; }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  header.top {
+    border-bottom: 1px solid var(--line);
+    padding-block: 3rem 2.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+  }
+  .verdict {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    align-self: flex-start;
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: var(--accent-soft);
+    border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+    border-radius: 999px;
+    padding: 0.3rem 0.7rem;
+  }
+  .standfirst { font-size: 1.12rem; color: var(--muted); max-width: 34rem; }
+  .byline {
+    font-family: var(--mono);
+    font-size: 0.74rem;
+    color: var(--muted);
+    border-top: 1px solid var(--line);
+    padding-top: 0.9rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1.4rem;
+  }
+
+  section { padding-block: 2.5rem; border-bottom: 1px solid var(--line); display: flex; flex-direction: column; gap: 1rem; }
+  section:last-of-type { border-bottom: 0; }
+  section > p, section > ul, section > ol { max-width: 36rem; }
+
+  .lede { font-family: var(--display); font-size: 1.22rem; line-height: 1.45; }
+
+  ul, ol { margin: 0; padding-left: 1.15rem; display: flex; flex-direction: column; gap: 0.6rem; }
+  li::marker { color: var(--muted); }
+  strong { font-weight: 600; }
+  em { font-style: italic; }
+  a { color: var(--accent); text-underline-offset: 2px; }
+
+  code { font-family: var(--mono); font-size: 0.86em; }
+  .code {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    overflow-x: auto;
+    min-width: 0;
+  }
+  .code pre {
+    margin: 0;
+    padding: 1.1rem 1.2rem;
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    line-height: 1.75;
+    white-space: pre;
+  }
+  .cmt { color: var(--muted); }
+  .kw { color: var(--accent); font-weight: 500; }
+
+  .tablewrap { overflow-x: auto; min-width: 0; border: 1px solid var(--line); border-radius: 4px; background: var(--surface); }
+  table { border-collapse: collapse; width: 100%; font-size: 0.84rem; }
+  caption {
+    caption-side: top;
+    text-align: left;
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 0.8rem 1rem 0.55rem;
+  }
+  th, td { padding: 0.5rem 1rem; text-align: left; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  thead th {
+    font-family: var(--mono);
+    font-weight: 500;
+    font-size: 0.7rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border-bottom: 1px solid var(--line-strong);
+  }
+  tbody tr:last-child td { border-bottom: 0; }
+  .num { font-variant-numeric: tabular-nums; font-family: var(--mono); }
+  td.zero { color: var(--bad); font-weight: 500; background: var(--bad-soft); font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  td.ok { color: var(--good); font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  .wrapcell { white-space: normal; min-width: 14rem; }
+
+  .three { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 4px; overflow: hidden; }
+  .three > div { background: var(--surface); padding: 1.1rem; display: flex; flex-direction: column; gap: 0.45rem; min-width: 0; }
+  .three .big { font-family: var(--mono); font-size: 1.9rem; line-height: 1; font-variant-numeric: tabular-nums; }
+  .three .big.bad { color: var(--bad); }
+  .three .big.good { color: var(--good); }
+  .three code { font-size: 0.78rem; color: var(--fg); }
+  .three p { font-size: 0.84rem; color: var(--muted); line-height: 1.5; }
+  @media (max-width: 620px) { .three { grid-template-columns: 1fr; } }
+
+  .ruleout { display: flex; flex-direction: column; gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 4px; overflow: hidden; }
+  .ruleout > div { background: var(--surface); padding: 0.95rem 1.1rem; display: grid; grid-template-columns: 11rem 1fr; gap: 0.3rem 1.4rem; min-width: 0; }
+  .ruleout h3 { font-size: 0.88rem; }
+  .ruleout p { font-size: 0.86rem; color: var(--muted); min-width: 0; }
+  @media (max-width: 620px) { .ruleout > div { grid-template-columns: 1fr; } }
+
+  figure { margin: 0; display: flex; flex-direction: column; gap: 0.7rem; }
+  figure svg { display: block; width: 100%; height: auto; max-width: 100%; background: var(--surface); border: 1px solid var(--line); border-radius: 4px; }
+  figcaption { font-size: 0.82rem; color: var(--muted); max-width: 34rem; }
+
+  .ask { background: var(--surface); border: 1px solid var(--line-strong); border-radius: 4px; padding: 1.4rem 1.5rem; display: flex; flex-direction: column; gap: 0.8rem; }
+  .ask .eyebrow { color: var(--accent); }
+  .ask h2 { font-size: 1.3rem; }
+  .ask p { font-size: 0.95rem; max-width: 34rem; }
+
+  .conf { display: flex; flex-direction: column; gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 4px; overflow: hidden; }
+  .conf > div { background: var(--surface); padding: 0.95rem 1.1rem; display: grid; grid-template-columns: 4.6rem 1fr; gap: 0.4rem 1.2rem; align-items: baseline; min-width: 0; }
+  .conf .pct { font-family: var(--mono); font-size: 1.1rem; font-variant-numeric: tabular-nums; color: var(--accent); }
+  .conf .claim { font-weight: 600; font-size: 0.94rem; min-width: 0; }
+  .conf .meter { height: 3px; border-radius: 2px; background: var(--line-strong); overflow: hidden; align-self: center; }
+  .conf .meter span { display: block; height: 100%; background: var(--accent); }
+  .conf .why { font-size: 0.86rem; color: var(--muted); min-width: 0; line-height: 1.55; }
+  @media (max-width: 620px) {
+    .conf > div { grid-template-columns: 1fr auto; }
+    .conf .meter { grid-column: 1 / -1; order: 3; }
+    .conf .why { grid-column: 1 / -1; order: 4; }
+    .conf .claim { order: 1; }
+    .conf .pct { order: 2; text-align: right; }
+  }
+
+  .retract { display: flex; flex-direction: column; gap: 1.35rem; }
+  .retract > div { border-left: 2px solid var(--bad); padding-left: 1.1rem; display: flex; flex-direction: column; gap: 0.4rem; min-width: 0; }
+  .retract .when { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--bad); }
+  .retract .said { font-family: var(--display); font-size: 1.1rem; line-height: 1.3; }
+  .retract p { font-size: 0.88rem; color: var(--muted); max-width: 34rem; }
+  .retract .now { font-size: 0.88rem; max-width: 34rem; }
+
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 4px; overflow: hidden; }
+  .split > div { background: var(--surface); padding: 1.2rem; display: flex; flex-direction: column; gap: 0.8rem; min-width: 0; }
+  .split h3 { font-size: 0.95rem; }
+  .split .yes h3 { color: var(--good); }
+  .split .no h3 { color: var(--muted); }
+  .split ul { padding-left: 1.05rem; gap: 0.6rem; }
+  .split li { font-size: 0.86rem; color: var(--muted); line-height: 1.55; }
+  .split li strong { color: var(--fg); }
+  @media (max-width: 620px) { .split { grid-template-columns: 1fr; } }
+
+  footer { padding-block: 2.5rem 1rem; font-size: 0.82rem; color: var(--muted); display: flex; flex-direction: column; gap: 0.5rem; }
+  footer code { font-size: 0.8rem; }
+</style>
+
+<div class="wrap">
+
+  <header class="top">
+    <p class="eyebrow">Capstone Project I &middot; MariaDB Foundation &middot; Area 4</p>
+    <h1>A query asks for 10 rows.<br>256 qualify. It returns none.</h1>
+    <p class="standfirst">No error message, no warning, and the program carries on as if the answer were correct. We think this is a genuine defect in MariaDB, and we would like to report it. This page is the case, from scratch.</p>
+    <span class="verdict">Asking to send one comment to MariaDB</span>
+    <div class="byline">
+      <span>Golden Record &middot; Vedant, Janhavi, Pranesh</span>
+      <span>2 November 2026</span>
+      <span>MariaDB 11.8, 12.3.3, current release</span>
+    </div>
+  </header>
+
+  <section>
+    <p class="eyebrow">What the project does</p>
+    <h2>Searching text by meaning, inside the database</h2>
+    <p class="lede">MariaDB recently learned to search by meaning rather than by keyword. Our project measures how well that works. In the course of measuring it, we found a case where the database quietly gives the wrong answer.</p>
+    <p>The technique is standard. Each paragraph of text is converted by a language model into a list of numbers, and paragraphs about similar things end up with similar numbers. "Nearest" in that number space means "closest in meaning". We loaded 1,289 Wikipedia articles, cut into 18,651 paragraphs, and asked the database for the paragraphs nearest to a question.</p>
+    <p>Searching all 18,651 paragraphs one by one is exact but slow, so databases build an <strong>index</strong>: a shortcut structure that finds the near ones without looking at everything. The shortcut is approximate by design, and trading a little accuracy for speed is expected and fine. <strong>Returning nothing at all is not.</strong></p>
+  </section>
+
+  <section>
+    <p class="eyebrow">The symptom</p>
+    <h2>One query, two ordinary conditions</h2>
+    <p>Our test table has 2,048 rows. Each row carries a category number from 0 to 7, so each category holds exactly 256 rows. The query says: of the rows in category 4, give me the 10 nearest to this point.</p>
+    <div class="code"><pre><span class="kw">SELECT</span> id
+<span class="kw">FROM</span>   t
+<span class="kw">WHERE</span>  cat = 4                             <span class="cmt">-- 256 of the 2,048 rows match this</span>
+<span class="kw">ORDER BY</span> VEC_DISTANCE_COSINE(v, @query)    <span class="cmt">-- nearest first</span>
+<span class="kw">LIMIT</span>  10;                                <span class="cmt">-- so: the 10 nearest of those 256</span></pre></div>
+    <p>There is nothing exotic here. Both conditions are the kind every application writes. The expected answer is 10 rows. The actual answer is an empty result, with <code>SHOW WARNINGS</code> empty and the program's exit status reporting success.</p>
+    <p>Running it for every category at once shows the shape of the problem. Six of the eight categories return nothing:</p>
+    <div class="tablewrap">
+      <table>
+        <caption>2,048 rows &middot; MariaDB 12.3.3 &middot; every category holds 256 rows</caption>
+        <thead>
+          <tr>
+            <th>Category</th>
+            <th>Rows that qualify</th>
+            <th>Distance from the question</th>
+            <th>Rows returned</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="num">0</td><td class="num">256</td><td class="num">0.0005</td><td class="ok">10</td></tr>
+          <tr><td class="num">7</td><td class="num">256</td><td class="num">0.0326</td><td class="zero">0</td></tr>
+          <tr><td class="num">1</td><td class="num">256</td><td class="num">0.0332</td><td class="ok">10</td></tr>
+          <tr><td class="num">6</td><td class="num">256</td><td class="num">0.1274</td><td class="zero">0</td></tr>
+          <tr><td class="num">2</td><td class="num">256</td><td class="num">0.1337</td><td class="zero">0</td></tr>
+          <tr><td class="num">5</td><td class="num">256</td><td class="num">0.2468</td><td class="zero">0</td></tr>
+          <tr><td class="num">3</td><td class="num">256</td><td class="num">0.2644</td><td class="zero">0</td></tr>
+          <tr><td class="num">4</td><td class="num">256</td><td class="num">0.3161</td><td class="zero">0</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>A program using this database has no way to notice. It asked a reasonable question, received an empty answer, and will report to its user that there is nothing to show.</p>
+  </section>
+
+  <section>
+    <p class="eyebrow">The control</p>
+    <h2>The same question, asked three ways</h2>
+    <p>This is the part that makes it a defect rather than a misunderstanding on our side. SQL lets you tell the database which shortcut to use. The data, the question and the answer required are identical in all three cases. Only the route changes.</p>
+    <div class="three">
+      <div>
+        <p class="eyebrow">Database chooses</p>
+        <span class="big bad">0</span>
+        <code>&mdash; no hint &mdash;</code>
+        <p>It picks the vector shortcut and returns an empty result.</p>
+      </div>
+      <div>
+        <p class="eyebrow">Filter first</p>
+        <span class="big good">10</span>
+        <code>FORCE INDEX (ix_cat)</code>
+        <p>Find the 256 rows in the category, then measure each one. Correct.</p>
+      </div>
+      <div>
+        <p class="eyebrow">No shortcut at all</p>
+        <span class="big good">10</span>
+        <code>IGNORE INDEX (v)</code>
+        <p>Measure every row in the table. Correct, and the definition of the right answer.</p>
+      </div>
+    </div>
+    <p>The rows exist, the database can reach them, and two of the three routes find them. The route it chooses on its own is the one that fails. That is the whole argument.</p>
+  </section>
+
+  <section>
+    <p class="eyebrow">The mechanism</p>
+    <h2>Why the shortcut comes back empty</h2>
+    <p>The shortcut is a map of which rows are near which other rows. To answer a query it starts near the question and walks outward a limited number of steps, collecting candidates. Only afterwards does it check the category condition and throw away whatever does not match.</p>
+    <figure>
+      <svg viewBox="0 0 760 290" role="img" aria-label="The index searches a small neighbourhood around the question, which contains only rows from the wrong category, so every candidate is discarded and nothing is returned.">
+        <circle cx="180" cy="145" r="92" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="5 5" opacity="0.75"></circle>
+        <circle cx="140" cy="110" r="4.5" fill="var(--line-strong)"></circle>
+        <circle cx="205" cy="118" r="4.5" fill="var(--line-strong)"></circle>
+        <circle cx="160" cy="170" r="4.5" fill="var(--line-strong)"></circle>
+        <circle cx="222" cy="178" r="4.5" fill="var(--line-strong)"></circle>
+        <circle cx="120" cy="165" r="4.5" fill="var(--line-strong)"></circle>
+        <circle cx="196" cy="88" r="4.5" fill="var(--line-strong)"></circle>
+        <circle cx="240" cy="140" r="4.5" fill="var(--line-strong)"></circle>
+        <circle cx="128" cy="202" r="4.5" fill="var(--line-strong)"></circle>
+        <path d="M180 131 L180 159 M166 145 L194 145" stroke="var(--fg)" stroke-width="2.5" stroke-linecap="round"></path>
+        <text x="180" y="100" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="var(--fg)">the question</text>
+        <text x="180" y="262" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="var(--accent)">where the index looks</text>
+        <text x="180" y="278" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="var(--muted)">all candidates are category 0</text>
+        <circle cx="575" cy="122" r="4.5" fill="var(--bad)"></circle>
+        <circle cx="612" cy="100" r="4.5" fill="var(--bad)"></circle>
+        <circle cx="640" cy="135" r="4.5" fill="var(--bad)"></circle>
+        <circle cx="596" cy="150" r="4.5" fill="var(--bad)"></circle>
+        <circle cx="558" cy="162" r="4.5" fill="var(--bad)"></circle>
+        <circle cx="630" cy="174" r="4.5" fill="var(--bad)"></circle>
+        <circle cx="668" cy="108" r="4.5" fill="var(--bad)"></circle>
+        <circle cx="586" cy="190" r="4.5" fill="var(--bad)"></circle>
+        <circle cx="654" cy="200" r="4.5" fill="var(--bad)"></circle>
+        <text x="612" y="68" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="var(--bad)">category 4: 256 rows</text>
+        <text x="612" y="232" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="var(--muted)">every one of them qualifies</text>
+        <text x="612" y="248" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="var(--muted)">and none is ever visited</text>
+        <path d="M292 145 L478 145" stroke="var(--line-strong)" stroke-width="1.5" stroke-dasharray="4 6"></path>
+        <text x="385" y="136" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="var(--muted)">never reached</text>
+      </svg>
+      <figcaption>The index collects its candidates from the neighbourhood of the question, then discards the ones in the wrong category. When the category you asked for lies outside that neighbourhood, every candidate is discarded and nothing is left. It does not widen the search to compensate, and it does not tell you it gave up.</figcaption>
+    </figure>
+    <p>This also explains the odd column in the table above. What predicts failure is not how rare the category is, since all eight are equally common here, but how far it sits from the question.</p>
+  </section>
+
+  <section>
+    <p class="eyebrow">Due diligence</p>
+    <h2>Four explanations we tested and eliminated</h2>
+    <p>Each of these was a plausible way for us to be wrong. We checked all four, and two of them corrected our own earlier claims.</p>
+    <div class="ruleout">
+      <div>
+        <h3>"The category is too rare"</h3>
+        <p>No. All eight categories are exactly 12.5% of the table, and they do not behave alike. Rarity does not explain it.</p>
+      </div>
+      <div>
+        <h3>"Too far is too far"</h3>
+        <p>Also no, and this one cost us a claim. Categories 7 and 1 sit at distance 0.0326 and 0.0332, two per cent apart, and one returns nothing while the other returns everything. Distance ranks the risk. It does not draw a line, and we no longer say it does.</p>
+      </div>
+      <div>
+        <h3>"Search harder"</h3>
+        <p>The documented remedy is to widen the search. We tried 10, 100 and 2,000 steps, the last being the size of the entire table. All three return zero rows.</p>
+      </div>
+      <div>
+        <h3>"Build a denser index"</h3>
+        <p>Helps, unpredictably. Going from the shipped density to the next one up fixes five categories and <em>breaks</em> one that previously worked. One category stays broken at every density we tried. It is a reshuffle, not a fix.</p>
+      </div>
+    </div>
+    <p>One more detail matters, because it is why this bug has survived. Below roughly 768 rows the database stops choosing the shortcut, filters first, and is perfectly correct. <strong>Shrink the test case and the bug disappears.</strong></p>
+  </section>
+
+  <section>
+    <p class="eyebrow">Prior art</p>
+    <h2>MariaDB's own bug tracker already agrees</h2>
+    <p>Before writing anything we searched their tracker, which changed what we are sending. We are not claiming to have discovered this. It is reported, accepted, and still present.</p>
+    <div class="tablewrap">
+      <table>
+        <caption>jira.mariadb.org &middot; searched 28 October 2026</caption>
+        <thead>
+          <tr><th>Ticket</th><th>Status</th><th class="wrapcell">What it means for us</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="num">MDEV-34774</td>
+            <td>Fixed in 11.7.1</td>
+            <td class="wrapcell">Our exact symptom, accepted as a bug and fixed. We reproduce it on 11.8, 12.3 and the current release, so the fix is incomplete or it came back.</td>
+          </tr>
+          <tr>
+            <td class="num">MDEV-37709</td>
+            <td>Closed, Incomplete</td>
+            <td class="wrapcell">Same symptom, closed only because the reporter could not shrink a 250&nbsp;MB database into a small test case. Our 2,048-row script is exactly what they asked for and never got.</td>
+          </tr>
+          <tr>
+            <td class="num">MDEV-41342</td>
+            <td>Confirmed, open</td>
+            <td class="wrapcell">Returns fewer rows than the table holds. Same shortfall, reached a different way.</td>
+          </tr>
+          <tr>
+            <td class="num">MDEV-41227</td>
+            <td>Confirmed, open</td>
+            <td class="wrapcell">Rows become unreachable through the index after deletions. Same family of problem.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p>So this is not a student team telling a database project that its behaviour is wrong. It is a database project that already calls this behaviour wrong, and a request they made that nobody has answered. <strong>That is why we want to send a comment on an existing ticket rather than open a new one.</strong></p>
+  </section>
+
+  <section>
+    <p class="eyebrow">Independence</p>
+    <h2>It reproduces on machines that are not ours</h2>
+    <p>Our reproduction is 2,048 rows generated by arithmetic inside the database. No downloads, no language model, no random numbers, so it loads identically on anyone's computer, and it runs in about one second. It runs automatically on GitHub's servers against three MariaDB versions on every change we make.</p>
+    <div class="tablewrap">
+      <table>
+        <caption>GitHub Actions &middot; Ubuntu &middot; official MariaDB images &middot; 29 October 2026</caption>
+        <thead><tr><th>Version</th><th>Categories short of 10</th><th>Worst case</th></tr></thead>
+        <tbody>
+          <tr><td class="num">mariadb:11.8</td><td class="num">6 of 8</td><td class="zero">0 rows</td></tr>
+          <tr><td class="num">mariadb:12.3</td><td class="num">6 of 8</td><td class="zero">0 rows</td></tr>
+          <tr><td class="num">mariadb:latest</td><td class="num">7 of 8</td><td class="zero">0 rows</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>The newest release is the worst of the three. For a defect marked fixed two versions ago, that is the opposite of what a reader would expect, and it is the single most useful fact we can hand them.</p>
+  </section>
+
+  <section>
+    <p class="eyebrow">Calibration</p>
+    <h2>How sure we are, claim by claim</h2>
+    <p>These four are not equally certain, and the report rests only on the first two. Separating them is the point. A single number for "it is a bug" would hide where the doubt actually sits.</p>
+    <div class="conf">
+      <div>
+        <span class="pct">~99%</span>
+        <span class="claim">The behaviour happens</span>
+        <span class="meter"><span style="width:99%"></span></span>
+        <span class="why">Identical across five runs and five rebuilds of the index, and reproduced on GitHub's machines against three server versions. For this to be wrong, a public build log would have to be wrong.</span>
+      </div>
+      <div>
+        <span class="pct">~90%</span>
+        <span class="claim">It is a defect, not intended behaviour</span>
+        <span class="meter"><span style="width:90%"></span></span>
+        <span class="why">Mostly because MariaDB already decided this. They accepted the same symptom as a bug and fixed it once, and two more in the family are confirmed open. No warning is raised either, and deliberate truncation would normally warn.</span>
+      </div>
+      <div>
+        <span class="pct">~60%</span>
+        <span class="claim">It is the same defect that was fixed in 11.7.1</span>
+        <span class="meter"><span style="width:60%"></span></span>
+        <span class="why">Same symptom, same query shape, but code paths are not visible from SQL. Incomplete fix, regression, or a separate bug that looks identical are all live. This is why the comment asks rather than asserts.</span>
+      </div>
+      <div>
+        <span class="pct">~50%</span>
+        <span class="claim">MariaDB acts on it</span>
+        <span class="meter"><span style="width:50%"></span></span>
+        <span class="why">Independent of whether we are right. Four tickets in this family are already open, or closed without resolution.</span>
+      </div>
+    </div>
+    <p><strong>The one way we are meaningfully wrong:</strong> a maintainer replies that the vector index was never meant to serve a query with an unrelated <code>WHERE</code>, that <code>FORCE INDEX</code> is the intended pattern, and closes it as a known limitation. We put that at roughly one in ten, and our own code comments already concede that this index does not currently serve selective filtered queries. What argues against it is that they fixed the earlier ticket instead of saying exactly that.</p>
+  </section>
+
+  <section>
+    <p class="eyebrow">The record</p>
+    <h2>We have published the wrong thing about this twice</h2>
+    <p>Both retractions are in the repository, each with the measurement that forced it. A finding that has been corrected twice should be presented by the people who corrected it, and in those words.</p>
+    <div class="retract">
+      <div>
+        <span class="when">Withdrawn 22 October</span>
+        <span class="said">"It does not reproduce on real embeddings."</span>
+        <p>We had run it against the real corpus, seen it behave correctly, and recorded that as a limit on the finding. The test was faulty. The filters we happened to pick pointed in the same direction as the question, which is the one arrangement in which the shortcut cannot fail.</p>
+        <span class="now">It does reproduce on real embeddings. The limit was a false negative of our own making, and it sat in the repository for six days.</span>
+      </div>
+      <div>
+        <span class="when">Withdrawn 28 October</span>
+        <span class="said">"The failure is deterministic."</span>
+        <p>Replaced when five rebuilds of the same index over the same rows answered the same query with 10, 0, 2, 3 and 0 rows.</p>
+        <span class="now">On the real corpus it moves between runs and we cannot explain why. The small reproduction is stable, so it is evidence for the shortfall and not for the instability, and we say so in the report.</span>
+      </div>
+    </div>
+    <p>Neither correction touched whether the under-return happens. Both were about how we described it. That distinction is the reason we are willing to send anything at all.</p>
+  </section>
+
+  <section>
+    <p class="eyebrow">The limits</p>
+    <h2>What we are deliberately not claiming</h2>
+    <p>We have been wrong about this finding twice already, in public, in our own repository. Both retractions are recorded there with the measurement that forced them. These four lines go into the report itself rather than being left for a reviewer to find.</p>
+    <ol>
+      <li><strong>We do not know whether this is the same underlying flaw as the one fixed in 11.7.1.</strong> It could be an incomplete fix or a separate problem with the same symptom. We offer to open a separate ticket if they say so.</li>
+      <li><strong>On the real 18,651-paragraph corpus the failure moves between identical runs.</strong> We cannot explain that. A MariaDB developer has posted a plausible theory on a stalled ticket of his own; verifying it needs a special build of the server, not a query, so we cite nobody's theory as our cause.</li>
+      <li><strong>MariaDB's documentation does describe rows being silently dropped</strong> in a related situation. It is a different situation from ours, but close enough that a reviewer might reasonably point at it, which is why our report shows the query plans and the measurements rather than simply asserting a bug.</li>
+      <li><strong>Our second finding is not a bug and is not in this report.</strong> The shipped index density reaches 83% accuracy on our corpus where a denser one reaches 99%. That is a default we think is set too low, which is an opinion, so it goes separately and last. Two similar reports from other people were declined.</li>
+    </ol>
+  </section>
+
+  <section>
+    <p class="eyebrow">The contribution</p>
+    <h2>What the comment adds, and what it does not</h2>
+    <p>The difference between these two columns is the difference between a useful report and a nuisance, so it is worth stating before sending rather than after.</p>
+    <div class="split">
+      <div class="yes">
+        <h3>What it adds</h3>
+        <ul>
+          <li><strong>A test case that runs.</strong> The ticket was closed for want of exactly this and the request is still unanswered. One second, nothing to download.</li>
+          <li><strong>Why shrinking it fails.</strong> Below about 768 rows the database stops choosing the shortcut and the symptom vanishes. That is probably why the original reporter could not reduce their 250&nbsp;MB case, and it appears nowhere in the tracker.</li>
+          <li><strong>A version to prioritise by.</strong> The newest release is the worst of the three, against a fix recorded two versions ago.</li>
+          <li><strong>Two dead ends closed.</strong> Widening the search recovers nothing, and a denser index repairs five categories while breaking one. Neither suggestion needs to be made.</li>
+        </ul>
+      </div>
+      <div class="no">
+        <h3>What it does not add</h3>
+        <ul>
+          <li><strong>A cause.</strong> No code pointer and no patch. Every part of the real diagnosis stays with them.</li>
+          <li><strong>A new symptom.</strong> They know the symptom; it is in four tickets. We supply the missing evidence, not the observation.</li>
+          <li><strong>Anything on the instability.</strong> Deliberately. The one plausible theory needs a build of the server we do not have.</li>
+          <li><strong>Any claim on their time.</strong> If the answer is "known limitation", that is a complete answer and we will have cost them two minutes.</li>
+        </ul>
+      </div>
+    </div>
+    <p>So: a good bug report, not a discovery. The realistic best outcome is that a maintainer reproduces in one second something they currently cannot reproduce at all.</p>
+  </section>
+
+  <section>
+    <div class="ask">
+      <p class="eyebrow">What I would like your approval for</p>
+      <h2>One comment, on MDEV-37709</h2>
+      <p>A single comment on the ticket that was closed for want of a small test case, carrying the script and the three-route comparison above. Nothing is sent anywhere else until that one has a response.</p>
+      <p>It is the lowest-risk of the options and the highest value. The ticket's reviewer asked for precisely this. The script either reproduces on their machine or it does not, so the claim cannot be embarrassed by argument. And it is a contribution to work they already consider open, rather than an opinion from outside.</p>
+      <p>Two follow-ups are drafted and waiting: a note on MDEV-34774 that the symptom survived its fix, and, separately and last, the index-density opinion. All three are written out word for word in the repository, with the limits above carried into the text.</p>
+      <p>One addition to that plan. The ticket is closed, and comments on closed tickets are easy to miss, so we would also post once on the Foundation's Zulip with a link to it, which is the channel Kaj pointed us to rather than the tracker. The comment is the evidence. Zulip is how a person finds out it exists.</p>
+    </div>
+  </section>
+
+  <footer>
+    <p>Reproduce it in one second, on any MariaDB 11.7 or newer:<br><code>mariadb -u root &lt; sql/retrieval/minimal_repro.sql</code></p>
+    <p>The script prints the query plan it actually used, the table above, and its own verdict, so a reader never has to take our word for the result. Source, measurements and the drafted reports: <a href="https://github.com/Vedant-Bhagat/capstone-project-1-primary">github.com/Vedant-Bhagat/capstone-project-1-primary</a></p>
+    <p>All timing figures in the project come from a single Windows laptop and are relative, not benchmarks. The accuracy figures come from one corpus with one language model.</p>
+  </footer>
+
+</div>
+
+</body>
+</html>

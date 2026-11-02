@@ -23,6 +23,13 @@ reproduced 6 of 8, matching the committed version exactly.
 Tick each box and record the comment URL or MDEV number as it goes up, so the process write-up can cite it
 rather than describe it.
 
+[`bug_explainer.html`](bug_explainer.html) is the same case written for someone with no background in the
+project or in vector search: the three-route comparison, the four alternative explanations we eliminated,
+our confidence split by claim, both of our retractions, and what the comment does and does not contribute.
+Open it in a browser. It exists because the decision to post had to be explainable to a reader who has
+never seen the repository, and writing it that way is what surfaced the one-in-ten objection now recorded
+in it.
+
 ---
 
 ## 1 — Comment on MDEV-37709

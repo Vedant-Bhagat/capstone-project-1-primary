@@ -164,6 +164,7 @@ docs/
   limitations.md                 what the feature will not do
   bug_report_draft.md            the defect write-up and the Jira prior art
   jira_submissions.md            what we post, verbatim, in posting order
+  bug_explainer.html             the case, explained from scratch for a non-specialist
 ```
 
 Mirrors the starter's conventions, so a reader coming from the first repository is already oriented.

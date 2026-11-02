@@ -360,6 +360,7 @@ docs/findings.md            every measured number, with the method that produced
 docs/limitations.md         what this does NOT establish, and where the numbers stop
 docs/bug_report_draft.md    the defect write-up, with the Jira prior art
 docs/jira_submissions.md    the three posts as they go to Jira, in order, with a checkbox each
+docs/bug_explainer.html     the same case for a reader with no context; open it in a browser
 corpus_manifest.csv         revision id and text SHA-256 per article; reproducibility
 eval_queries.csv            54 evaluation questions, six per category
 eval_qa_pairs.csv           30 QA pairs with known source chunks, plus 10 unanswerable
