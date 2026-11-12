@@ -167,7 +167,8 @@ selectivity — the 5%-selectivity category returned nothing while the 16.7% one
 | **B** | Schema & retrieval | Vedant | `sql/schema.sql` and four retrieval queries, each one statement |
 | **C** | Evaluation & CI | Janhavi | brute-force ground truth, recall sweep, T1–T10, three-version CI |
 
-Work is split three ways — see [`WORK_DIVISION.md`](WORK_DIVISION.md) for who owns what and how to start.
+Each component was built by its owner and landed through a pull request reviewed by another
+contributor. Setup for all three is in *Quickstart* above.
 
 The full specification is in [`docs/main_dish_spec/`](docs/main_dish_spec/) — 14 documents plus a runnable
 probe script, written before any implementation so that the graded requirements, the schema and the
@@ -355,6 +356,10 @@ sql/evaluation/
   recall_sweep.sql          recall and latency across ef_search, with variance
   tests.sql                 T1-T10, gating CI via SIGNAL SQLSTATE '45000'
 
+sql/experiments/            how the filtered-search numbers were measured; run 01-04 in
+                            order, then 99_teardown.sql. Adds a synthetic `tenant`
+                            column to chunks; see its README
+
 .github/workflows/ci.yml    11.8, 12.3 and current; unit tests, then every SQL script
 docs/findings.md            every measured number, with the method that produced it
 docs/limitations.md         what this does NOT establish, and where the numbers stop
@@ -369,7 +374,6 @@ eval_qa_pairs.csv           30 QA pairs with known source chunks, plus 10 unansw
 requirements.txt            pinned, because unpinned deps make a corpus unreproducible
 
 self_assessment/            weekly self-assessment, one section per contributor
-WORK_DIVISION.md            who owns which component, and how to start
 AI_USE_LOG.md               record of AI tool use, traced per change
 CONTRIBUTING.md             branching, commits, PR and review workflow
 ```

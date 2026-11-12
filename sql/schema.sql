@@ -77,6 +77,13 @@ CREATE TABLE chunks (
     FULLTEXT KEY ft_body (body)
 );
 
+-- The scripts in sql/experiments/ add one more column to `chunks`:
+--   tenant TINYINT NOT NULL DEFAULT 0, indexed as ix_tenant
+-- It is a synthetic filter used to measure filtered vector search against a
+-- filter uncorrelated with query meaning, and it is deliberately NOT part of
+-- this schema -- the product has no tenants. sql/experiments/99_teardown.sql
+-- removes it. See sql/experiments/README.md.
+
 -- Evaluation. Two separate query sets on purpose -- recall needs no labels
 -- (ground truth is brute force), answer quality does. Spec: 03_corpus.md.
 CREATE TABLE eval_queries (

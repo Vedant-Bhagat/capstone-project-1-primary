@@ -5,7 +5,8 @@ recommendation is, so that a decision is a short conversation rather than a fres
 
 ## D1 — Work distribution *(decided 2026-10-22, team)*
 
-**Settled as it was carried out**, and recorded in `WORK_DIVISION.md`: A corpus and ingest (Pranesh), B
+**Settled as it was carried out**, and recorded here and in the README's component table: A corpus and
+ingest (Pranesh), B
 schema and retrieval (Vedant), C evaluation and CI (Janhavi), with Vedant integrating. The RAG pipeline
 (file 08) stayed unassigned until the end and fell to the integrator, as planned. All three landed through
 pull requests reviewed by another contributor.
