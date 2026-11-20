@@ -8,7 +8,10 @@
 -- ===========================================================================
 
 USE wikirag;
-SET @q = (SELECT embedding FROM eval_queries WHERE id = 5);   -- composers probe
+-- id 5 is a birds question on the real corpus (eval_queries.csv) and the
+-- space_telescopes probe on the fixture -- either way it points away from
+-- the composers filter below, which is the case the hint exists for.
+SET @q = (SELECT embedding FROM eval_queries WHERE id = 5);
 -- A NULL @q is the one failure this script must not pass off as a result: the
 -- distances all come back NULL, ORDER BY leaves the rows in storage order, and
 -- ten plausible-looking rows are printed. Fail instead.

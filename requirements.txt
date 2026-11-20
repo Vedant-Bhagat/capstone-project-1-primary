@@ -9,7 +9,6 @@
 # number work offline after that. `anthropic` is listed last and is OPTIONAL:
 # only python/answer.py uses it, and only without --no-llm.
 
-requests==2.31.0              # the Wikipedia API; fetch.py
 sentence-transformers==3.0.1  # BAAI/bge-small-en-v1.5; embed.py
 torch==2.2.1                  # sentence-transformers backend
 #
