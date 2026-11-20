@@ -10,8 +10,9 @@ Spec: docs/main_dish_spec/08_rag_pipeline.md.
 `--no-llm` is a hard requirement, not a convenience (file 02, requirement
 A7): retrieval and every measurement must run with no API key, so anyone can
 clone, ingest and reproduce the numbers without an account. Generation is the
-only optional step, and without `ANTHROPIC_API_KEY` this prints the passages
-and says so rather than failing.
+only optional step, and without `GEMINI_API_KEY` or `ANTHROPIC_API_KEY`
+(Gemini is used if both are set) this prints the passages and says so rather
+than failing.
 
 THE RETRIEVAL IS ONE SQL STATEMENT and it is the point of the project, so it
 lives here in full rather than behind a query builder. Two shapes:
