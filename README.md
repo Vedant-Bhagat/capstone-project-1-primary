@@ -25,6 +25,40 @@ SQL statement, then measures honestly what the approximate index costs in accura
 
 **Capstone Project I**, Constructor University, in partnership with the MariaDB Foundation.
 
+## Try this
+
+The one query worth copying: meaning, a relational filter and a join, in one statement. It runs on the
+2,000-chunk fixture, which takes two commands — `mariadb -u root < sql/schema.sql`, then
+`mariadb -u root < sql/fixture.sql` (~11 s, per *Quickstart*). **Both wipe the `wikirag` database**; see
+*Quickstart* before running them after a real ingest.
+
+```sql
+USE wikirag;
+SET @q = (SELECT embedding FROM eval_queries ORDER BY id LIMIT 1);
+
+SELECT a.title, c.section, LEFT(c.body, 60) AS preview,
+       VEC_DISTANCE_COSINE(c.embedding, @q) AS distance
+FROM chunks c FORCE INDEX (ix_category)   -- do not remove: see below
+JOIN articles a ON a.id = c.article_id
+WHERE c.category = 'composers'
+  AND c.word_count >= 100
+ORDER BY distance
+LIMIT 10;
+```
+
+The first query points at `birds` and the filter keeps `composers` — the hard case, a filter pointing away
+from the question. Put `EXPLAIN` in front of it, then delete the `FORCE INDEX` line and look again. With the
+hint the plan reads `key: ix_category`: the btree selects the composers rows and every distance among them
+is computed exactly. Without it the plan reads `key: embedding`: a walk of the HNSW graph near the
+question, discarding non-composer rows afterwards. That second plan is the one that can silently return
+fewer rows than asked for. Whether rows actually go missing varies with the index build, so the fixture may
+well return all ten; [`sql/retrieval/minimal_repro.sql`](sql/retrieval/minimal_repro.sql) is built to show
+them going missing, in its own database. The hint is how every query in this repository stays on the first
+plan.
+
+On the fixture every chunk is 300 words, so `word_count >= 100` shows the shape of a second predicate
+rather than filtering anything.
+
 ## Quickstart
 
 **Requirements:** MariaDB **11.8 or later** (`VECTOR` does not exist before it) and Python **3.11**. No API
@@ -176,6 +210,54 @@ measurement methodology are fixed in advance rather than reverse-engineered afte
 
 Start at [`docs/main_dish_spec/README.md`](docs/main_dish_spec/README.md).
 
+## What doing this inside MariaDB gave us — and what it didn't
+
+**One statement instead of two systems.** The semantic search, the category filter, the length filter and
+the join back to article titles and URLs are one `SELECT` ([`hybrid_filter.sql`](sql/retrieval/hybrid_filter.sql),
+and `retrieve()` in [`answer.py`](python/answer.py)). A separate vector store returns ids; you then query
+your real database for the titles, and write the code that stitches the two together
+([`06_retrieval.md`](docs/main_dish_spec/06_retrieval.md) §1).
+
+**Keywords and meaning in the same table.** A `FULLTEXT` index sits beside the vector index on `chunks`,
+and [`hybrid_fulltext.sql`](sql/retrieval/hybrid_fulltext.sql) fuses the two rankings with RRF in SQL.
+
+**Vectors that cannot drift from their rows.** Each article and its chunk vectors are written on one
+connection and committed together — "a commit is always a whole article" ([`ingest.py`](python/ingest.py)) —
+and the foreign key `fk_chunk_article ... ON DELETE CASCADE` ([`schema.sql`](sql/schema.sql)) removes an
+article's vectors with it. There is no second copy to re-sync. How the embeddings were made is stored next
+to them in `corpus_meta`, and `answer.py` refuses to query with a different model.
+
+**And the counterpoint our own measurements force.** The vector index does not serve selective filtered
+queries. Unhinted, the optimizer post-filters through the HNSW graph and can return 0 rows of 10 with no
+error ([`docs/findings.md`](docs/findings.md)). With `FORCE INDEX (ix_category)` the btree selects the
+slice and every distance in it is computed exactly — correct, but the vector index contributes nothing
+to that query. So for filtered search, what the native approach gave us is not a faster approximate search;
+it is that the exact fallback is one hint away, in the same statement, and cheap at this corpus size. It
+also cost us something: the hint cannot name an index on another table, so `category` is copied onto
+`chunks`, and test T3 exists to catch it drifting from `articles`.
+
+We did not benchmark against a dedicated vector database ([`docs/limitations.md`](docs/limitations.md) §6),
+so none of this is a claim that one would be slower or less accurate — only that it could not run the
+statement above.
+
+### Chunking, model and index — the short version
+
+- **300-word chunks, 50-word overlap** (~17%), never split mid-sentence, never across a section heading,
+  under 40 words discarded. 300 words stays inside the model's 512-token limit so nothing is silently
+  truncated; the overlap keeps a fact on a boundary whole in at least one chunk.
+- **Each chunk is embedded as "title — section, then body"**, stored bare, so a passage that never names
+  its subject can still be found.
+- **`BAAI/bge-small-en-v1.5`, 384 dimensions, run locally.** Local because the ingest must run from this
+  README with no API key, and a pinned local model gives identical vectors every time. BGE because it is
+  trained for retrieval, at half the index size of a 768-dimension model. Its relative quality comes from
+  published benchmarks, not our measurement, and the title-prepending choice has not been A/B-tested on
+  this corpus.
+- **`DISTANCE=cosine`, `m = 16`, `ef_search` at its default.** Cosine ignores vector length, so no
+  normalisation step is needed. `m = 16` rather than MariaDB's 6 is the measured result above.
+
+Every value lives in [`python/config.py`](python/config.py); the full reasoning, including the models we
+rejected, is in [`04_chunking_embedding.md`](docs/main_dish_spec/04_chunking_embedding.md).
+
 ## Team
 
 | Name | GitHub |
@@ -301,15 +383,21 @@ The mechanism follows: post-filtering explores the graph near the query and disc
 predicate. When the predicate keeps only distant rows, every candidate is discarded and the query returns an
 empty set rather than widening its search.
 
-**`mhnsw_ef_search` does not mitigate it.** At 2000 — more than the entire table — the answer is still zero.
-That is the part with teeth: this is not a point on a recall/latency curve that tuning can move. `FORCE
-INDEX` is the only mitigation we have found, which makes it load-bearing rather than merely prudent, because
-nine categories put every filter in our corpus above the 7% crossover.
+**On this fixture, `mhnsw_ef_search` does not mitigate it.** At 2000 — more than the entire table — the
+answer is still zero. That turned out to be a property of the fixture's near-orthogonal clusters, not of
+the index: on real embeddings every category is whole by `ef_search = 200`
+([`docs/findings.md`](docs/findings.md)). The fixture is the harsher geometry. `FORCE INDEX` remains the
+only mitigation that returned the exact answer in every case we measured.
 
-**It is still synthetic.** The fixture's clusters are near-orthogonal; real embeddings are not. Reproducing
-this on real BGE vectors is the open item that decides whether it gets reported, and the checklist at the end
-of [`09_verified_findings.md`](docs/main_dish_spec/09_verified_findings.md) gates it — real embeddings,
-genuinely random vectors, 11.8 and the current release, Linux, and a search of MariaDB's Jira for duplicates.
+**It reproduces on real embeddings.** On the full corpus — 18,651 `bge-small-en-v1.5` chunks, `LIMIT 10`,
+MariaDB's defaults — `composers` and `space_telescopes` returned 0 rows, `ethics` 2 and `architecture` 4,
+while `FORCE INDEX` returned the exact answer for all nine categories. What predicts the shortfall is the
+filter's distance from the query, not its selectivity: the 5.0% category returned nothing and the 16.7%
+one returned everything, so the ~7% crossover above was measuring a correlate. At `m = 16` two categories
+are still short, which is why the hint stays. The checklist at the end of
+[`09_verified_findings.md`](docs/main_dish_spec/09_verified_findings.md) is complete except for two items
+it explains: uniform-random vectors, skipped deliberately, and re-sweeping the crossover at 384 dimensions,
+still open.
 
 ## Repository layout
 
