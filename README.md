@@ -221,11 +221,25 @@ your real database for the titles, and write the code that stitches the two toge
 **Keywords and meaning in the same table.** A `FULLTEXT` index sits beside the vector index on `chunks`,
 and [`hybrid_fulltext.sql`](sql/retrieval/hybrid_fulltext.sql) fuses the two rankings with RRF in SQL.
 
-**Vectors that cannot drift from their rows.** Each article and its chunk vectors are written on one
-connection and committed together — "a commit is always a whole article" ([`ingest.py`](python/ingest.py)) —
-and the foreign key `fk_chunk_article ... ON DELETE CASCADE` ([`schema.sql`](sql/schema.sql)) removes an
-article's vectors with it. There is no second copy to re-sync. How the embeddings were made is stored next
-to them in `corpus_meta`, and `answer.py` refuses to query with a different model.
+**Rows and vectors written together — but deleted with care.** Each article and its chunk vectors are
+written on one connection and committed together — "a commit is always a whole article"
+([`ingest.py`](python/ingest.py)) — so there is no second copy to re-sync. How the embeddings were made is
+stored next to them in `corpus_meta`, and `answer.py` refuses to query with a different model.
+
+Deleting is where that breaks down. The foreign key `fk_chunk_article ... ON DELETE CASCADE`
+([`schema.sql`](sql/schema.sql)) does remove an article's chunk rows, but a cascade can leave the vector
+index unable to reach *other* rows that still exist: searches silently return fewer rows than asked for,
+with no error, and nothing short of rebuilding the index fixes it. This is
+[MDEV-41227](https://jira.mariadb.org/browse/MDEV-41227), confirmed and open. We reproduced it on 13.0.2
+with [`cascade_repro.sql`](sql/retrieval/cascade_repro.sql): one cascade delete of 8 rows left an
+unfiltered `LIMIT 10` search returning between 0 and 7 rows across six fresh builds, while deleting the same
+rows directly returned 10 every time. `FLUSH TABLES` on the affected tables did not clear it — with the
+caveat that we flushed only those tables by name, and have not checked that this clears the vector-index
+cache as an unqualified `FLUSH TABLES` would.
+
+This repository never cascades into an indexed table: [`fixture.sql`](sql/fixture.sql) deletes `chunks`
+before `articles`, and `ingest.py` drops the vector index before reloading. **The rule for anyone else:
+delete the child rows directly before the parent, or rebuild the vector index after a cascade.**
 
 **And the counterpoint our own measurements force.** The vector index does not serve selective filtered
 queries. Unhinted, the optimizer post-filters through the HNSW graph and can return 0 rows of 10 with no
@@ -439,6 +453,7 @@ sql/retrieval/
   hybrid_fulltext.sql       full-text + vector, fused with RRF
   under_return.sql          the filtered-search behaviour, on the real corpus
   minimal_repro.sql         the same defect in 2,048 rows of pure SQL, no corpus needed
+  cascade_repro.sql         ON DELETE CASCADE leaves the vector index short (MDEV-41227); reports only
 sql/evaluation/
   ground_truth.sql          exact neighbours by brute force; the index is graded against this
   recall_sweep.sql          recall and latency across ef_search, with variance
